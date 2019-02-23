@@ -61,7 +61,6 @@ namespace SwordClash
 
         public override void ProcessState(ITentacleInputCommandInput input)
         {
-            //throw new NotImplementedException();
             ProcessState();
         }
 

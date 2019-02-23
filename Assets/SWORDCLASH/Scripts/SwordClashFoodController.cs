@@ -13,10 +13,10 @@ namespace SwordClash
         // Bolt network UnityEngine.Start()
         public override void Attached()
         {
-            if (entity.isOwner)
-            {
+           // Need to SetTransfroms on Server and Client both so movement will be synced.
                 state.SetTransforms(state.FoodTransform, transform);
-            }
+                
+          
         }
 
         private void Update()
@@ -24,17 +24,7 @@ namespace SwordClash
             SnackSprite.sprite = SnackSpriteArray[state.SpriteIndex];
         }
 
-        //public override void SimulateOwner()
-        //{
-        //    // Attempt to keep sprite in sync over Bolt network.
-        //    SnackSprite.sprite = SnackSpriteArray[state.SpriteIndex];
-        //}
-
-        //public override void SimulateController()
-        //{
-        //    // Attempt to keep sprite in sync over Bolt network.
-        //    SnackSprite.sprite = SnackSpriteArray[state.SpriteIndex];
-        //}
+      
 
         // Test to see if OnEnable works with Instantiate. May have to use constructor
         void OnEnable()
@@ -63,7 +53,9 @@ namespace SwordClash
             // UnityEngine.Random.Range is min inclusive; max exlcusive; so it is safe to use length of array as max.
             int randomIndexIntoSnackSpriteArray = UnityEngine.Random.Range(0, SnackSpriteArray.Length);
             SnackSprite.sprite = SnackSpriteArray[randomIndexIntoSnackSpriteArray];
+            // Update Bolt Entity State SpriteIndex as well
             state.SpriteIndex = randomIndexIntoSnackSpriteArray;
+
             return randomIndexIntoSnackSpriteArray;
         }
 
