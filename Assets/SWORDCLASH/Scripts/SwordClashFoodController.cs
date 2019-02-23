@@ -10,6 +10,31 @@ namespace SwordClash
         private SpriteRenderer SnackSprite;
         private Rigidbody2D SnackBody;
 
+        // Bolt network UnityEngine.Start()
+        public override void Attached()
+        {
+            if (entity.isOwner)
+            {
+                state.SetTransforms(state.FoodTransform, transform);
+            }
+        }
+
+        private void Update()
+        {
+            SnackSprite.sprite = SnackSpriteArray[state.SpriteIndex];
+        }
+
+        //public override void SimulateOwner()
+        //{
+        //    // Attempt to keep sprite in sync over Bolt network.
+        //    SnackSprite.sprite = SnackSpriteArray[state.SpriteIndex];
+        //}
+
+        //public override void SimulateController()
+        //{
+        //    // Attempt to keep sprite in sync over Bolt network.
+        //    SnackSprite.sprite = SnackSpriteArray[state.SpriteIndex];
+        //}
 
         // Test to see if OnEnable works with Instantiate. May have to use constructor
         void OnEnable()
@@ -38,6 +63,7 @@ namespace SwordClash
             // UnityEngine.Random.Range is min inclusive; max exlcusive; so it is safe to use length of array as max.
             int randomIndexIntoSnackSpriteArray = UnityEngine.Random.Range(0, SnackSpriteArray.Length);
             SnackSprite.sprite = SnackSpriteArray[randomIndexIntoSnackSpriteArray];
+            state.SpriteIndex = randomIndexIntoSnackSpriteArray;
             return randomIndexIntoSnackSpriteArray;
         }
 

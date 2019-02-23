@@ -24,6 +24,7 @@ namespace SwordClash
 
         private short PlayerOnePoints;
         private short PlayerTwoPoints;
+        private bool FoodSpawned;
 
         //// Start is called before the first frame update
         //void Start()
@@ -41,20 +42,21 @@ namespace SwordClash
 
             PlayerOnePoints = 0;
             PlayerTwoPoints = 0;
+            FoodSpawned = false;
+
 
             // Spawn in snack just off screen.
-            Snack = BoltNetwork.Instantiate(Snack, CenterCameraCoord * 10.0f, Quaternion.identity);
-            SCFoodController = Snack.GetComponent<SwordClashFoodController>();
+            if (entity.isOwner)
+            {
+                Snack = BoltNetwork.Instantiate(Snack, CenterCameraCoord * 10.0f, Quaternion.identity);
+            }
 
-            NextRoundFoodInCenter();
 
             //TODO: programmatic UI spawner here
             // Spawn in UI from prefabs
             // WinnerPopUpText = Instantiate();
             // WinnerPopUpText.text = "";
             // PlayerOneScoreUIText.text = "P1 Score: " + PlayerOneScoreUIVal;
-
-
 
         }
 
@@ -64,8 +66,33 @@ namespace SwordClash
 
         //}
 
-        // Monobehavior reset when component is first dropped into scene, set default editor fields here
-        void Reset()
+        // BoltNetwork Update()
+        //  The computer which called BoltNetwork.Instantiate will always be considered the 'Owner'
+        // See https://doc.photonengine.com/en-us/bolt/current/reference/glossary
+        // SimulateController executes one time per frame.
+        public override void SimulateOwner()
+        {
+            // Keep points updated each frame?
+            state.P1Score = PlayerOnePoints;
+            state.P2Score = PlayerTwoPoints;
+
+            if (SCFoodController == null)
+            {
+                SCFoodController = Snack.GetComponent<SwordClashFoodController>();
+
+                NextRoundFoodInCenter();
+            }
+            else if (FoodSpawned == false)
+            {
+                NextRoundFoodInCenter();
+            }
+
+           
+
+        }
+
+            // Monobehavior reset when component is first dropped into scene, set default editor fields here
+            void Reset()
         {
             NumberofRounds = 3;
         }
@@ -77,6 +104,7 @@ namespace SwordClash
             if (SCFoodController != null)
             {
                 SCFoodController.MoveFoodToCenter(CenterCameraCoord);
+                FoodSpawned = true;
 
             }
         }
