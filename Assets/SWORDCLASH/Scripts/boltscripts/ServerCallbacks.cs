@@ -19,7 +19,14 @@ public class ServerCallbacks : Bolt.GlobalEventListener
        // instantiate cube; all BoltPrefabs are accessed through a static class
        BoltEntity playerOne = BoltNetwork.Instantiate(BoltPrefabs.TentacleTipScene, spawnPosition, Quaternion.identity);
         playerOne.TakeControl();
-}
+
+        // NOw spawn in GameLogicController which will spawn in food???
+        // BoltEntity tentacleFood = BoltNetwork.Attach();
+
+        BoltEntity SCGameLogic = BoltNetwork.Instantiate(BoltPrefabs.SCGameWorld);
+        // TakeControl only needed if controller???
+        //SCGameLogic.TakeControl();
+    }
 
 
     public override void SceneLoadRemoteDone(BoltConnection connection)
@@ -31,10 +38,7 @@ public class ServerCallbacks : Bolt.GlobalEventListener
         playerTwo.tag = "TentacleTipP2";
         playerTwo.AssignControl(connection);
 
-        // NOw spawn in GameLogicController which will spawn in food???
-        // BoltEntity tentacleFood = BoltNetwork.Attach();
-
-        //BoltEntity SCGameLogic = BoltNetwork.Instantiate(BoltPrefabs.SCGameWorld);
+        
     }
 
     public override void Connected(BoltConnection connection)
