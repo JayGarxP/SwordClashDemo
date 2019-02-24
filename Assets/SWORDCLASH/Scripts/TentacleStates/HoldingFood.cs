@@ -59,6 +59,7 @@ namespace SwordClash
             }
         }
 
+        // Called from Bolt.SimulateController()
         public override void ProcessState(ITentacleInputCommandInput input)
         {
             ProcessState();

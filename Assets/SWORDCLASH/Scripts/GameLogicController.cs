@@ -1,7 +1,5 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace SwordClash
 {
@@ -10,9 +8,12 @@ namespace SwordClash
     public class GameLogicController : Bolt.EntityEventListener<ISwordClashGameWorldState>
     {
         public short NumberofRounds;
-        public static int PlayerOneScoreUIVal = 0;
-        public Text PlayerOneScoreUIText;
-        public Text WinnerPopUpText;
+        //public static int PlayerOneScoreUIVal = 0;
+        //public Text PlayerOneScoreUIText;
+        //public Text WinnerPopUpText;
+
+        private GameObject UIManager;
+        private SwordClashUIManager SCUIManager;
 
         // Food tentacles fight over
         [SerializeField]
@@ -22,9 +23,10 @@ namespace SwordClash
         // Center of camera game screen in world units
         private Vector3 CenterCameraCoord;
 
-        private short PlayerOnePoints;
-        private short PlayerTwoPoints;
+        //private short PlayerOnePoints;
+        //private short PlayerTwoPoints;
         private bool FoodSpawned;
+        private short PointsToWin;
 
         //// Start is called before the first frame update
         //void Start()
@@ -34,37 +36,82 @@ namespace SwordClash
         // Bolt network UnityEngine.Start()
         public override void Attached()
         {
+            // Best outta 3 rounds means whoever hits 2 wins is the big match winner.
+            PointsToWin = (short)((NumberofRounds / 2) + 1);
+
             CenterCameraCoord = Camera.main.ScreenToWorldPoint(new Vector2((Screen.width / 2),
                 (Screen.height / 2)));
 
             // Zero out z coordinate, for some reason setting it to zero in ScreenToWorldPoint results in -10 for z...
             CenterCameraCoord.z = 0;
 
-            PlayerOnePoints = 0;
-            PlayerTwoPoints = 0;
+            state.P1Score = 0;
+            state.P2Score = 0;
             FoodSpawned = false;
 
 
             // Spawn in snack just off screen.
-            if (entity.isOwner)
+            if (this.entity.isOwner)
             {
                 Snack = BoltNetwork.Instantiate(Snack, CenterCameraCoord * 10.0f, Quaternion.identity);
             }
 
 
-            //TODO: programmatic UI spawner here
-            // Spawn in UI from prefabs
-            // WinnerPopUpText = Instantiate();
-            // WinnerPopUpText.text = "";
-            // PlayerOneScoreUIText.text = "P1 Score: " + PlayerOneScoreUIVal;
+
+            if (UIManager == null)
+            {
+                UIManager = GameObject.FindWithTag("UIMan");
+
+                if (UIManager != null && UIManager.tag != "/")
+                {
+                    // Get an instance of SwordClashUIManager script attached to the UIManager Gameobject
+                    SCUIManager = UIManager.GetComponent<SwordClashUIManager>();
+                    if (SCUIManager == null)
+                    {
+                        // Did you forget to put a UIManager game object in the scene?
+                    }
+                }
+
+            }
 
         }
 
-        //// Update is called once per frame
-        //void Update()
-        //{
+        // Update is called once per frame
+        void Update()
+        {
+            // In each player's game local update loop, check the state of shared/synced network variables
+            //      to have specific behavior.
+            if (state.P1Score >= PointsToWin)
+            {
+                // Player one wins!!!
+                if (SCUIManager != null)
+                {
+                    SCUIManager.UpdateWinnerPopupMessage("Player1");
+                }
 
-        //}
+                //TODO: remove wait, set speed to zero, ignore inputs and popup pause menu
+                StartCoroutine(WaitUnityCoroutine());
+
+            }
+            else if (state.P2Score >= PointsToWin)
+            {
+                // Player two wins...
+                if (SCUIManager != null)
+                {
+                    SCUIManager.UpdateWinnerPopupMessage("Player Two");
+                }
+
+                StartCoroutine(WaitUnityCoroutine());
+
+            }
+
+            if (SCUIManager != null)
+            {
+                SCUIManager.UpdatePlayerOneScore(this.state.P1Score.ToString());
+                SCUIManager.UpdatePlayerTwoScore(this.state.P2Score.ToString());
+
+            }
+        }
 
         // BoltNetwork Update()
         //  The computer which called BoltNetwork.Instantiate will always be considered the 'Owner'
@@ -72,10 +119,6 @@ namespace SwordClash
         // SimulateController executes one time per frame.
         public override void SimulateOwner()
         {
-            // Keep points updated each frame?
-            state.P1Score = PlayerOnePoints;
-            state.P2Score = PlayerTwoPoints;
-
             if (SCFoodController == null)
             {
                 SCFoodController = Snack.GetComponent<SwordClashFoodController>();
@@ -86,13 +129,10 @@ namespace SwordClash
             {
                 NextRoundFoodInCenter();
             }
-
-           
-
         }
 
-            // Monobehavior reset when component is first dropped into scene, set default editor fields here
-            void Reset()
+        // Monobehavior reset when component is first dropped into scene, set default editor fields here
+        void Reset()
         {
             NumberofRounds = 3;
         }
@@ -115,42 +155,19 @@ namespace SwordClash
         {
             if (EaterPlayerID == "Player1")
             {
-                PlayerOnePoints += 1;
-                PlayerOneScoreUIVal = PlayerOnePoints;
-                PlayerOneScoreUIText.text = "P1 Score: " + PlayerOneScoreUIVal;
-
+                this.state.P1Score += 1;
             }
             else if (EaterPlayerID == "Player2")
             {
-                PlayerTwoPoints += 1;
-                // no p2 yet
+                this.state.P2Score += 1;
+
             }
             else
             {
                 // Bad playerID ...
             }
 
-            // Best outta 3 rounds means whoever hits 2 wins is the big match winner.
-            short pointsToWin = (short)((NumberofRounds / 2) + 1);
 
-            if (PlayerOnePoints >= pointsToWin)
-            {
-                // Player one wins!!!
-                WinnerPopUpText.text = EaterPlayerID + "  Wins!!!";
-                //TODO: remove wait, set speed to zero, ignore inputs and popup pause menu
-                StartCoroutine(WaitUnityCoroutine());
-
-
-                PlayerOnePoints = 0;
-                PlayerTwoPoints = 0;
-                PlayerOneScoreUIVal = 0;
-                PlayerOneScoreUIText.text = "P1 Score: " + PlayerOneScoreUIVal;
-
-            }
-            else if (PlayerTwoPoints >= pointsToWin)
-            {
-                // Player two wins...
-            }
 
             // Spawn in new food
             NextRoundFoodInCenter();
@@ -163,7 +180,18 @@ namespace SwordClash
             print(Time.time);
             yield return new WaitForSeconds(3);
             print(Time.time);
-            WinnerPopUpText.text = "";
+
+            // reset points to zero
+            this.state.P1Score = 0;
+            this.state.P2Score = 0;
+
+            // reset all UI elements 
+            if (SCUIManager != null)
+            {
+                SCUIManager.ClearWinnerPopupMessage();
+                SCUIManager.UpdatePlayerOneScore("");
+                SCUIManager.UpdatePlayerTwoScore("");
+            }
         }
 
 

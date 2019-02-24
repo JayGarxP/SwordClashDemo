@@ -43,9 +43,7 @@ namespace SwordClash
         public Sprite TTStungSprite;
 
         public Sprite TTPlayerTwoSprite;
-        // Reference to game logic controller in scene
-        [SerializeField]
-        private GameLogicController GLCInstance;
+        
         #endregion
 
         // Gang of Four State pattern, state machine for inputs allowed during tentacle movement
@@ -66,8 +64,10 @@ namespace SwordClash
         private SpriteRenderer TTSpriteRenderer;
         private Sprite TTSceneSprite; //sprite object starts with
 
-        //private bool AmIPlayerTwo;
-
+        private bool AmIPlayerTwo;
+        private GameObject GameWorld;
+        // Reference to game logic controller in scene
+        private GameLogicController GLCInstance;
 
 
 
@@ -112,17 +112,6 @@ namespace SwordClash
         // BoltNetwork Start()
         public override void Attached()
         {
-            var GameWorld = GameObject.FindWithTag("GameWorld");
-            // check if component is unattached or null here? Not sure best way to make tightly-coupled components know of each other
-            if (GameWorld != null && GameWorld.tag != "/")
-            {
-                GLCInstance = GameWorld.GetComponent<GameLogicController>();
-                if (GLCInstance == null)
-                {
-                    // bad thing happen
-                }
-            }
-
             TentacleTipRB2D = TentacleTip.GetComponent<Rigidbody2D>();
             TentacleReadyPosition = TentacleTipRB2D.position;
             TentacleEatingPosition = new Vector2(TentacleReadyPosition.x, TentacleReadyPosition.y - EatingZoneOffsetFromStart);
@@ -150,19 +139,37 @@ namespace SwordClash
         public override void SimulateController()
         {
 
-
-            // IrigidbodyPlayerCommandInput input = rigidbodyPlayerCommand.Create();
-            ITentacleInputCommandInput input = TentacleInputCommand.Create();
-            
-
-            if (this.CurrentTentacleState != null)
+            if (GameWorld == null)
             {
-                // Actual game loop logic code, contained in each ProcessState() method of concrete TentacleState s 
-                // change values of input
-                this.CurrentTentacleState.ProcessState(input);
-            }
+                GameWorld = GameObject.FindWithTag("GameWorld");
 
-            this.entity.QueueInput(input);
+                if (GameWorld != null && GameWorld.tag != "/")
+                {
+                    GLCInstance = GameWorld.GetComponent<GameLogicController>();
+                    if (GLCInstance == null)
+                    {
+                        // bad thing happen; GLCInstance is still Null somehow
+                    }
+                }
+
+            }
+            else
+            {
+                // IrigidbodyPlayerCommandInput input = rigidbodyPlayerCommand.Create();
+                ITentacleInputCommandInput input = TentacleInputCommand.Create();
+
+                if (this.CurrentTentacleState != null && GLCInstance != null)
+                {
+                    // Actual game loop logic code, contained in each ProcessState() method of concrete TentacleState s 
+                    // change values of input
+                    this.CurrentTentacleState.ProcessState(input);
+                }
+
+                this.entity.QueueInput(input);
+            }
+           
+
+            
 
         }
 
@@ -321,6 +328,7 @@ namespace SwordClash
 
         public void PleaseMakeMePlayerTwo()
         {
+            AmIPlayerTwo = true;
             this.CurrentTentacleState.AmIPlayerTwo = true;
         }
 
@@ -354,7 +362,21 @@ namespace SwordClash
 
         public void TTEatFood()
         {
-            GLCInstance.OnFoodEaten("Player1");
+            string PlayerID = "Player1";
+            if (AmIPlayerTwo)
+            {
+                PlayerID = "Player2";
+            }
+
+
+            if (GLCInstance != null)
+            {
+                GLCInstance.OnFoodEaten(PlayerID);
+            }
+            else
+            {
+                Debug.Log("GLCInstance null in TTEatFood()");
+            }
         }
 
         public void TTMoveTowardsEatingZone(Rigidbody2D moveMeAsWell)
