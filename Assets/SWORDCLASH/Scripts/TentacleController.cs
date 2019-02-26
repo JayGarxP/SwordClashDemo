@@ -75,7 +75,7 @@ namespace SwordClash
         private TentacleController OpponentTCInstance;
 
         //private GameObject PlayerControllerGO;
-       // private PlayerController PlayerControllerScriptInstance;
+        // private PlayerController PlayerControllerScriptInstance;
         private bool AmIPlayerTwo;
         public short WhichPlayerIBe; // 0 is NOBODY;  1 is p1;   2 is p2
 
@@ -139,6 +139,7 @@ namespace SwordClash
 
             }
 
+            // If I am running on server machine
             if (this.entity.isOwner && this.entity.hasControl)
             {
                 // Not working??!?!?!
@@ -148,8 +149,8 @@ namespace SwordClash
                 AmIPlayerTwo = false;
                 WhichPlayerIBe = 1;
 
-               // Debug.Log("<color=red>AmIPlayer2: </color>" + this.gameObject.GetInstanceID().ToString() +
-            //"@@@" + AmIPlayerTwo.ToString() + "@@@ ", this);
+                // Debug.Log("<color=red>AmIPlayer2: </color>" + this.gameObject.GetInstanceID().ToString() +
+                //"@@@" + AmIPlayerTwo.ToString() + "@@@ ", this);
             }
 
         }
@@ -212,15 +213,48 @@ namespace SwordClash
 
 
 
-        //// Update is called once per frame
-        //void Update()
-        //{
-        //    //if (AmIPlayerTwo || state.AmIPlayer2) //&& entity.isControllerOrOwner)
-        //    //{
-        //    //    TTChangeTentacleSpritetoPlayerTwo();
-        //    //}
-    //}
+        // Update is called once per frame
+        void Update()
+        {
+            //Find reference to other tentacle, if I am player one, change the local p2 sprite to orange
+            if (OpponentTCInstance == null)
+            {
+                var TentaControllaGOs = GameObject.FindGameObjectsWithTag("TentacleTip");
 
+                if (TentaControllaGOs.Length == 2)
+                {
+                    // Attempt to change the sprite to player 2 orange, on server's local game instance.
+                    foreach (var TCGO in TentaControllaGOs)
+                    {
+                        // Get the tentacle controller script instance, if it isn't this one
+                        //if (TCGO.GetInstanceID() != gameObject.GetInstanceID())
+
+                        OpponentTCInstance = TCGO.GetComponent<TentacleController>();
+
+                        // if found something AND they do not reference same game object
+                        if (OpponentTCInstance != null)
+                        {
+
+                            // If the other tentacle is in scene is NOT controlled by this TentacleController 'controller' human
+                            if (OpponentTCInstance.entity.hasControl == false)
+                            {
+                                // Trying to make this only run on server...
+                                if (this.entity.isOwner && this.entity.hasControl)
+                                {
+                                    // Change local server sprite to player 2 orange.
+                                    OpponentTCInstance.TTChangeTentacleSpritetoPlayerTwo();
+
+                                }
+                            }
+
+                        }
+                    }
+
+
+                }
+            }
+
+        }
 
 
         //void FixedUpdate()
@@ -359,7 +393,7 @@ namespace SwordClash
         {
             AmIPlayerTwo = true;
             this.CurrentTentacleState.AmIPlayerTwo = true;
-            
+
             TTChangeTentacleSpritetoPlayerTwo();
             TentacleEatingPosition = new Vector2(TentacleReadyPosition.x, TentacleReadyPosition.y + EatingZoneOffsetFromStart);
 
