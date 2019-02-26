@@ -63,19 +63,19 @@ namespace SwordClash
             // Coiled States ProcessState does NOT block flag changes while executing.
             IsCurrentlyProcessing = false;
 
-            if (AmIPlayerTwo)
-            {
-                TentaControllerInstance.TTChangeTentacleSpritetoPlayerTwo();
-            }
+            //if (AmIPlayerTwo)
+            //{
+            //    TentaControllerInstance.TTChangeTentacleSpritetoPlayerTwo();
+            //}
 
 
-            // if player up-swipe, they tryna  *L A U N C H*
-            if (InputFlagArray[(int)HotInputs.LaunchSwipe])
-            {
-                TentaControllerInstance.CurrentTentacleState = new ProjectileState(this,
-                    TentaControllerInstance.TTMovePositionVelocityRequested,
-                    TentaControllerInstance.TTMoveRotationAngleRequested);
-            }
+            //// if player up-swipe, they tryna  *L A U N C H*
+            //if (InputFlagArray[(int)HotInputs.LaunchSwipe])
+            //{
+            //    TentaControllerInstance.CurrentTentacleState = new ProjectileState(this,
+            //        TentaControllerInstance.TTMovePositionVelocityRequested,
+            //        TentaControllerInstance.TTMoveRotationAngleRequested);
+            //}
 
             //// if juke-right input received, actaully juke right using TentacleController callback method
             //if (InputFlagArray[(int)HotInputs.RudderRight])
@@ -130,6 +130,8 @@ namespace SwordClash
                 //// if player up-swipe, they tryna  *L A U N C H*
                 if (command.Input.UpSwipe != Vector3.zero)
                 {
+                    //TODO: THIS LOGIC IS NOT BEING REACHED!!!
+                    Debug.Log("$$$$$ ProcessCommand Up swipe logic reached ");
                     TentaControllerInstance.CurrentTentacleState = new ProjectileState(this,
                         command.Input.UpSwipe,
                         TentaControllerInstance.TTMoveRotationAngleRequested);

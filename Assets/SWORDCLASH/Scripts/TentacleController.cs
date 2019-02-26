@@ -303,7 +303,15 @@ namespace SwordClash
 
         public bool IsTentacleAtMaxExtension()
         {
-            return TentacleTipRB2D.position.magnitude >= maxTentacleLength;
+            if (AmIPlayerTwo)
+            {
+                return false;
+            }
+            else
+            {
+                return TentacleTipRB2D.position.magnitude >= maxTentacleLength;
+            }
+
         }
 
         private void ResetTentacletoStartingPosition()

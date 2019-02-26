@@ -199,6 +199,8 @@ namespace SwordClash
             // move tentacle tip
             TentaControllerInstance.TT_MoveTentacleTip(SwipeVelocityVector, SwipeAngle);
 
+            Debug.Log("######## AM IN PROJECTILE STATE #########");
+
             // Check if done moving
             if (TentaControllerInstance.IsTentacleAtMaxExtension())
             {
