@@ -70,6 +70,38 @@ namespace SwordClash
             // Make player two orange
             // Flip da board for P2 so it lookin red100
 
+            if (TTInSceneCount != 2)
+            {
+                
+                var tentaclesInScene = GameObject.FindGameObjectsWithTag("TentacleTip");
+
+                if (tentaclesInScene.Length == 2)
+                {
+                    //Debug.Log("@@@@ TWO TENTS IN SCENE @@@@");
+                    //Debug.Log("@@ my ID: " + gameObject.GetInstanceID().ToString());
+
+                    // If player two object is intantiated, we are player2
+                    var Player2DummyObject = GameObject.FindWithTag("Player2");
+                    if (Player2DummyObject != null && Player2DummyObject.tag != "/")
+                    {
+                        AmIPlayerTwo = true;
+                    }
+                    Debug.Log("AmIPlayerTwo: " + AmIPlayerTwo.ToString());
+
+                    //foreach (var TENT in tentaclesInScene)
+                    //{
+                    //    if (TENT.GetInstanceID() != gameObject.GetInstanceID())
+                    //    {
+                    //        OpponentTentacleGO = TENT;
+                    //        OpponentTCInstance = TENT.GetComponent<TentacleController>();
+                    //        Debug.Log("@@ ENEMY ID: " + TENT.GetInstanceID().ToString());
+
+                    //    }
+                    //}
+                }
+            }
+
+
 
 
         }
