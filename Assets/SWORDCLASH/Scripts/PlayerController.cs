@@ -113,6 +113,7 @@ namespace SwordClash
                                 TentaController = TCInstance;
                                 TTInSceneCount = 2;
 
+                                FlipCameraUpsideDown();
                             }
                         }
 
@@ -125,56 +126,6 @@ namespace SwordClash
 
         }
 
-        //void Update()
-        //{
-        //    // Hack to keep player input non-bolt networked for now, object is null until it spawns in from
-        //    // NetworkCallbacks.cs Bolt Global
-        //    if (TTPrefabset == false && TTInSceneCount == 0)
-        //    {
-        //        LeftTentacle = GameObject.FindWithTag("TentacleTip");
-
-        //        // check if component is unattached or null here? Not sure best way to make tightly-coupled components know of each other
-        //        if (LeftTentacle != null && LeftTentacle.tag != "/")
-        //        {
-        //            TentaController = LeftTentacle.GetComponent<TentacleController>();
-        //            if (TentaController == null)
-        //            {
-        //                // Message using rich text.
-        //                Debug.Log("<color=red>GetComponent Error: </color>LeftTentacle's TentacleController not found");
-        //            }
-        //            else
-        //            {
-        //                TentacleTipStartPosition = TentaController.GetComponent<Rigidbody2D>().position;
-        //                TTPrefabset = true;
-        //                TTInSceneCount += 1;
-        //                AmIPlayerTwo = false;
-        //            }
-        //        }
-        //        else if(TTInSceneCount == 1)
-        //        {
-        //            // Maybe we are player two then...
-        //          LeftTentacle = GameObject.FindWithTag("TentacleTipP2");
-        //            if (LeftTentacle != null && LeftTentacle.tag != "/")
-        //            {
-        //                TentaController = LeftTentacle.GetComponent<TentacleController>();
-        //                if (TentaController != null)
-        //                {
-        //                    TentacleTipStartPosition = TentaController.GetComponent<Rigidbody2D>().position;
-        //                    TTPrefabset = true;
-        //                    TTInSceneCount += 1;
-        //                    AmIPlayerTwo = true;
-        //                    TentaController.PleaseMakeMePlayerTwo();
-
-        //                }
-        //                else
-        //                {
-        //                    // Message using rich text.
-        //                    Debug.Log("<color=red>GetComponent Error: </color>LeftTentacle's TentacleController not found");
-        //                }
-        //            }
-        //        }
-        //    }
-        //}
 
         // after MonoBehavior.Update(); see https://docs.unity3d.com/Manual/ExecutionOrder.html
         private void LateUpdate()
@@ -226,11 +177,28 @@ namespace SwordClash
                     //Determine what side of screen is tapped, 'juke' to that side.
                     if (gesture.FocusX >= screeenWidth)
                     {
-                        TentaController.JukeRight_Please();
+                        // Player 2 camera is upside down, the gestures use Screen Space coordinates;
+                        if (AmIPlayerTwo)
+                        {
+                            TentaController.JukeLeft_Please();
+
+                        }
+                        else
+                        {
+                            TentaController.JukeRight_Please();
+                        }
                     }
                     else
                     {
-                        TentaController.JukeLeft_Please();
+                        if (AmIPlayerTwo)
+                        {
+                            TentaController.JukeRight_Please();
+                        }
+                        else
+                        {
+                            TentaController.JukeLeft_Please();
+
+                        }
                     }
                 }
             }
@@ -275,6 +243,8 @@ namespace SwordClash
             {
                 if (gesture.State == GestureRecognizerState.Ended)
                 {
+                    Debug.Log("@@@UP SWIPE DETECTED UP SWIPE DETECTED@@@");
+
                     Vector2 normalizedSwipeVelocityVector = new Vector2(gesture.VelocityX, gesture.VelocityY).normalized;
 
                     // BAD! Do not do!!! FingersLite uses arbitrary Iphone inch pixel units, not actual pixels, ScrrentoWorldPoint() has big rounding errors!
@@ -358,6 +328,11 @@ namespace SwordClash
             FingersScript.Instance.AddGesture(whichSwipe);
         }
 
+        private void FlipCameraUpsideDown()
+        {
+            CameraReference.transform.Rotate(0, 0, 180);
+            //transform.Rotate(0, 0 * Time.deltaTime, 180);
+        }
 
         // When this component is reset, renamed, or placed in new scene: set default values of editor fields
         private void Reset()

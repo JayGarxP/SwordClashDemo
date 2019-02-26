@@ -71,11 +71,11 @@ namespace SwordClash
         private GameLogicController GLCInstance;
 
         // Reference to OTHER player's tentacle
-        private GameObject OpponentTentacleGO;
+        //private GameObject OpponentTentacleGO;
         private TentacleController OpponentTCInstance;
 
-        private GameObject PlayerControllerGO;
-        private PlayerController PlayerControllerScriptInstance;
+        //private GameObject PlayerControllerGO;
+       // private PlayerController PlayerControllerScriptInstance;
         private bool AmIPlayerTwo;
         public short WhichPlayerIBe; // 0 is NOBODY;  1 is p1;   2 is p2
 
@@ -113,10 +113,6 @@ namespace SwordClash
             // Bolt Entity Transform sync
             this.state.SetTransforms(this.state.TTTransform, this.transform);
 
-            Debug.Log("ATTACH chek if p2, " + this.entity.networkId.ToString());
-            Debug.Log("Attached() debug log test...");
-
-
             if (this.entity.isOwner == false && this.entity.hasControl == true)
             {
                 Debug.Log("Hi I am player2, " + this.entity.networkId);
@@ -125,18 +121,20 @@ namespace SwordClash
                 //PleaseMakeMePlayerTwo();
                 AmIPlayerTwo = true;
                 WhichPlayerIBe = 2;
+
+                // Instantiate P2Pog with tag "Player2" ONLY if player 2
                 Instantiate(P2Pog);
+                // P2Pog is used in PlayerController to know if the local scene is supposed to be Player2.
 
-
-                Debug.Log("<color=cyan>AmIPlayer2: </color>" + this.gameObject.GetInstanceID().ToString() +
-                "@@@" + AmIPlayerTwo.ToString() + "@@@ ", this);
+                PleaseMakeMePlayerTwo();
+                //Debug.Log("<color=cyan>AmIPlayer2: </color>" + this.gameObject.GetInstanceID().ToString() +
+                //"@@@" + AmIPlayerTwo.ToString() + "@@@ ", this);
 
             }
 
-            Debug.Log("ATTACH cheec if P11111, " + this.entity.networkId.ToString());
             if (this.entity.isOwner)
             {
-                Debug.Log("@@@@@@@@@@@@@@@Hi I am player1111, " + this.entity.networkId.ToString());
+                //Debug.Log("@@@@@@@@@@@@@@@Hi I am player1111, " + this.entity.networkId.ToString());
                 this.entity.TakeControl(); //Why do I need to do this?!?!?!
 
             }
@@ -150,42 +148,9 @@ namespace SwordClash
                 AmIPlayerTwo = false;
                 WhichPlayerIBe = 1;
 
-                Debug.Log("<color=red>AmIPlayer2: </color>" + this.gameObject.GetInstanceID().ToString() +
-            "@@@" + AmIPlayerTwo.ToString() + "@@@ ", this);
+               // Debug.Log("<color=red>AmIPlayer2: </color>" + this.gameObject.GetInstanceID().ToString() +
+            //"@@@" + AmIPlayerTwo.ToString() + "@@@ ", this);
             }
-
-
-
-
-            //// Old attempt at getting player 2 working
-            //if (PlayerControllerGO == null)
-            //{
-            //    PlayerControllerGO = GameObject.FindWithTag("Player");
-
-            //    if (PlayerControllerGO != null && PlayerControllerGO.tag != "/")
-            //    {
-            //        PlayerControllerScriptInstance = PlayerControllerGO.GetComponent<PlayerController>();
-            //        if (PlayerControllerScriptInstance == null)
-            //        {
-            //            // bad thing happen; still Null somehow
-            //            Debug.Log("    OH NO PlayerController is null");
-            //        }
-            //        else
-            //        {
-            //            // PlayerControllerScriptInstance is not null ;_;
-            //            if (state.AmIPlayer2 == true)
-            //            {
-            //                PleaseMakeMePlayerTwo();
-            //            }
-            //            else
-            //            {
-            //                PlayerControllerScriptInstance.MakeMePlayerOne(this);
-            //            }
-            //        }
-
-            //    }
-
-            //}
 
         }
 
@@ -213,46 +178,6 @@ namespace SwordClash
             }
             else
             {
-                //// Second PlayerController in Scene ALSO not working at all for player2...
-                //if (PlayerControllerGO == null)
-                //{
-
-                //    if (state.AmIPlayer2)
-                //    {
-                //        PlayerControllerGO = GameObject.FindWithTag("Player2");
-                //    }
-                //    else
-                //    {
-                //        PlayerControllerGO = GameObject.FindWithTag("Player");
-                //    }
-
-                //    if (PlayerControllerGO != null && PlayerControllerGO.tag != "/")
-                //    {
-                //        PlayerControllerScriptInstance = PlayerControllerGO.GetComponent<PlayerController>();
-                //        if (PlayerControllerScriptInstance == null)
-                //        {
-                //            // bad thing happen; still Null somehow
-                //            Debug.Log("@@@@ OH NO PlayerController is null @@@@");
-                //        }
-                //        else
-                //        {
-                //            // PlayerControllerScriptInstance is not null ;_;
-                //            if (state.AmIPlayer2 == true)
-                //            {
-                //                PleaseMakeMePlayerTwo();
-                //            }
-                //            else
-                //            {
-                //                PlayerControllerScriptInstance.MakeMePlayerOne((TentacleController)this);
-                //            }
-                //        }
-
-                //    }
-
-                //}
-
-
-
                 ////ACTUAL GAME LOOP:
 
                 // IrigidbodyPlayerCommandInput input = rigidbodyPlayerCommand.Create();
@@ -269,11 +194,9 @@ namespace SwordClash
             }
 
 
-
-
         }
 
-
+        // Bolt method called after SimulateController() sends commands based on Queued inputs.
         public override void ExecuteCommand(Command command, bool resetState)
         {
             TentacleInputCommand cmd = (TentacleInputCommand)command;
@@ -296,89 +219,9 @@ namespace SwordClash
         //    //{
         //    //    TTChangeTentacleSpritetoPlayerTwo();
         //    //}
+    //}
 
 
-        //    if(OpponentTentacleGO == null)
-        //    {
-        //        //OpponentTentacleGO = GameObject.FindWithTag("TentacleTip");
-        //        //if (OpponentTentacleGO != null && OpponentTentacleGO.tag != "/")
-        //        //{
-
-        //        //}
-        //        var tentaclesInScene = GameObject.FindGameObjectsWithTag("TentacleTip");
-
-        //        if (tentaclesInScene.Length == 2)
-        //        {
-        //            Debug.Log("@@@@ TWO TENTS IN SCENE @@@@");
-        //            Debug.Log("@@ my ID: " + gameObject.GetInstanceID().ToString());
-
-
-        //            //if (tentaclesInScene[0].GetInstanceID() == gameObject.GetInstanceID())
-        //            //{
-        //            //    //OpponentTentacleGO = tentaclesInScene[0];
-        //            //    //OpponentTCInstance = OpponentTentacleGO.GetComponent<TentacleController>();
-
-        //            //}else
-        //            //{
-        //            //    OpponentTentacleGO = tentaclesInScene[1];
-        //            //    OpponentTCInstance = OpponentTentacleGO.GetComponent<TentacleController>();
-
-        //            //}
-        //            foreach (var TENT in tentaclesInScene)
-        //            {
-        //                if (TENT.GetInstanceID() != gameObject.GetInstanceID())
-        //                {
-        //                    OpponentTentacleGO = TENT;
-        //                    OpponentTCInstance = TENT.GetComponent<TentacleController>();
-        //                    Debug.Log("@@ ENEMY ID: " + TENT.GetInstanceID().ToString());
-
-        //                }
-        //            }
-        //        }
-        //    } //need additional variable to NOT assign playerController for client, client will get their own
-        //    else if (PlayerControllerGO == null)
-        //    {
-        //        PlayerControllerGO = GameObject.FindWithTag("Player");
-
-        //        if (PlayerControllerGO != null && PlayerControllerGO.tag != "/")
-        //        {
-        //            PlayerControllerScriptInstance = PlayerControllerGO.GetComponent<PlayerController>();
-        //            if (PlayerControllerScriptInstance == null)
-        //            {
-        //                // bad thing happen; still Null somehow
-        //                Debug.Log("@@@@ OH NO PlayerController is null @@@@");
-        //            }
-        //            else
-        //            {
-        //                //// PlayerControllerScriptInstance is not null ;_;
-        //                //// Player two check???
-        //                //if (entity.isOwner == false && entity.isControlled == true)
-        //                //{
-        //                //    Debug.Log("Hi I am player2, " + entity.networkId);
-        //                //    TTChangeTentacleSpritetoPlayerTwo();
-        //                //    // PlayerControllerScriptInstance.MakeMePlayerTwo(this);
-        //                //    PleaseMakeMePlayerTwo();
-
-
-        //                //}else
-        //                if (entity.isOwner && entity.isControlled)
-        //                {
-        //                    Debug.Log("Lo Iam P1, " + entity.networkId);
-        //                    PlayerControllerScriptInstance.MakeMePlayerOne(this);
-
-        //                    OpponentTCInstance.PleaseMakeMePlayerTwo();
-        //                    OpponentTCInstance.TTChangeTentacleSpritetoPlayerTwo();
-
-        //                }
-
-        //            }
-
-        //        }
-
-        //    }
-
-
-        //}
 
         //void FixedUpdate()
         //{
@@ -511,14 +354,15 @@ namespace SwordClash
             TTSpriteRenderer.color = Color.black;
         }
 
+        // Make me player 2two2
         public void PleaseMakeMePlayerTwo()
         {
             AmIPlayerTwo = true;
             this.CurrentTentacleState.AmIPlayerTwo = true;
-            //state.AmIPlayer2 = true;
-            //this.tag = "TentacleTipP2";
-            //PlayerControllerScriptInstance.MakeMePlayerTwo(OpponentTCInstance);
+            
             TTChangeTentacleSpritetoPlayerTwo();
+            TentacleEatingPosition = new Vector2(TentacleReadyPosition.x, TentacleReadyPosition.y + EatingZoneOffsetFromStart);
+
         }
 
 

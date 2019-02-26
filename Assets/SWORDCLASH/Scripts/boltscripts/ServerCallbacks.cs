@@ -35,7 +35,7 @@ public class ServerCallbacks : Bolt.GlobalEventListener
 
     public override void SceneLoadRemoteDone(BoltConnection connection)
     {
-        var spawnPosition = new Vector3(-1.5f, 1.0f, 0);
+        var spawnPosition = new Vector3(-1.5f, -3.0f, 0);
 
         //// instantiate cube; all BoltPrefabs are accessed through a static class
         BoltEntity playerTwo = BoltNetwork.Instantiate(BoltPrefabs.TentacleTipScene, spawnPosition, Quaternion.identity);
