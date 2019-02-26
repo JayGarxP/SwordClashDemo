@@ -64,6 +64,16 @@ namespace SwordClash
 
         //}
 
+        private void Update()
+        {
+            // Get references to player one TT and p2 TentacleTip
+            // Make player two orange
+            // Flip da board for P2 so it lookin red100
+
+
+
+        }
+
         //void Update()
         //{
         //    // Hack to keep player input non-bolt networked for now, object is null until it spawns in from
@@ -71,7 +81,7 @@ namespace SwordClash
         //    if (TTPrefabset == false && TTInSceneCount == 0)
         //    {
         //        LeftTentacle = GameObject.FindWithTag("TentacleTip");
-                
+
         //        // check if component is unattached or null here? Not sure best way to make tightly-coupled components know of each other
         //        if (LeftTentacle != null && LeftTentacle.tag != "/")
         //        {
@@ -103,7 +113,7 @@ namespace SwordClash
         //                    TTInSceneCount += 1;
         //                    AmIPlayerTwo = true;
         //                    TentaController.PleaseMakeMePlayerTwo();
-                            
+
         //                }
         //                else
         //                {
@@ -310,21 +320,7 @@ namespace SwordClash
             DoubleTapTimeThreshold = 1;
         }
 
-        public void MakeMePlayerTwo(TentacleController TC)
-        {
-            if (TentaController == null)
-            {
-                AmIPlayerTwo = true;
-                this.TentaController = TC;
 
-            }
-        }
-
-        public void MakeMePlayerOne(TentacleController TC)
-        {
-            AmIPlayerTwo = false;
-            this.TentaController = TC;
-        }
 
 
     }

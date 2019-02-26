@@ -13,6 +13,8 @@ namespace SwordClash
         //TODO: make these private with [SerializeField] atrribute so they still appear in editor
         // Collision object
         public GameObject TentacleTip;
+        // Placeholder instantiated if player2 so local scripts can use tag lookup more easily.
+        public GameObject P2Pog;
         // constant speed of tentacle
         public float UPswipeSpeedConstant;
         // Added to constant speed of tentacle
@@ -43,7 +45,7 @@ namespace SwordClash
         public Sprite TTStungSprite;
 
         public Sprite TTPlayerTwoSprite;
-        
+
         #endregion
 
         // Gang of Four State pattern, state machine for inputs allowed during tentacle movement
@@ -75,6 +77,7 @@ namespace SwordClash
         private GameObject PlayerControllerGO;
         private PlayerController PlayerControllerScriptInstance;
         private bool AmIPlayerTwo;
+        public short WhichPlayerIBe; // 0 is NOBODY;  1 is p1;   2 is p2
 
 
         // Setup the component you are on right now (the "this" object); before all Start()s
@@ -82,8 +85,9 @@ namespace SwordClash
         {
             //MovePositionVelocity_TT_Active = Vector2.zero;
             StartTentacleLength = 0;
-            AmIPlayerTwo = false;
-           
+            // AmIPlayerTwo = null;
+            WhichPlayerIBe = 0;
+
         }
 
         // BoltNetwork Start()
@@ -95,6 +99,7 @@ namespace SwordClash
             StartTentacleLength = TentacleReadyPosition.magnitude;
             maxTentacleLength = StartTentacleLength * 2; //TODO: fix maxtentacleLength solution
             StartTentacleRotation = TentacleTipRB2D.rotation;
+            WhichPlayerIBe = 0;
 
 
             // Set sprite renderer reference so tentacle can change color
@@ -108,7 +113,49 @@ namespace SwordClash
             // Bolt Entity Transform sync
             this.state.SetTransforms(this.state.TTTransform, this.transform);
 
-          
+            Debug.Log("ATTACH chek if p2, " + this.entity.networkId.ToString());
+            Debug.Log("Attached() debug log test...");
+
+
+            if (this.entity.isOwner == false && this.entity.hasControl == true)
+            {
+                Debug.Log("Hi I am player2, " + this.entity.networkId);
+                //TTChangeTentacleSpritetoPlayerTwo();
+                // PlayerControllerScriptInstance.MakeMePlayerTwo(this);
+                //PleaseMakeMePlayerTwo();
+                AmIPlayerTwo = true;
+                WhichPlayerIBe = 2;
+                Instantiate(P2Pog);
+
+
+                Debug.Log("<color=cyan>AmIPlayer2: </color>" + this.gameObject.GetInstanceID().ToString() +
+                "@@@" + AmIPlayerTwo.ToString() + "@@@ ", this);
+
+            }
+
+            Debug.Log("ATTACH cheec if P11111, " + this.entity.networkId.ToString());
+            if (this.entity.isOwner)
+            {
+                Debug.Log("@@@@@@@@@@@@@@@Hi I am player1111, " + this.entity.networkId.ToString());
+                this.entity.TakeControl(); //Why do I need to do this?!?!?!
+
+            }
+
+            if (this.entity.isOwner && this.entity.hasControl)
+            {
+                // Not working??!?!?!
+                // AmIPlayerTwo = state.AmIPlayer2;
+                Debug.Log("Hi I am player1111, " + this.entity.networkId.ToString());
+
+                AmIPlayerTwo = false;
+                WhichPlayerIBe = 1;
+
+                Debug.Log("<color=red>AmIPlayer2: </color>" + this.gameObject.GetInstanceID().ToString() +
+            "@@@" + AmIPlayerTwo.ToString() + "@@@ ", this);
+            }
+
+
+
 
             //// Old attempt at getting player 2 working
             //if (PlayerControllerGO == null)
@@ -135,14 +182,14 @@ namespace SwordClash
             //                PlayerControllerScriptInstance.MakeMePlayerOne(this);
             //            }
             //        }
-                  
+
             //    }
 
             //}
 
         }
 
-      
+
 
         // BoltNetwork Update()
         // is used to collect inputs from your game and putting it into a Command. 
@@ -220,9 +267,9 @@ namespace SwordClash
 
                 this.entity.QueueInput(input);
             }
-           
 
-            
+
+
 
         }
 
@@ -250,7 +297,7 @@ namespace SwordClash
         //    //    TTChangeTentacleSpritetoPlayerTwo();
         //    //}
 
-          
+
         //    if(OpponentTentacleGO == null)
         //    {
         //        //OpponentTentacleGO = GameObject.FindWithTag("TentacleTip");
@@ -399,7 +446,7 @@ namespace SwordClash
         }
 
         // pass in true to jump left, false to get a jump right end position vector as return value
-        public Vector2 TT_CalculateEndJumpPosition( bool YesJumpingLeft)
+        public Vector2 TT_CalculateEndJumpPosition(bool YesJumpingLeft)
         {
             Vector2 whereToJumpTo;
 
@@ -422,8 +469,8 @@ namespace SwordClash
         public bool TT_JumpSideways(Vector2 endOfJumpPosition)
         {
             //Vector2 whereToJumpTo = new Vector2(TentacleTipRB2D.position.x - TTJukePosLeftAmount, TentacleTipRB2D.position.y);
-            
-                TentacleTip_JumpSideways(endOfJumpPosition);
+
+            TentacleTip_JumpSideways(endOfJumpPosition);
 
             bool HaventReachedEndJumpPosition = true;
 
@@ -432,7 +479,7 @@ namespace SwordClash
                 HaventReachedEndJumpPosition = false;
             }
 
-            return HaventReachedEndJumpPosition; 
+            return HaventReachedEndJumpPosition;
         }
         private void TentacleTip_JumpSideways(Vector2 whereToJumpTo)
         {
@@ -441,7 +488,7 @@ namespace SwordClash
 
         }
 
-      
+
         public void PleaseStingTentacleSprite()
         {
             ChangeTentacleSpritetoSting();
@@ -470,7 +517,7 @@ namespace SwordClash
             this.CurrentTentacleState.AmIPlayerTwo = true;
             //state.AmIPlayer2 = true;
             //this.tag = "TentacleTipP2";
-            PlayerControllerScriptInstance.MakeMePlayerTwo(OpponentTCInstance);
+            //PlayerControllerScriptInstance.MakeMePlayerTwo(OpponentTCInstance);
             TTChangeTentacleSpritetoPlayerTwo();
         }
 
@@ -590,7 +637,7 @@ namespace SwordClash
 
         }
 
-    
+
 
         public void ResetTentacleTipRotation()
         {

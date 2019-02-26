@@ -20,6 +20,10 @@ public class ServerCallbacks : Bolt.GlobalEventListener
        BoltEntity playerOne = BoltNetwork.Instantiate(BoltPrefabs.TentacleTipScene, spawnPosition, Quaternion.identity);
         playerOne.TakeControl();
 
+        // THis does not work...
+       // playerOne.GetState<ITentacleTipState>().AmIPlayer2 = false;
+
+
         // NOw spawn in GameLogicController which will spawn in food???
         // BoltEntity tentacleFood = BoltNetwork.Attach();
 
@@ -37,10 +41,11 @@ public class ServerCallbacks : Bolt.GlobalEventListener
         BoltEntity playerTwo = BoltNetwork.Instantiate(BoltPrefabs.TentacleTipScene, spawnPosition, Quaternion.identity);
         //playerTwo.tag = "TentacleTipP2";
         //playerTwo.gameObject.tag = "TentacleTipP2";
-        //playerTwo.GetState<ITentacleTipState>().AmIPlayer2 = true;
         playerTwo.AssignControl(connection);
+        //playerTwo.GetState<ITentacleTipState>().AmIPlayer2 = true;
 
-        
+
+
     }
 
     public override void Connected(BoltConnection connection)
