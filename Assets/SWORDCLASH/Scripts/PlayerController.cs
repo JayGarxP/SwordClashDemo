@@ -1,8 +1,6 @@
-﻿using UnityEngine;
+﻿using DigitalRubyShared; //Fingers bought full version 1/10/2019
+using UnityEngine;
 using UnityEngine.UI;
-using DigitalRubyShared; //Fingers bought full version 1/10/2019
-using System;
-using System.Collections.Generic;
 
 namespace SwordClash
 {
@@ -15,17 +13,17 @@ namespace SwordClash
         // = 1f; // where 1.5 means 1.5* greater y axis movement needed to for gesture event to fire.
         public float UPSwipeGestureDirectionThreshold;
         // left right down swipes need to be more precise
-        public float LeftRightDownSwipeGestureDirectionThreshold; 
+        public float LeftRightDownSwipeGestureDirectionThreshold;
         // time between taps allowed for double tap
-        public float DoubleTapTimeThreshold; 
-      
+        public float DoubleTapTimeThreshold;
+
         public Camera CameraReference;
         public Text SwipeAngleText;
-       
+
         public GameObject LeftTentacle;
 
         // ImageScript set in editor, to recognize circles
-       public FingersImageGestureHelper_SC_BarrelRoll ImageReconzrScript;
+        public FingersImageGestureHelper_SC_BarrelRoll ImageReconzrScript;
         #endregion
 
         private TapGestureRecognizer TapGesture; //juke by which half of screen tapped
@@ -36,7 +34,7 @@ namespace SwordClash
         private SwipeGestureRecognizer RightSwipeGesture; //wall jump off left wall
         private SwipeGestureRecognizer DownSwipeGesture; //Reel in tentacle
 
-        
+
         private TentacleController TentaController;
         private Vector2 TentacleTipStartPosition;
         private bool TTPrefabset;
@@ -47,7 +45,7 @@ namespace SwordClash
         void Start()
         {
             //CreateDoubleTapGesture(); //TODO: find event order solution: https://stackoverflow.com/questions/374398/are-event-subscribers-called-in-order-of-subscription
-            
+
             //CreateDoubleTapGesture(); // test if order matters; it does sadly... :(
             CreateSwipeGestures();
             CreateTapGesture();
@@ -72,7 +70,7 @@ namespace SwordClash
 
             if (TTInSceneCount != 2)
             {
-                
+
                 var tentaclesInScene = GameObject.FindGameObjectsWithTag("TentacleTip");
 
                 if (tentaclesInScene.Length == 2)
@@ -86,18 +84,39 @@ namespace SwordClash
                     {
                         AmIPlayerTwo = true;
                     }
-                    Debug.Log("AmIPlayerTwo: " + AmIPlayerTwo.ToString());
+                    // This is working!!!! YAYAY
+                    //Debug.Log("AmIPlayerTwo: " + AmIPlayerTwo.ToString());
 
-                    //foreach (var TENT in tentaclesInScene)
-                    //{
-                    //    if (TENT.GetInstanceID() != gameObject.GetInstanceID())
-                    //    {
-                    //        OpponentTentacleGO = TENT;
-                    //        OpponentTCInstance = TENT.GetComponent<TentacleController>();
-                    //        Debug.Log("@@ ENEMY ID: " + TENT.GetInstanceID().ToString());
+                    foreach (var TENT in tentaclesInScene)
+                    {
+                        //OpponentTentacleGO = TENT;
+                        var TCInstance = TENT.GetComponent<TentacleController>();
+                        //Debug.Log("@@ TENTA ID: " + TENT.GetInstanceID().ToString());
+                        //Debug.Log("@@ WhichPlayerIBe: " + TCInstance.WhichPlayerIBe.ToString());
 
-                    //    }
-                    //}
+                        if (TentaController == null)
+                        {
+
+
+                            if (TCInstance.WhichPlayerIBe == 1 && AmIPlayerTwo == false)
+                            {
+                                //We are player 1
+                                Debug.Log("$$$ I am Player 1 $$$");
+                                TentaController = TCInstance;
+                                TTInSceneCount = 2;
+
+                            }
+                            else if (TCInstance.WhichPlayerIBe == 2 && AmIPlayerTwo == true)
+                            {
+                                //We are player 2
+                                Debug.Log("$ I am Player 22222 $");
+                                TentaController = TCInstance;
+                                TTInSceneCount = 2;
+
+                            }
+                        }
+
+                    }
                 }
             }
 
@@ -164,7 +183,7 @@ namespace SwordClash
             if (match != null && match.Name == "Circle")
             {
                 // send barrel roll flag
-               bool temp_Circled_soBROLL = TentaController.BarrelRoll_Please();
+                bool temp_Circled_soBROLL = TentaController.BarrelRoll_Please();
 
                 // image gesture must be manually reset when a shape is recognized AND after calling BarrelRoll_Please()
                 ImageReconzrScript.ResetMatchedImage();
@@ -244,7 +263,7 @@ namespace SwordClash
             UpSwipeGesture.Direction = SwipeGestureRecognizerDirection.Up;
             UpSwipeGesture.StateUpdated += SwipeGestureCallback_UP;
             // Still has 6 degree dead zone??? 39 to 32 if dirThresh is set to 1
-            UpSwipeGesture.DirectionThreshold = UPSwipeGestureDirectionThreshold; 
+            UpSwipeGesture.DirectionThreshold = UPSwipeGestureDirectionThreshold;
 
             FingersScript.Instance.AddGesture(UpSwipeGesture);
         }
