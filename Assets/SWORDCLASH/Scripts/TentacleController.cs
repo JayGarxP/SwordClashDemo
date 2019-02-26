@@ -64,11 +64,17 @@ namespace SwordClash
         private SpriteRenderer TTSpriteRenderer;
         private Sprite TTSceneSprite; //sprite object starts with
 
-        private bool AmIPlayerTwo;
         private GameObject GameWorld;
         // Reference to game logic controller in scene
         private GameLogicController GLCInstance;
 
+        // Reference to OTHER player's tentacle
+        private GameObject OpponentTentacleGO;
+        private TentacleController OpponentTCInstance;
+
+        private GameObject PlayerControllerGO;
+        private PlayerController PlayerControllerScriptInstance;
+        private bool AmIPlayerTwo;
 
 
         // Setup the component you are on right now (the "this" object); before all Start()s
@@ -76,38 +82,9 @@ namespace SwordClash
         {
             //MovePositionVelocity_TT_Active = Vector2.zero;
             StartTentacleLength = 0;
-            //AmIPlayerTwo = false;
+            AmIPlayerTwo = false;
+           
         }
-
-        //// Use this for initialization; Here you setup things that depend on other components.
-        //void Start()
-        //{
-        //        var GameWorld = GameObject.FindWithTag("GameWorld");
-        //    // check if component is unattached or null here? Not sure best way to make tightly-coupled components know of each other
-        //    if (GameWorld != null && GameWorld.tag != "/")
-        //    {
-        //        GLCInstance = GameWorld.GetComponent<GameLogicController>();
-        //        if (GLCInstance == null)
-        //        {
-        //            // bad thing happen
-        //        }
-        //    }
-
-        //    TentacleTipRB2D = TentacleTip.GetComponent<Rigidbody2D>();
-        //    TentacleReadyPosition = TentacleTipRB2D.position;
-        //    TentacleEatingPosition = new Vector2(TentacleReadyPosition.x, TentacleReadyPosition.y - EatingZoneOffsetFromStart);
-        //    StartTentacleLength = TentacleReadyPosition.magnitude;
-        //    maxTentacleLength = StartTentacleLength * 2; //TODO: fix maxtentacleLength solution
-        //    StartTentacleRotation = TentacleTipRB2D.rotation;
-
-
-        //    // Set sprite renderer reference so tentacle can change color
-        //    TTSpriteRenderer = this.GetComponent<SpriteRenderer>();
-        //    TTSceneSprite = TTSpriteRenderer.sprite;
-
-        //    // Redundant cast seems to help avoid null reference in update loop
-        //    CurrentTentacleState = new CoiledState(((TentacleController)this));
-        //}
 
         // BoltNetwork Start()
         public override void Attached()
@@ -131,7 +108,41 @@ namespace SwordClash
             // Bolt Entity Transform sync
             this.state.SetTransforms(this.state.TTTransform, this.transform);
 
+          
+
+            //// Old attempt at getting player 2 working
+            //if (PlayerControllerGO == null)
+            //{
+            //    PlayerControllerGO = GameObject.FindWithTag("Player");
+
+            //    if (PlayerControllerGO != null && PlayerControllerGO.tag != "/")
+            //    {
+            //        PlayerControllerScriptInstance = PlayerControllerGO.GetComponent<PlayerController>();
+            //        if (PlayerControllerScriptInstance == null)
+            //        {
+            //            // bad thing happen; still Null somehow
+            //            Debug.Log("    OH NO PlayerController is null");
+            //        }
+            //        else
+            //        {
+            //            // PlayerControllerScriptInstance is not null ;_;
+            //            if (state.AmIPlayer2 == true)
+            //            {
+            //                PleaseMakeMePlayerTwo();
+            //            }
+            //            else
+            //            {
+            //                PlayerControllerScriptInstance.MakeMePlayerOne(this);
+            //            }
+            //        }
+                  
+            //    }
+
+            //}
+
         }
+
+      
 
         // BoltNetwork Update()
         // is used to collect inputs from your game and putting it into a Command. 
@@ -155,6 +166,48 @@ namespace SwordClash
             }
             else
             {
+                //// Second PlayerController in Scene ALSO not working at all for player2...
+                //if (PlayerControllerGO == null)
+                //{
+
+                //    if (state.AmIPlayer2)
+                //    {
+                //        PlayerControllerGO = GameObject.FindWithTag("Player2");
+                //    }
+                //    else
+                //    {
+                //        PlayerControllerGO = GameObject.FindWithTag("Player");
+                //    }
+
+                //    if (PlayerControllerGO != null && PlayerControllerGO.tag != "/")
+                //    {
+                //        PlayerControllerScriptInstance = PlayerControllerGO.GetComponent<PlayerController>();
+                //        if (PlayerControllerScriptInstance == null)
+                //        {
+                //            // bad thing happen; still Null somehow
+                //            Debug.Log("@@@@ OH NO PlayerController is null @@@@");
+                //        }
+                //        else
+                //        {
+                //            // PlayerControllerScriptInstance is not null ;_;
+                //            if (state.AmIPlayer2 == true)
+                //            {
+                //                PleaseMakeMePlayerTwo();
+                //            }
+                //            else
+                //            {
+                //                PlayerControllerScriptInstance.MakeMePlayerOne((TentacleController)this);
+                //            }
+                //        }
+
+                //    }
+
+                //}
+
+
+
+                ////ACTUAL GAME LOOP:
+
                 // IrigidbodyPlayerCommandInput input = rigidbodyPlayerCommand.Create();
                 ITentacleInputCommandInput input = TentacleInputCommand.Create();
 
@@ -192,6 +245,91 @@ namespace SwordClash
         //// Update is called once per frame
         //void Update()
         //{
+        //    //if (AmIPlayerTwo || state.AmIPlayer2) //&& entity.isControllerOrOwner)
+        //    //{
+        //    //    TTChangeTentacleSpritetoPlayerTwo();
+        //    //}
+
+          
+        //    if(OpponentTentacleGO == null)
+        //    {
+        //        //OpponentTentacleGO = GameObject.FindWithTag("TentacleTip");
+        //        //if (OpponentTentacleGO != null && OpponentTentacleGO.tag != "/")
+        //        //{
+
+        //        //}
+        //        var tentaclesInScene = GameObject.FindGameObjectsWithTag("TentacleTip");
+
+        //        if (tentaclesInScene.Length == 2)
+        //        {
+        //            Debug.Log("@@@@ TWO TENTS IN SCENE @@@@");
+        //            Debug.Log("@@ my ID: " + gameObject.GetInstanceID().ToString());
+
+
+        //            //if (tentaclesInScene[0].GetInstanceID() == gameObject.GetInstanceID())
+        //            //{
+        //            //    //OpponentTentacleGO = tentaclesInScene[0];
+        //            //    //OpponentTCInstance = OpponentTentacleGO.GetComponent<TentacleController>();
+
+        //            //}else
+        //            //{
+        //            //    OpponentTentacleGO = tentaclesInScene[1];
+        //            //    OpponentTCInstance = OpponentTentacleGO.GetComponent<TentacleController>();
+
+        //            //}
+        //            foreach (var TENT in tentaclesInScene)
+        //            {
+        //                if (TENT.GetInstanceID() != gameObject.GetInstanceID())
+        //                {
+        //                    OpponentTentacleGO = TENT;
+        //                    OpponentTCInstance = TENT.GetComponent<TentacleController>();
+        //                    Debug.Log("@@ ENEMY ID: " + TENT.GetInstanceID().ToString());
+
+        //                }
+        //            }
+        //        }
+        //    } //need additional variable to NOT assign playerController for client, client will get their own
+        //    else if (PlayerControllerGO == null)
+        //    {
+        //        PlayerControllerGO = GameObject.FindWithTag("Player");
+
+        //        if (PlayerControllerGO != null && PlayerControllerGO.tag != "/")
+        //        {
+        //            PlayerControllerScriptInstance = PlayerControllerGO.GetComponent<PlayerController>();
+        //            if (PlayerControllerScriptInstance == null)
+        //            {
+        //                // bad thing happen; still Null somehow
+        //                Debug.Log("@@@@ OH NO PlayerController is null @@@@");
+        //            }
+        //            else
+        //            {
+        //                //// PlayerControllerScriptInstance is not null ;_;
+        //                //// Player two check???
+        //                //if (entity.isOwner == false && entity.isControlled == true)
+        //                //{
+        //                //    Debug.Log("Hi I am player2, " + entity.networkId);
+        //                //    TTChangeTentacleSpritetoPlayerTwo();
+        //                //    // PlayerControllerScriptInstance.MakeMePlayerTwo(this);
+        //                //    PleaseMakeMePlayerTwo();
+
+
+        //                //}else
+        //                if (entity.isOwner && entity.isControlled)
+        //                {
+        //                    Debug.Log("Lo Iam P1, " + entity.networkId);
+        //                    PlayerControllerScriptInstance.MakeMePlayerOne(this);
+
+        //                    OpponentTCInstance.PleaseMakeMePlayerTwo();
+        //                    OpponentTCInstance.TTChangeTentacleSpritetoPlayerTwo();
+
+        //                }
+
+        //            }
+
+        //        }
+
+        //    }
+
 
         //}
 
@@ -330,6 +468,10 @@ namespace SwordClash
         {
             AmIPlayerTwo = true;
             this.CurrentTentacleState.AmIPlayerTwo = true;
+            //state.AmIPlayer2 = true;
+            //this.tag = "TentacleTipP2";
+            PlayerControllerScriptInstance.MakeMePlayerTwo(OpponentTCInstance);
+            TTChangeTentacleSpritetoPlayerTwo();
         }
 
 
@@ -448,6 +590,7 @@ namespace SwordClash
 
         }
 
+    
 
         public void ResetTentacleTipRotation()
         {

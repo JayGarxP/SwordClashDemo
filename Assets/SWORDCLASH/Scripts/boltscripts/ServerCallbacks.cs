@@ -35,7 +35,9 @@ public class ServerCallbacks : Bolt.GlobalEventListener
 
         //// instantiate cube; all BoltPrefabs are accessed through a static class
         BoltEntity playerTwo = BoltNetwork.Instantiate(BoltPrefabs.TentacleTipScene, spawnPosition, Quaternion.identity);
-        playerTwo.tag = "TentacleTipP2";
+        //playerTwo.tag = "TentacleTipP2";
+        //playerTwo.gameObject.tag = "TentacleTipP2";
+        //playerTwo.GetState<ITentacleTipState>().AmIPlayer2 = true;
         playerTwo.AssignControl(connection);
 
         

@@ -98,11 +98,6 @@ namespace SwordClash
             // Coiled States ProcessState does NOT block flag changes while executing.
             IsCurrentlyProcessing = false;
 
-            if (AmIPlayerTwo)
-            {
-                TentaControllerInstance.TTChangeTentacleSpritetoPlayerTwo();
-            }
-
             // if player up-swipe, they tryna  *L A U N C H*
             if (InputFlagArray[(int)HotInputs.LaunchSwipe])
             {
@@ -128,25 +123,11 @@ namespace SwordClash
         // After ProcessState sets the Bolt Command input, ProcessCommand does stuff in-game
         public override void ProcessCommand(TentacleInputCommand command)
         {
-            if (AmIPlayerTwo)
-            {
-                TentaControllerInstance.TTChangeTentacleSpritetoPlayerTwo();
-            }
 
             // Only accept input if NOT in middle of animation
             if (CurrentlyJuking == false)
             {
                 //// if player up-swipe, they tryna  *L A U N C H*
-                //if (InputFlagArray[(int)HotInputs.LaunchSwipe])
-                //{
-                //    TentaControllerInstance.CurrentTentacleState = new ProjectileState(this,
-                //        TentaControllerInstance.TTMovePositionVelocityRequested,
-                //        TentaControllerInstance.TTMoveRotationAngleRequested);
-                //}
-
-                //input.
-
-
                 if (command.Input.UpSwipe != Vector3.zero)
                 {
                     TentaControllerInstance.CurrentTentacleState = new ProjectileState(this,
