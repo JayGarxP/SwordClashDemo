@@ -95,13 +95,19 @@ namespace SwordClash
 
         public override void ProcessState(ITentacleInputCommandInput input)
         {
+
             // Coiled States ProcessState does NOT block flag changes while executing.
             IsCurrentlyProcessing = false;
 
             // if player up-swipe, they tryna  *L A U N C H*
             if (InputFlagArray[(int)HotInputs.LaunchSwipe])
             {
-                input.UpSwipe = TentaControllerInstance.TTMovePositionVelocityRequested;
+                input.UpSwipe = new Vector3(TentaControllerInstance.TTMovePositionVelocityRequested.x,
+                    TentaControllerInstance.TTMovePositionVelocityRequested.y, 0);
+
+               //Debug.Log("$$$$$ ProcessState LAUNCH FLAG RAISED logic reached $$$$$$$");
+               //Debug.Log("@ input.UpSwipe=" + input.UpSwipe.ToString());
+
 
             }
 
@@ -123,15 +129,18 @@ namespace SwordClash
         // After ProcessState sets the Bolt Command input, ProcessCommand does stuff in-game
         public override void ProcessCommand(TentacleInputCommand command)
         {
+            Debug.Log("$$$$$ ProcessCommand coiled $$$$$$$");
 
             // Only accept input if NOT in middle of animation
             if (CurrentlyJuking == false)
             {
+                //Debug.Log("$$$$$ ProcessCommand Up swipe logic reached $$$$$$$");
+
                 //// if player up-swipe, they tryna  *L A U N C H*
                 if (command.Input.UpSwipe != Vector3.zero)
                 {
                     //TODO: THIS LOGIC IS NOT BEING REACHED!!!
-                    Debug.Log("$$$$$ ProcessCommand Up swipe logic reached ");
+                    //Debug.Log("$$$$$ ProcessCommand Up swipe logic reached $$$$$$$");
                     TentaControllerInstance.CurrentTentacleState = new ProjectileState(this,
                         command.Input.UpSwipe,
                         TentaControllerInstance.TTMoveRotationAngleRequested);

@@ -191,6 +191,7 @@ namespace SwordClash
                     this.CurrentTentacleState.ProcessState(input);
                 }
 
+
                 this.entity.QueueInput(input);
             }
 
@@ -202,13 +203,34 @@ namespace SwordClash
         {
             TentacleInputCommand cmd = (TentacleInputCommand)command;
 
+
             if (BoltNetwork.IsServer)
             {
                 this.CurrentTentacleState.ProcessCommand(cmd);
             }
 
-            //transform.GetChild(0).GetChild(3).transform.rotation = Quaternion.LookRotation(cmd.Input.lookDirection);
+            // Monument to my sins
+            ////if (BoltNetwork.IsServer)
+            ////{
+            //    if (! AmIPlayerTwo)
+            //    {
+            //        this.CurrentTentacleState.ProcessCommand(cmd);
+            //    }
+            //    else
+            //    {
+            //        this.CurrentTentacleState.ProcessCommand(cmd);
+            //    }
+            ////}
 
+        }
+
+
+        // Why only taps work??? Swipes are not working???
+        // https://forum.photonengine.com/discussion/8085/do-you-only-have-movement-code-in-executecommand
+        public override void MissingCommand(Bolt.Command previous)
+        {
+            if (previous == null) { return; }
+            ExecuteCommand(previous, true);
         }
 
 

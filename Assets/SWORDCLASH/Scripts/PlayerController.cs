@@ -243,7 +243,7 @@ namespace SwordClash
             {
                 if (gesture.State == GestureRecognizerState.Ended)
                 {
-                    Debug.Log("@@@UP SWIPE DETECTED UP SWIPE DETECTED@@@");
+                    Debug.Log("1@1@1@1UP SWIPE DETECTED UP SWIPE DETECTED1@1@1@1");
 
                     Vector2 normalizedSwipeVelocityVector = new Vector2(gesture.VelocityX, gesture.VelocityY).normalized;
 

@@ -200,6 +200,8 @@ namespace SwordClash
             TentaControllerInstance.TT_MoveTentacleTip(SwipeVelocityVector, SwipeAngle);
 
             Debug.Log("######## AM IN PROJECTILE STATE #########");
+            Debug.Log("2@2@2@2 UP SWIPE Projectile state 2@2@2@2");
+
 
             // Check if done moving
             if (TentaControllerInstance.IsTentacleAtMaxExtension())
