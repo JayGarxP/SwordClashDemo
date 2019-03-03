@@ -2,7 +2,7 @@
 
 namespace SwordClash
 {
-    class ProjectileState : TentacleState
+    public class ProjectileState : TentacleState
     {
         // Can't do anything until finished with side-to-side movement
         private bool CurrentlyJuking;
@@ -57,6 +57,23 @@ namespace SwordClash
             JukeCount = jukeCount;
             OnStateEnter();
 
+        }
+
+        public ProjectileState(ProjectileState copy, TentacleController copyTC)
+            : base(copyTC)
+        {
+            this.SwipeVelocityVector = copy.SwipeVelocityVector;
+            SwipeAngle = copy.SwipeAngle;
+            BarrelRollCount = 0;
+
+            SwipeVelocityVector = MultiplyVectorComponentsBySpeed(
+                SwipeVelocityVector,
+                TentaControllerInstance.UPswipeSpeedConstant + TentaControllerInstance.UPswipeSpeedModifier
+                );
+
+            OnStateEnter();
+            // Set JukeCount to zero
+            JukeCount = 0;
         }
 
 

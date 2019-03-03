@@ -127,32 +127,44 @@ namespace SwordClash
 
 
         // After ProcessState sets the Bolt Command input, ProcessCommand does stuff in-game
+        // Only EVER runs on server P1
         public override void ProcessCommand(TentacleInputCommand command)
         {
-            Debug.Log("$$$$$ ProcessCommand coiled $$$$$$$");
-
             // Only accept input if NOT in middle of animation
             if (CurrentlyJuking == false)
             {
                 //Debug.Log("$$$$$ ProcessCommand Up swipe logic reached $$$$$$$");
 
                 //// if player up-swipe, they tryna  *L A U N C H*
-                if (command.Input.UpSwipe != Vector3.zero)
+                if (command.Input.UpSwipe.x != 0 || command.Input.UpSwipe.y != 0)
                 {
-                    //TODO: THIS LOGIC IS NOT BEING REACHED!!!
                     //Debug.Log("$$$$$ ProcessCommand Up swipe logic reached $$$$$$$");
-                    TentaControllerInstance.CurrentTentacleState = new ProjectileState(this,
-                        command.Input.UpSwipe,
-                        TentaControllerInstance.TTMoveRotationAngleRequested);
+
+                    var JebediahTheProjectileState = new ProjectileState(this,
+                      command.Input.UpSwipe,
+                      TentaControllerInstance.TTMoveRotationAngleRequested);
+
+                    if (command.Input.CommandFromP2)
+                    {
+                        Debug.Log("$$$$$ ProcessCommand Up swipe WAS from Player two btw $$$$$$$");
+
+                        //TentaControllerInstance.ChangeOpponentState(JebediahTheProjectileState);
+                        this.TentaControllerInstance.ChangeOpponentToProjectile(JebediahTheProjectileState);
+                    }
+                    else
+                    {
+                        this.TentaControllerInstance.CurrentTentacleState = JebediahTheProjectileState;
+                    }
 
                     InputFlagArray[(int)HotInputs.LaunchSwipe] = false;
-
                 }
 
 
                 // if juke input received, actaully juke using TentacleController callback method
                 if (command.Input.RightTap || command.Input.LeftTap)
                 {
+                    Debug.Log("$$$$$ IN BIKINI BOTTOM IM WITH SANDY $$$$$$$");
+
                     CurrentlyJuking = true;
                     // false parameter to jump RIGHT, true parameter to jump LEFT
                     WhereJumpingTo = TentaControllerInstance.TT_CalculateEndJumpPosition(command.Input.LeftTap);

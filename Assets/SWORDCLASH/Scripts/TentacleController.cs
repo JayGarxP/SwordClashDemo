@@ -191,6 +191,11 @@ namespace SwordClash
                     this.CurrentTentacleState.ProcessState(input);
                 }
 
+                // BoltNetwork.isClient could work too?
+                if (AmIPlayerTwo)
+                {
+                    input.CommandFromP2 = true;
+                }
 
                 this.entity.QueueInput(input);
             }
@@ -199,6 +204,8 @@ namespace SwordClash
         }
 
         // Bolt method called after SimulateController() sends commands based on Queued inputs.
+        // Execute command is called on Owner (P1) and Controller (p1 & P2)
+        // But IsServer check ensures this is Server Authoritative....
         public override void ExecuteCommand(Command command, bool resetState)
         {
             TentacleInputCommand cmd = (TentacleInputCommand)command;
@@ -206,22 +213,30 @@ namespace SwordClash
 
             if (BoltNetwork.IsServer)
             {
-                this.CurrentTentacleState.ProcessCommand(cmd);
+                if (cmd.Input.CommandFromP2)
+                {
+                    // Test, P2 should do nothing now...
+                }
+                else
+                {
+                    this.CurrentTentacleState.ProcessCommand(cmd);
+                }
             }
 
-            // Monument to my sins
-            ////if (BoltNetwork.IsServer)
-            ////{
-            //    if (! AmIPlayerTwo)
+            ////owner has sent a correction to the controller
+            //if (resetState)
+            //{
+            //    transform.position = cmd.Result.position;
+            //}
+            //else
+            //{
+            //    if (cmd.Input.click != Vector3.zero)
             //    {
-            //        this.CurrentTentacleState.ProcessCommand(cmd);
+            //        gameObject.SendMessage("SetTarget", cmd.Input.click);
             //    }
-            //    else
-            //    {
-            //        this.CurrentTentacleState.ProcessCommand(cmd);
-            //    }
-            ////}
 
+            //    cmd.Result.position = transform.position;
+            //}
         }
 
 
@@ -499,6 +514,22 @@ namespace SwordClash
 
         //}
 
+        public void ChangeOpponentState(TentacleState TTS)
+        {
+            // may neeed to use new here not sure?????
+            OpponentTCInstance.CurrentTentacleState = TTS;
+        }
+
+        public void ChangeMyStateToProjectile(ProjectileState stateToChangeTo)
+        {
+            this.CurrentTentacleState = new ProjectileState(stateToChangeTo, this);
+        }
+
+        public void ChangeOpponentToProjectile(ProjectileState stateToChangeTo)
+        {
+            
+            OpponentTCInstance.CurrentTentacleState = new ProjectileState(stateToChangeTo, this);
+        }
 
         //TODO: rename methods to have Pleasefirst and remove the underscores
         //Juke to the right, eventaully will only work 3 times either way; called by player controller
