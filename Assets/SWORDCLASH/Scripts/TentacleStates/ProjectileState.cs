@@ -119,51 +119,6 @@ namespace SwordClash
         // code summary here for projectile.processstate()
         public override void ProcessState()
         {
-            //// Free to process here,
-            //IsCurrentlyProcessing = false;
-
-            //// Check if barrel roll flag and haven't already brolled too much
-            //if ((BarrelRollCount < TentaControllerInstance.TimesCanBarrelRoll) &&
-            //    (InputFlagArray[(int)HotInputs.BarrelRoll]))
-            //{
-            //    TentaControllerInstance.CurrentTentacleState = new BarrelRollState(this, SwipeVelocityVector,
-            //        SwipeAngle, BarrelRollCount, JukeCount);
-            //}
-
-
-            //// check if tapping after checking if tapped out
-            //if (JukeCount < TentaControllerInstance.TTTimesAllowedToJuke)
-            //{
-            //    //// if juke - right input received
-            //    //if (InputFlagArray[(int)HotInputs.RudderRight])
-            //    //{
-            //    //    //TODO: make seperate jump methods for coiled jumps
-            //    //    TentaControllerInstance.TT_JumpRight(); 
-            //    //    InputFlagArray[(int)HotInputs.RudderRight] = false;
-            //    //    ++JukeCount;
-            //    //}
-
-            //    //if (InputFlagArray[(int)HotInputs.RudderLeft])
-            //    //{
-            //    //    TentaControllerInstance.TT_JumpLeft();
-            //    //    InputFlagArray[(int)HotInputs.RudderLeft] = false;
-            //    //    ++JukeCount;
-            //    //}
-
-            //}
-
-            //// move tentacle tip
-            //TentaControllerInstance.TT_MoveTentacleTip(SwipeVelocityVector, SwipeAngle);
-
-            //// Check if done moving
-            //if (TentaControllerInstance.IsTentacleAtMaxExtension())
-            //{
-            //    //TODO: Recovery mode state
-
-            //    OnStateExit();
-            //    TentaControllerInstance.CurrentTentacleState = new CoiledState(this);
-            //}
-
 
         }
 
@@ -213,20 +168,24 @@ namespace SwordClash
 
             }
 
-            // move tentacle tip
-            TentaControllerInstance.TT_MoveTentacleTip(SwipeVelocityVector, SwipeAngle);
-
-            Debug.Log("######## AM IN PROJECTILE STATE #########");
-            Debug.Log("2@2@2@2 UP SWIPE Projectile state 2@2@2@2");
-
-
-            // Check if done moving
-            if (TentaControllerInstance.IsTentacleAtMaxExtension())
+            if (BoltNetwork.IsServer)
             {
-                //TODO: Recovery mode state
+                // move tentacle tip
+                TentaControllerInstance.TT_MoveTentacleTip(SwipeVelocityVector, SwipeAngle);
 
-                OnStateExit();
-                TentaControllerInstance.CurrentTentacleState = new CoiledState(this);
+                Debug.Log("######## AM IN PROJECTILE STATE #########");
+                Debug.Log("2@2@2@2 UP SWIPE Projectile state 2@2@2@2");
+
+
+
+                // Check if done moving
+                if (TentaControllerInstance.IsTentacleAtMaxExtension())
+                {
+                    //TODO: Recovery mode state
+
+                    OnStateExit();
+                    TentaControllerInstance.CurrentTentacleState = new CoiledState(this);
+                }
             }
 
         }

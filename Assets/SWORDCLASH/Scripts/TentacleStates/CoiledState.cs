@@ -39,8 +39,12 @@ namespace SwordClash
             LowerAllInputFlags();
             CurrentlyJuking = false;
 
-            // Reset position and sprite of tentacle tip
-            TentaControllerInstance.TT_RecoilTentacle();
+            if (BoltNetwork.IsServer)
+            {
+                // Reset position and sprite of tentacle tip
+                TentaControllerInstance.TT_RecoilTentacle();
+            }
+            
         }
 
         public override void OnStateExit()
@@ -60,36 +64,6 @@ namespace SwordClash
         /// </remarks>
         public override void ProcessState()
         {
-            // Coiled States ProcessState does NOT block flag changes while executing.
-            IsCurrentlyProcessing = false;
-
-            //if (AmIPlayerTwo)
-            //{
-            //    TentaControllerInstance.TTChangeTentacleSpritetoPlayerTwo();
-            //}
-
-
-            //// if player up-swipe, they tryna  *L A U N C H*
-            //if (InputFlagArray[(int)HotInputs.LaunchSwipe])
-            //{
-            //    TentaControllerInstance.CurrentTentacleState = new ProjectileState(this,
-            //        TentaControllerInstance.TTMovePositionVelocityRequested,
-            //        TentaControllerInstance.TTMoveRotationAngleRequested);
-            //}
-
-            //// if juke-right input received, actaully juke right using TentacleController callback method
-            //if (InputFlagArray[(int)HotInputs.RudderRight])
-            //{
-            //    TentaControllerInstance.TT_JumpRight(); //TODO: make seperate jump methods for coiled jumps
-            //    InputFlagArray[(int)HotInputs.RudderRight] = false;
-            //}
-            //else if (InputFlagArray[(int)HotInputs.RudderLeft])
-            //{
-            //    TentaControllerInstance.TT_JumpLeft();
-            //    InputFlagArray[(int)HotInputs.RudderLeft] = false;
-
-            //}
-
 
         }
 
@@ -104,11 +78,6 @@ namespace SwordClash
             {
                 input.UpSwipe = new Vector3(TentaControllerInstance.TTMovePositionVelocityRequested.x,
                     TentaControllerInstance.TTMovePositionVelocityRequested.y, 0);
-
-               //Debug.Log("$$$$$ ProcessState LAUNCH FLAG RAISED logic reached $$$$$$$");
-               //Debug.Log("@ input.UpSwipe=" + input.UpSwipe.ToString());
-
-
             }
 
             // if juke-right input received, actaully juke right using TentacleController callback method

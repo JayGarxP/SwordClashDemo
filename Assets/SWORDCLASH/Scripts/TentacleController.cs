@@ -216,6 +216,7 @@ namespace SwordClash
                 if (cmd.Input.CommandFromP2)
                 {
                     // Test, P2 should do nothing now...
+                    OpponentTCInstance.TT_MoveTentacleTip(new Vector2(0, -1), 0.0f);
                 }
                 else
                 {
