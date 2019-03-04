@@ -116,5 +116,9 @@ namespace SwordClash
             //throw new NotImplementedException();
         }
 
+        public override void ProcessCommandFromPlayerTwo(TentacleInputCommand command)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

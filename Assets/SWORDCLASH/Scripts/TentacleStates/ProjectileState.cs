@@ -217,5 +217,10 @@ namespace SwordClash
                 CurrentlyJuking = TentaControllerInstance.TT_JumpSideways(WhereJumpingTo);
             }
         }
+
+        public override void ProcessCommandFromPlayerTwo(TentacleInputCommand command)
+        {
+            //throw new System.NotImplementedException();
+        }
     }
 }

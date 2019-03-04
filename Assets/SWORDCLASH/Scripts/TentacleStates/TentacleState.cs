@@ -39,6 +39,14 @@ namespace SwordClash
 
         // Inputs received each frame of physics FixedUpdate (for now)
         protected bool[] InputFlagArray;
+
+        // Not property??? JP comes from CPP you see
+        public bool[] GetInputFlagArray()
+        {
+            return InputFlagArray;
+        }
+
+
         // number of HotInput values
         protected int InputFlagCount;
 
@@ -55,6 +63,8 @@ namespace SwordClash
                 InputFlagArray[i] = false;
             }
         }
+
+       
 
 
         /// <summary>  
@@ -116,6 +126,25 @@ namespace SwordClash
             return yesFlagRaised;
         }
 
+
+        // TODO: refactor the common behavior of FlagRequests into private method, keep the public facing EZ to read stuff tho
+        public bool LowerTentacleFlag_Request(int requestedFlagtoLower)
+        {
+            bool yesFlagLowered = false;
+
+            // only try to raise if: requested flag is inside InputFlagEnum range
+            if ((requestedFlagtoLower >= 0) && (requestedFlagtoLower < InputFlagCount))
+            {
+                if (IsCurrentlyProcessing == false)
+                {
+                    //TODO: try catch here?
+                    InputFlagArray[requestedFlagtoLower] = false;
+                    yesFlagLowered= true;
+                }
+            }
+            return yesFlagLowered;
+        }
+
         protected bool LowerTentacleFlag_Force(int requestedFlagtoLower)
         {
             bool yesFlagLowered = false;
@@ -134,6 +163,8 @@ namespace SwordClash
         public abstract void ProcessState();
         public abstract void ProcessState(ITentacleInputCommandInput input);
         public abstract void ProcessCommand(TentacleInputCommand command);
+        public abstract void ProcessCommandFromPlayerTwo(TentacleInputCommand command);
+
         public abstract void HandleCollisionByTag(string ObjectHitTag, UnityEngine.Rigidbody2D ObjectHitRB2D);
     }
 

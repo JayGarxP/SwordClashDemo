@@ -11,7 +11,7 @@ namespace SwordClash
     {
 
         // Can't do anything until finished with side-to-side movement
-        bool CurrentlyJuking;
+        public bool CurrentlyJuking;
         Vector2 WhereJumpingTo;
 
         // initialize with another state, resuming coiled state
@@ -150,9 +150,54 @@ namespace SwordClash
             }
         }
 
+        // Coiled state is NOT the same for P1 and P2
+        public override void ProcessCommandFromPlayerTwo(TentacleInputCommand command)
+        {
+            // Only accept input if NOT in middle of animation
+            if (TentaControllerInstance.IsOtherPlayerJuking() == false)
+            {
+                //Debug.Log("$$$$$ ProcessCommand Up swipe logic reached $$$$$$$");
+
+                //// if player up-swipe, they tryna  *L A U N C H*
+                if (command.Input.UpSwipe.x != 0 || command.Input.UpSwipe.y != 0)
+                {
+                    //Debug.Log("$$$$$ ProcessCommand Up swipe logic reached $$$$$$$");
+
+                    var JebediahTheProjectileState = new ProjectileState(this,
+                      command.Input.UpSwipe,
+                      TentaControllerInstance.GetOtherPlayerRequestedLaunchAngle());
+
+                    
+                        Debug.Log("$$$$$ ProcessCommand Up swipe WAS from Player two btw $$$$$$$");
+
+                        //TentaControllerInstance.ChangeOpponentState(JebediahTheProjectileState);
+                        this.TentaControllerInstance.ChangeOpponentToProjectile(JebediahTheProjectileState);
+                   
+                    //TODO: lower opponent tentacle instance flag with 
+                    this.Ten
+                    InputFlagArray[(int)HotInputs.LaunchSwipe] = false;
+                }
 
 
+                // if juke input received, actaully juke using TentacleController callback method
+                if (command.Input.RightTap || command.Input.LeftTap)
+                {
+                    Debug.Log("$$$$$ IN BIKINI BOTTOM IM WITH SANDY $$$$$$$");
+
+                    CurrentlyJuking = true;
+                    // false parameter to jump RIGHT, true parameter to jump LEFT
+                    WhereJumpingTo = TentaControllerInstance.TT_CalculateEndJumpPosition(command.Input.LeftTap);
+                    // Set CurrentlyJuking to true if still need to keep moving, when done juking set CurrentlyJuking to false
+                    CurrentlyJuking = TentaControllerInstance.TT_JumpSideways(WhereJumpingTo);
+                }
 
 
+            }
+            else
+            {
+                // Still currently juking
+                CurrentlyJuking = TentaControllerInstance.TT_JumpSideways(WhereJumpingTo);
+            }
+        }
     }
 }

@@ -215,8 +215,9 @@ namespace SwordClash
             {
                 if (cmd.Input.CommandFromP2)
                 {
-                    // Test, P2 should do nothing now...
-                    OpponentTCInstance.TT_MoveTentacleTip(new Vector2(0, -1), 0.0f);
+                    //OpponentTCInstance.TT_MoveTentacleTip(new Vector2(0, -1), 0.0f);
+
+                    this.CurrentTentacleState.ProcessCommandFromPlayerTwo(cmd);
                 }
                 else
                 {
@@ -514,6 +515,25 @@ namespace SwordClash
         //{
 
         //}
+
+
+        public bool IsOtherPlayerJuking()
+        {
+            // Is this legal in Canada???
+            var SheSharp = OpponentTCInstance.CurrentTentacleState as CoiledState;
+            return SheSharp.CurrentlyJuking;
+        }
+
+        public float GetOtherPlayerRequestedLaunchAngle()
+        {
+            return OpponentTCInstance.TTMoveRotationAngleRequested;
+        }
+
+        //TODO: finish this code up in here.
+        public int LowerOtherPlayerInputFlag(int whichFlagToLower)
+        {
+            OpponentTCInstance.CurrentTentacleState.Lo
+        }
 
         public void ChangeOpponentState(TentacleState TTS)
         {
