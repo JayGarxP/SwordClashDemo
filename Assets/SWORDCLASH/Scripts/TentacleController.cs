@@ -689,7 +689,10 @@ namespace SwordClash
 
         }
 
-
+        public bool IsThisTentaclePlayer2()
+        {
+            return AmIPlayerTwo;
+        }
 
         public void ResetTentacleTipRotation()
         {

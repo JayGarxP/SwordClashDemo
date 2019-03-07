@@ -38,6 +38,30 @@ namespace SwordClash
                 TentaControllerInstance.UPswipeSpeedConstant + TentaControllerInstance.UPswipeSpeedModifier
                 );
 
+            Debug.Log("Chris SwipeVelocityVector in ProjectileState Constructor: " + SwipeVelocityVector.ToString());
+
+            OnStateEnter();
+            // Set JukeCount to zero
+            JukeCount = 0;
+        }
+
+        public ProjectileState(TentacleController tc) : base(tc)
+        {
+            SwipeVelocityVector = TentaControllerInstance.state.LatestSwipe;
+            SwipeAngle = TentaControllerInstance.state.LatestSwipeAngle;
+
+            Debug.Log("Chris SwipeVelocityVector in ProjectileState(tc) from tc.state: " + SwipeVelocityVector.ToString());
+
+
+            BarrelRollCount = 0;
+
+            SwipeVelocityVector = MultiplyVectorComponentsBySpeed(
+                SwipeVelocityVector,
+                TentaControllerInstance.UPswipeSpeedConstant + TentaControllerInstance.UPswipeSpeedModifier
+                );
+
+            Debug.Log("Chris SwipeVelocityVector in ProjectileState(tc) Constructor: " + SwipeVelocityVector.ToString());
+
             OnStateEnter();
             // Set JukeCount to zero
             JukeCount = 0;
@@ -85,10 +109,20 @@ namespace SwordClash
             //  not needed right now...
             LowerAllInputFlags();
 
-            //StringRep = "Projectile";
-            //var stateString = TentaControllerInstance.SetBoltTentaStateString("Projectile");
-            //Debug.Log("Chris    StateString is now: " + stateString);
+            StringRep = "Projectile";
+            var stateString = TentaControllerInstance.SetBoltTentaStateString("Projectile");
+            Debug.Log("Chris    StateString is now: " + stateString);
 
+            //if (SwipeVelocityVector == Vector2.zero)
+            //{
+            //    SwipeVelocityVector = MultiplyVectorComponentsBySpeed(TentaControllerInstance.state.LatestSwipe,
+            //      TentaControllerInstance.UPswipeSpeedConstant + TentaControllerInstance.UPswipeSpeedModifier);
+
+            //    SwipeAngle = TentaControllerInstance.state.LatestSwipeAngle;
+
+            //    Debug.Log("Chris    Fixed SwipeVelocityVector: " + SwipeVelocityVector.ToString());
+
+            //}
 
         }
 
@@ -142,13 +176,21 @@ namespace SwordClash
         private Vector2 MultiplyVectorComponentsBySpeed(Vector2 DirectionVector, float speed)
         {
             //Return velocity vector with [x*=speed, y*=speed]
-            return new Vector2(DirectionVector.x * speed, DirectionVector.y * speed);
+            var velocityVector =  new Vector2(DirectionVector.x * speed, DirectionVector.y * speed);
+
+
+            Debug.Log("Chris velocityVector: " + velocityVector.ToString());
+            return velocityVector;
+
         }
 
         public override void ProcessState(ITentacleInputCommandInput input)
         {
             // Free to process here,
             IsCurrentlyProcessing = false;
+            StringRep = "Projectile";
+
+            // SYNC STATE HERE
 
             // Check if barrel roll flag and haven't already brolled too much
             if ((BarrelRollCount < TentaControllerInstance.TimesCanBarrelRoll) &&
@@ -179,32 +221,21 @@ namespace SwordClash
 
             }
 
-            //if (BoltNetwork.IsServer)
-            //{
-                // move tentacle tip
-                TentaControllerInstance.TT_MoveTentacleTip(SwipeVelocityVector, SwipeAngle);
-
-                //Debug.Log("######## AM IN PROJECTILE STATE #########");
-                //Debug.Log("2@2@2@2 UP SWIPE Projectile state 2@2@2@2");
-
-
-
-                // Check if done moving
-                if (TentaControllerInstance.IsTentacleAtMaxExtension())
-                {
-                    //TODO: Recovery mode state
-
-                    OnStateExit();
-                    TentaControllerInstance.CurrentTentacleState = new CoiledState(this);
-                }
-            //}
+     
+               
 
         }
 
+        // Only move the synced transform in ProcessCommand since it is run server-side!!!
         public override void ProcessCommand(TentacleInputCommand command)
         {
+
+            // Move that tentacle tip baby
+            TentaControllerInstance.TT_MoveTentacleTip(SwipeVelocityVector, SwipeAngle);
+
             if (CurrentlyJuking == false)
             {
+
                 if (command.Input.BarrelRoll)
                 {
                     TentaControllerInstance.CurrentTentacleState = new BarrelRollState(this, SwipeVelocityVector,
@@ -227,6 +258,17 @@ namespace SwordClash
                 // Keep moving sideways
                 CurrentlyJuking = TentaControllerInstance.TT_JumpSideways(WhereJumpingTo);
             }
+
+            // Check if done moving
+            if (TentaControllerInstance.IsTentacleAtMaxExtension())
+            {
+                //TODO: Recovery mode state
+
+                OnStateExit();
+                TentaControllerInstance.CurrentTentacleState = new CoiledState(this);
+                TentaControllerInstance.state.CurrentStateString = "Coiled";
+            }
+
         }
 
         public override void ProcessCommandFromPlayerTwo(TentacleInputCommand command)

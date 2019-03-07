@@ -86,10 +86,12 @@ namespace SwordClash
 
                     if (TentaControllerInstance.state.CurrentStateString == "Projectile")
                     {
-                        //become projectile
-                        this.TentaControllerInstance.CurrentTentacleState = new ProjectileState(this,
-                      TentaControllerInstance.state.LatestSwipe,
-                      TentaControllerInstance.state.LatestSwipeAngle);
+                        //  //become projectile
+                        //  this.TentaControllerInstance.CurrentTentacleState = new ProjectileState(this,
+                        //TentaControllerInstance.state.LatestSwipe,
+                        //TentaControllerInstance.state.LatestSwipeAngle);
+
+                        TentaControllerInstance.CurrentTentacleState = new ProjectileState(TentaControllerInstance);
 
                         StringRep = "Projectile";
                     }
@@ -105,11 +107,9 @@ namespace SwordClash
                 input.UpSwipe = new Vector3(TentaControllerInstance.TTMovePositionVelocityRequested.x,
                     TentaControllerInstance.TTMovePositionVelocityRequested.y, 0);
 
-                TentaControllerInstance.state.LatestSwipe = input.UpSwipe;
 
                 input.SwipeAngle = TentaControllerInstance.TTMoveRotationAngleRequested;
 
-                TentaControllerInstance.state.LatestSwipeAngle = input.SwipeAngle;
 
                 if (BoltNetwork.IsClient)
                 {
@@ -166,10 +166,29 @@ namespace SwordClash
                     Debug.Log("Chris <b>LaunchSwipe in CoiledState.ProcessCommand(command)</b>");
                     Debug.Log("Chris <b>Input.UpSwipe = </b>" + command.Input.UpSwipe.ToString());
 
+                    TentaControllerInstance.state.LatestSwipe = command.Input.UpSwipe;
+                    TentaControllerInstance.state.LatestSwipeAngle = command.Input.SwipeAngle;
 
-                    TentaControllerInstance.CurrentTentacleState = new ProjectileState(this,
-                      command.Input.UpSwipe,
-                      command.Input.SwipeAngle);
+                    // BOLT NETWORK STATE SYNC LOGIC MUST BE RUN SERVER SIDE BY 'OWNER'
+                    if (command.Input.CommandFromP2)
+                    {
+                        // Use inverse quaternion identity to flip the swipe so it works on flipped camera
+                        var P2Swipe = new Vector2(command.Input.UpSwipe.x * -1, command.Input.UpSwipe.y * -1);
+                        TentaControllerInstance.state.LatestSwipe = P2Swipe;
+
+                        TentaControllerInstance.CurrentTentacleState = new ProjectileState(this,
+                     P2Swipe,
+                     command.Input.SwipeAngle);
+
+                    }
+                    else
+                    {
+
+                        TentaControllerInstance.CurrentTentacleState = new ProjectileState(this,
+                          command.Input.UpSwipe,
+                          command.Input.SwipeAngle);
+
+                    }
 
                     TentaControllerInstance.state.CurrentStateString = "Projectile";
 
