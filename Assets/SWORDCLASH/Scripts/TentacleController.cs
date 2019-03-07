@@ -72,13 +72,14 @@ namespace SwordClash
 
         // Reference to OTHER player's tentacle
         //private GameObject OpponentTentacleGO;
-        private TentacleController OpponentTCInstance;
+        public TentacleController OpponentTCInstance;
 
         //private GameObject PlayerControllerGO;
         // private PlayerController PlayerControllerScriptInstance;
         private bool AmIPlayerTwo;
         public short WhichPlayerIBe; // 0 is NOBODY;  1 is p1;   2 is p2
 
+        private Command LatestStateChangeCommand;
 
         // Setup the component you are on right now (the "this" object); before all Start()s
         void Awake()
@@ -106,52 +107,51 @@ namespace SwordClash
             TTSpriteRenderer = GetComponent<SpriteRenderer>();
             TTSceneSprite = TTSpriteRenderer.sprite;
 
+
             // Redundant cast seems to help avoid null reference in update loop
             this.CurrentTentacleState = new CoiledState(((TentacleController)this));
+            this.state.CurrentStateString = "Coiled";
+            Debug.Log("Chris Current State string: " + state.CurrentStateString);
 
-
-            // Bolt Entity Transform sync
+            // Bolt Entity Transform sync; entire point of using Photon Bolt :)
             this.state.SetTransforms(this.state.TTTransform, this.transform);
 
-            if (this.entity.isOwner == false && this.entity.hasControl == true)
+
+            if (BoltNetwork.IsClient)
             {
-                Debug.Log("Hi I am player2, " + this.entity.networkId);
-                //TTChangeTentacleSpritetoPlayerTwo();
-                // PlayerControllerScriptInstance.MakeMePlayerTwo(this);
-                //PleaseMakeMePlayerTwo();
-                AmIPlayerTwo = true;
-                WhichPlayerIBe = 2;
+                if (this.entity.isOwner == false && this.entity.hasControl == true)
+                {
+                    Debug.Log("Hi I am player2, " + this.entity.networkId);
+                    
+                    AmIPlayerTwo = true;
+                    WhichPlayerIBe = 2;
 
-                // Instantiate P2Pog with tag "Player2" ONLY if player 2
-                Instantiate(P2Pog);
-                // P2Pog is used in PlayerController to know if the local scene is supposed to be Player2.
+                    // Instantiate P2Pog with tag "Player2" ONLY if player 2
+                    Instantiate(P2Pog);
+                    // P2Pog is used in PlayerController to know if the local scene is supposed to be Player2.
 
-                PleaseMakeMePlayerTwo();
-                //Debug.Log("<color=cyan>AmIPlayer2: </color>" + this.gameObject.GetInstanceID().ToString() +
-                //"@@@" + AmIPlayerTwo.ToString() + "@@@ ", this);
-
+                    PleaseMakeMePlayerTwo();
+                }
             }
 
-            if (this.entity.isOwner)
+            if (BoltNetwork.IsServer)
             {
-                //Debug.Log("@@@@@@@@@@@@@@@Hi I am player1111, " + this.entity.networkId.ToString());
-                this.entity.TakeControl(); //Why do I need to do this?!?!?!
+                if (this.entity.isOwner)
+                {
+                    //Debug.Log("@@@@@@@@@@@@@@@Hi I am player1111, " + this.entity.networkId.ToString());
+                    this.entity.TakeControl(); //Why do I need to do this?!?!?!
+                }
 
+                // If I am running on server machine
+                if (this.entity.isOwner && this.entity.hasControl)
+                {
+                    Debug.Log("Hi I am player1111, " + this.entity.networkId.ToString());
+
+                    AmIPlayerTwo = false;
+                    WhichPlayerIBe = 1;
+                }
             }
-
-            // If I am running on server machine
-            if (this.entity.isOwner && this.entity.hasControl)
-            {
-                // Not working??!?!?!
-                // AmIPlayerTwo = state.AmIPlayer2;
-                Debug.Log("Hi I am player1111, " + this.entity.networkId.ToString());
-
-                AmIPlayerTwo = false;
-                WhichPlayerIBe = 1;
-
-                // Debug.Log("<color=red>AmIPlayer2: </color>" + this.gameObject.GetInstanceID().ToString() +
-                //"@@@" + AmIPlayerTwo.ToString() + "@@@ ", this);
-            }
+          
 
         }
 
@@ -181,6 +181,18 @@ namespace SwordClash
             {
                 ////ACTUAL GAME LOOP:
 
+                if (this.CurrentTentacleState == null)
+                {
+                    // Why is P2 starting in Projectile State?!?!
+                    this.CurrentTentacleState = new CoiledState(this);
+                    this.state.CurrentStateString = "Coiled";
+                }
+
+
+                //// if not Bolt Proxy:
+                //if (!(!entity.hasControl && !entity.isOwner))
+
+
                 // IrigidbodyPlayerCommandInput input = rigidbodyPlayerCommand.Create();
                 ITentacleInputCommandInput input = TentacleInputCommand.Create();
 
@@ -192,12 +204,13 @@ namespace SwordClash
                 }
 
                 // BoltNetwork.isClient could work too?
-                if (AmIPlayerTwo)
+                if (AmIPlayerTwo && BoltNetwork.IsClient)
                 {
                     input.CommandFromP2 = true;
                 }
 
                 this.entity.QueueInput(input);
+
             }
 
 
@@ -208,6 +221,11 @@ namespace SwordClash
         // But IsServer check ensures this is Server Authoritative....
         public override void ExecuteCommand(Command command, bool resetState)
         {
+
+            //// if not Bolt Proxy:
+            //if (!(!this.entity.hasControl && !this.entity.isOwner))
+            //{
+
             TentacleInputCommand cmd = (TentacleInputCommand)command;
 
 
@@ -215,9 +233,10 @@ namespace SwordClash
             {
                 if (cmd.Input.CommandFromP2)
                 {
-                    //OpponentTCInstance.TT_MoveTentacleTip(new Vector2(0, -1), 0.0f);
+                    //not working????/
+                    // this.CurrentTentacleState.ProcessCommandFromPlayerTwo(cmd);
 
-                    this.CurrentTentacleState.ProcessCommandFromPlayerTwo(cmd);
+                    OpponentTCInstance.CurrentTentacleState.ProcessCommand(cmd);
                 }
                 else
                 {
@@ -225,30 +244,18 @@ namespace SwordClash
                 }
             }
 
-            ////owner has sent a correction to the controller
-            //if (resetState)
-            //{
-            //    transform.position = cmd.Result.position;
-            //}
-            //else
-            //{
-            //    if (cmd.Input.click != Vector3.zero)
-            //    {
-            //        gameObject.SendMessage("SetTarget", cmd.Input.click);
-            //    }
 
-            //    cmd.Result.position = transform.position;
-            //}
+
         }
 
 
-        // Why only taps work??? Swipes are not working???
-        // https://forum.photonengine.com/discussion/8085/do-you-only-have-movement-code-in-executecommand
-        public override void MissingCommand(Bolt.Command previous)
-        {
-            if (previous == null) { return; }
-            ExecuteCommand(previous, true);
-        }
+        //// Why only taps work??? Swipes are not working???
+        //// https://forum.photonengine.com/discussion/8085/do-you-only-have-movement-code-in-executecommand
+        //public override void MissingCommand(Bolt.Command previous)
+        //{
+        //    if (previous == null) { return; }
+        //    ExecuteCommand(previous, true);
+        //}
 
 
 
@@ -282,7 +289,6 @@ namespace SwordClash
                                 {
                                     // Change local server sprite to player 2 orange.
                                     OpponentTCInstance.TTChangeTentacleSpritetoPlayerTwo();
-
                                 }
                             }
 
@@ -292,6 +298,20 @@ namespace SwordClash
 
                 }
             }
+            //else
+            //{
+            //    // Both Tentacles in scene; check if I am P2 on Client
+            //    // if not Bolt Proxy:
+            //    if (!(!entity.hasControl && !entity.isOwner))
+            //    {
+            //        //Debug.Log("Chris I am suffering.");
+            //        // If I am running on client
+            //        if (BoltNetwork.IsClient && AmIPlayerTwo && LatestStateChangeCommand != null)
+            //        {
+            //            SyncTentacleStateWithClient(LatestStateChangeCommand);
+            //        }
+            //    }
+            //}
 
         }
 
@@ -311,6 +331,12 @@ namespace SwordClash
         //    //    }
 
         //}
+
+        public string SetBoltTentaStateString(string id)
+        {
+            this.state.CurrentStateString = id;
+            return this.state.CurrentStateString;
+        }
 
         public void PleaseRecoilTentacle()
         {
@@ -388,6 +414,26 @@ namespace SwordClash
             return whereToJumpTo;
         }
 
+        // pass in true to jump left, false to get a jump right end position vector as return value
+        public Vector2 TT_P2CalculateEndJumpPosition(bool YesJumpingLeft)
+        {
+            Vector2 whereToJumpTo;
+
+            if (YesJumpingLeft)
+            {
+                whereToJumpTo = new Vector2(OpponentTCInstance.TentacleTipRB2D.position.x - TTJukePosLeftAmount, OpponentTCInstance.TentacleTipRB2D.position.y);
+
+            }
+            else
+            {
+                // jumping right
+                whereToJumpTo = new Vector2(OpponentTCInstance.TentacleTipRB2D.position.x + TTJukePosRightAmount, OpponentTCInstance.TentacleTipRB2D.position.y);
+            }
+
+            return whereToJumpTo;
+        }
+
+
         // For now is x position '-' instead of rights '+'; but juking may change in future, so leave as
         // two seperate methods.
         public bool TT_JumpSideways(Vector2 endOfJumpPosition)
@@ -409,6 +455,47 @@ namespace SwordClash
         {
 
             TentacleTipRB2D.position = Vector2.MoveTowards(TentacleTipRB2D.position, whereToJumpTo, Time.fixedDeltaTime * TTJumpSpeed);
+
+        }
+
+
+        public bool TT_P2JumpSideways(Vector2 endOfJumpPosition)
+        {
+            //Vector2 whereToJumpTo = new Vector2(TentacleTipRB2D.position.x - TTJukePosLeftAmount, TentacleTipRB2D.position.y);
+
+            TentacleTipP2_JumpSideways(endOfJumpPosition);
+
+            bool HaventReachedEndJumpPosition = true;
+
+            if (OpponentTCInstance.TentacleTipRB2D.position == endOfJumpPosition)
+            {
+                HaventReachedEndJumpPosition = false;
+            }
+
+            return HaventReachedEndJumpPosition;
+        }
+        private void TentacleTipP2_JumpSideways(Vector2 whereToJumpTo)
+        {
+
+            OpponentTCInstance.TentacleTipRB2D.position = Vector2.MoveTowards(OpponentTCInstance.TentacleTipRB2D.position, whereToJumpTo, Time.fixedDeltaTime * TTJumpSpeed);
+
+        }
+
+        public void UpdateLatestStateChangeCommand(Command cmd)
+        {
+            // Save command in Tentaclecontroller
+            LatestStateChangeCommand = cmd;
+
+        }
+
+        // Called on Client to keep TentacleState in sync with Server-side P2
+        public void SyncTentacleStateWithClient(Command cmd)
+        {
+            if (this.CurrentTentacleState.StringRep != this.state.CurrentStateString)
+            {
+                Debug.Log("Chris StringRep " + this.CurrentTentacleState.StringRep + "does not equal state.Current   "
+                    + this.state.CurrentStateString);
+            }
 
         }
 
@@ -529,10 +616,19 @@ namespace SwordClash
             return OpponentTCInstance.TTMoveRotationAngleRequested;
         }
 
-        //TODO: finish this code up in here.
+
         public int LowerOtherPlayerInputFlag(int whichFlagToLower)
         {
-            OpponentTCInstance.CurrentTentacleState.Lo
+            bool YESflagLowered = OpponentTCInstance.CurrentTentacleState.LowerTentacleFlag_Request(whichFlagToLower);
+
+            int whichFlagWasLowered = -1;
+
+            if (YESflagLowered)
+            {
+                whichFlagWasLowered = whichFlagToLower;
+            }
+
+            return whichFlagWasLowered;
         }
 
         public void ChangeOpponentState(TentacleState TTS)
@@ -541,16 +637,12 @@ namespace SwordClash
             OpponentTCInstance.CurrentTentacleState = TTS;
         }
 
-        public void ChangeMyStateToProjectile(ProjectileState stateToChangeTo)
+        public void ChangeMyStateToCoiled()
         {
-            this.CurrentTentacleState = new ProjectileState(stateToChangeTo, this);
+            this.CurrentTentacleState = new CoiledState(this);
+            this.state.CurrentStateString = "Coiled";
         }
 
-        public void ChangeOpponentToProjectile(ProjectileState stateToChangeTo)
-        {
-            
-            OpponentTCInstance.CurrentTentacleState = new ProjectileState(stateToChangeTo, this);
-        }
 
         //TODO: rename methods to have Pleasefirst and remove the underscores
         //Juke to the right, eventaully will only work 3 times either way; called by player controller
@@ -606,8 +698,16 @@ namespace SwordClash
 
         private void ResetTentacleTipSprite()
         {
-            //reset tentacle tip sprite to starting sprite; reference set in the Start() method
-            TTSpriteRenderer.sprite = TTSceneSprite;
+            if (AmIPlayerTwo)
+            {
+                TTChangeTentacleSpritetoPlayerTwo();
+            }
+            else
+            {
+                //reset tentacle tip sprite to starting sprite; reference set in the Start() method
+                TTSpriteRenderer.sprite = TTSceneSprite;
+            }
+
             // default sprite color in Unity is white, undoing black burnt sprite from being zapped.
             TTSpriteRenderer.color = Color.white;
         }

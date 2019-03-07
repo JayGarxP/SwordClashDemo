@@ -20,6 +20,9 @@ namespace SwordClash
 
         public bool AmIPlayerTwo;
 
+        // Probably will make this string a bolt state property to sync server and client P2 states
+        public string StringRep;
+
         // mutex / semaphore??? should this be?
         protected bool IsCurrentlyProcessing;
 
@@ -77,6 +80,7 @@ namespace SwordClash
             TentaControllerInstance = tc;
             IsCurrentlyProcessing = false;
             AmIPlayerTwo = false;
+            StringRep = "Unknown";
 
             // initialize input flag array to length of InputFlag_Enum, default value is false.
             InputFlagCount = Enum.GetNames(typeof(HotInputs)).Length;

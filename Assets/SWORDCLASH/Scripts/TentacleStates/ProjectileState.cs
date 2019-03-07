@@ -85,6 +85,11 @@ namespace SwordClash
             //  not needed right now...
             LowerAllInputFlags();
 
+            //StringRep = "Projectile";
+            //var stateString = TentaControllerInstance.SetBoltTentaStateString("Projectile");
+            //Debug.Log("Chris    StateString is now: " + stateString);
+
+
         }
 
         // Recoil Tentacle and lower all input flags.
@@ -93,6 +98,12 @@ namespace SwordClash
             //just teleport for now
             TentaControllerInstance.PleaseRecoilTentacle();
             LowerAllInputFlags();
+
+
+            StringRep = "Unknown";
+            var stateString = TentaControllerInstance.SetBoltTentaStateString(StringRep);
+            Debug.Log("Chris    StateString is now: " + stateString);
+
         }
 
         // ProjectileState hits many things
@@ -168,13 +179,13 @@ namespace SwordClash
 
             }
 
-            if (BoltNetwork.IsServer)
-            {
+            //if (BoltNetwork.IsServer)
+            //{
                 // move tentacle tip
                 TentaControllerInstance.TT_MoveTentacleTip(SwipeVelocityVector, SwipeAngle);
 
-                Debug.Log("######## AM IN PROJECTILE STATE #########");
-                Debug.Log("2@2@2@2 UP SWIPE Projectile state 2@2@2@2");
+                //Debug.Log("######## AM IN PROJECTILE STATE #########");
+                //Debug.Log("2@2@2@2 UP SWIPE Projectile state 2@2@2@2");
 
 
 
@@ -186,7 +197,7 @@ namespace SwordClash
                     OnStateExit();
                     TentaControllerInstance.CurrentTentacleState = new CoiledState(this);
                 }
-            }
+            //}
 
         }
 
