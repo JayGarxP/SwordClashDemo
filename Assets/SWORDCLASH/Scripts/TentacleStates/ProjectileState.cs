@@ -144,6 +144,7 @@ namespace SwordClash
             {
                 // Change state to HoldingFood and give reference to which food hit in constructor
                 TentaControllerInstance.CurrentTentacleState = new HoldingFoodState(this, objectHit);
+                Debug.Log("Chris Changing to HoldingFoodState... .... ....");
             }
         }
 

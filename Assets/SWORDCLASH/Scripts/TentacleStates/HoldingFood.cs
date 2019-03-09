@@ -44,6 +44,44 @@ namespace SwordClash
 
         public override void ProcessState()
         {
+            
+        }
+
+        // Called from Bolt.SimulateController()
+        public override void ProcessState(ITentacleInputCommandInput input)
+        {
+            StringRep = "HoldingFood";
+
+            // SYNC STATE HERE
+            if (BoltNetwork.IsClient && AmIPlayerTwo)
+            {
+                // Check if out of sync with server
+                if (StringRep != TentaControllerInstance.state.CurrentStateString)
+                {
+                    Debug.Log("Chris StringRep " + StringRep + "does not equal state.Current   "
+                        + TentaControllerInstance.state.CurrentStateString);
+
+
+                    if (TentaControllerInstance.state.CurrentStateString == "Coiled")
+                    {
+                        //  //become coiled
+                        TentaControllerInstance.CurrentTentacleState = new CoiledState(this);
+
+                        StringRep = "Coiled";
+                    }
+
+
+                }
+            }
+
+            }
+
+        public override void ProcessCommand(TentacleInputCommand command)
+        {
+
+            
+
+
             // move towards start position
             TentaControllerInstance.TTMoveTowardsEatingZone(FoodHeld);
 
@@ -56,18 +94,12 @@ namespace SwordClash
 
                 OnStateExit();
                 TentaControllerInstance.CurrentTentacleState = new CoiledState(this);
+                TentaControllerInstance.SetBoltTentaStateString("Coiled");
             }
-        }
-
-        // Called from Bolt.SimulateController()
-        public override void ProcessState(ITentacleInputCommandInput input)
-        {
-            ProcessState();
-        }
-
-        public override void ProcessCommand(TentacleInputCommand command)
-        {
-            //throw new NotImplementedException();
+            else
+            {
+                TentaControllerInstance.SetBoltTentaStateString("HoldingFood");
+            }
         }
 
         public override void ProcessCommandFromPlayerTwo(TentacleInputCommand command)

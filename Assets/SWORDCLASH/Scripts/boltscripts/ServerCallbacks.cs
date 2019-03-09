@@ -20,13 +20,6 @@ public class ServerCallbacks : Bolt.GlobalEventListener
        BoltEntity playerOne = BoltNetwork.Instantiate(BoltPrefabs.TentacleTipScene, spawnPosition, Quaternion.identity);
         playerOne.TakeControl();
 
-        // THis does not work...
-       // playerOne.GetState<ITentacleTipState>().AmIPlayer2 = false;
-
-
-        // NOw spawn in GameLogicController which will spawn in food???
-        // BoltEntity tentacleFood = BoltNetwork.Attach();
-
         BoltEntity SCGameLogic = BoltNetwork.Instantiate(BoltPrefabs.SCGameWorld);
         // TakeControl only needed if controller???
         //SCGameLogic.TakeControl();

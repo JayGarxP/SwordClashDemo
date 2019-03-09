@@ -116,7 +116,7 @@ namespace SwordClash
             // Bolt Entity Transform sync; entire point of using Photon Bolt :)
             this.state.SetTransforms(this.state.TTTransform, this.transform);
 
-
+            //TODO: P2 Proxy on Server Side is NOT being set to AmIPlayerTwo = true; correctly...
             if (BoltNetwork.IsClient)
             {
                 if (this.entity.isOwner == false && this.entity.hasControl == true)
@@ -187,11 +187,6 @@ namespace SwordClash
                     this.CurrentTentacleState = new CoiledState(this);
                     this.state.CurrentStateString = "Coiled";
                 }
-
-
-                //// if not Bolt Proxy:
-                //if (!(!entity.hasControl && !entity.isOwner))
-
 
                 // IrigidbodyPlayerCommandInput input = rigidbodyPlayerCommand.Create();
                 ITentacleInputCommandInput input = TentacleInputCommand.Create();
@@ -289,6 +284,7 @@ namespace SwordClash
                                 {
                                     // Change local server sprite to player 2 orange.
                                     OpponentTCInstance.TTChangeTentacleSpritetoPlayerTwo();
+                                    OpponentTCInstance.ResetPlayer2EatingZone();
                                 }
                             }
 
@@ -500,10 +496,14 @@ namespace SwordClash
             this.CurrentTentacleState.AmIPlayerTwo = true;
 
             TTChangeTentacleSpritetoPlayerTwo();
-            TentacleEatingPosition = new Vector2(TentacleReadyPosition.x, TentacleReadyPosition.y + EatingZoneOffsetFromStart);
-
+            ResetPlayer2EatingZone();        
         }
 
+        public void ResetPlayer2EatingZone()
+        {
+            //TentacleEatingPosition = new Vector2(TentacleReadyPosition.x, TentacleReadyPosition.y + EatingZoneOffsetFromStart);
+            TentacleEatingPosition = new Vector2(TentacleReadyPosition.x, TentacleReadyPosition.y + 6.0f);
+        }
 
         public void TT_WiggleBackToStartPosition()
         {
