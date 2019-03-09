@@ -370,7 +370,8 @@ namespace SwordClash
         {
             if (AmIPlayerTwo)
             {
-                return false;
+                return  maxTentacleLength >= TentacleTipRB2D.position.magnitude;
+                
             }
             else
             {

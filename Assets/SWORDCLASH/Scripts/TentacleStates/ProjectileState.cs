@@ -109,21 +109,8 @@ namespace SwordClash
             //  not needed right now...
             LowerAllInputFlags();
 
-            StringRep = "Projectile";
-            var stateString = TentaControllerInstance.SetBoltTentaStateString("Projectile");
-            Debug.Log("Chris    StateString is now: " + stateString);
-
-            //if (SwipeVelocityVector == Vector2.zero)
-            //{
-            //    SwipeVelocityVector = MultiplyVectorComponentsBySpeed(TentaControllerInstance.state.LatestSwipe,
-            //      TentaControllerInstance.UPswipeSpeedConstant + TentaControllerInstance.UPswipeSpeedModifier);
-
-            //    SwipeAngle = TentaControllerInstance.state.LatestSwipeAngle;
-
-            //    Debug.Log("Chris    Fixed SwipeVelocityVector: " + SwipeVelocityVector.ToString());
-
-            //}
-
+            //StringRep = "Projectile";
+            
         }
 
         // Recoil Tentacle and lower all input flags.
@@ -134,9 +121,9 @@ namespace SwordClash
             LowerAllInputFlags();
 
 
-            StringRep = "Unknown";
-            var stateString = TentaControllerInstance.SetBoltTentaStateString(StringRep);
-            Debug.Log("Chris    StateString is now: " + stateString);
+            //StringRep = "Unknown";
+           // var stateString = TentaControllerInstance.SetBoltTentaStateString(StringRep);
+          //  Debug.Log("Chris    StateString is now: " + stateString);
 
         }
 
@@ -191,6 +178,26 @@ namespace SwordClash
             StringRep = "Projectile";
 
             // SYNC STATE HERE
+            if (BoltNetwork.IsClient && AmIPlayerTwo)
+            {
+                // Check if out of sync with server
+                if (StringRep != TentaControllerInstance.state.CurrentStateString)
+                {
+                    Debug.Log("Chris StringRep " + StringRep + "does not equal state.Current   "
+                        + TentaControllerInstance.state.CurrentStateString);
+
+
+                    if (TentaControllerInstance.state.CurrentStateString == "Coiled" )
+                    {
+                        //  //become coiled
+                        TentaControllerInstance.CurrentTentacleState = new CoiledState(this);
+
+                        StringRep = "Coiled";
+                    }
+
+
+                }
+            }
 
             // Check if barrel roll flag and haven't already brolled too much
             if ((BarrelRollCount < TentaControllerInstance.TimesCanBarrelRoll) &&
@@ -221,9 +228,6 @@ namespace SwordClash
 
             }
 
-     
-               
-
         }
 
         // Only move the synced transform in ProcessCommand since it is run server-side!!!
@@ -232,6 +236,13 @@ namespace SwordClash
 
             // Move that tentacle tip baby
             TentaControllerInstance.TT_MoveTentacleTip(SwipeVelocityVector, SwipeAngle);
+
+            if (StringRep == "Projectile")
+            {
+                TentaControllerInstance.SetBoltTentaStateString("Projectile");
+            }
+
+
 
             if (CurrentlyJuking == false)
             {
@@ -265,8 +276,11 @@ namespace SwordClash
                 //TODO: Recovery mode state
 
                 OnStateExit();
+                var stateString = TentaControllerInstance.SetBoltTentaStateString("Coiled");
+                Debug.Log("PS.PCOMMAND StateString is now: " + stateString);
+                //TentaControllerInstance.state.CurrentStateString = "Coiled";
+
                 TentaControllerInstance.CurrentTentacleState = new CoiledState(this);
-                TentaControllerInstance.state.CurrentStateString = "Coiled";
             }
 
         }

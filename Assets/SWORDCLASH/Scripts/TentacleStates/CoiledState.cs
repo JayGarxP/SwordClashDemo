@@ -9,6 +9,7 @@ namespace SwordClash
         // Can't do anything until finished with side-to-side movement
         public bool CurrentlyJuking;
         Vector2 WhereJumpingTo;
+        int GameLoopTicksBeforeSync;
 
         // initialize with another state, resuming coiled state
         public CoiledState(TentacleState oldState)
@@ -35,10 +36,11 @@ namespace SwordClash
             LowerAllInputFlags();
             CurrentlyJuking = false;
             IsCurrentlyProcessing = false;
+            GameLoopTicksBeforeSync = 0;
 
-            StringRep = "Coiled";
-            var stateString = TentaControllerInstance.SetBoltTentaStateString("Coiled");
-            Debug.Log("Chris    StateString is now: " + stateString);
+            //StringRep = "Coiled";
+            //var stateString = TentaControllerInstance.SetBoltTentaStateString("Coiled");
+            //Debug.Log("Chris    StateString is now: " + stateString);
 
 
             // Reset position and sprite of tentacle tip
@@ -49,9 +51,9 @@ namespace SwordClash
 
         public override void OnStateExit()
         {
-            StringRep = "Unknown";
-            var stateString = TentaControllerInstance.SetBoltTentaStateString("Unknown");
-            Debug.Log("Chris    StateString is now: " + stateString);
+            //StringRep = "Unknown";
+            //var stateString = TentaControllerInstance.SetBoltTentaStateString("Unknown");
+            //Debug.Log("Chris    StateString is now: " + stateString);
 
         }
 
@@ -78,7 +80,8 @@ namespace SwordClash
             if (BoltNetwork.IsClient && AmIPlayerTwo)
             {
                 // Check if out of sync with server
-                if (StringRep != TentaControllerInstance.state.CurrentStateString)
+                // Need to block this logic a few times to let the State be synced over the network b4 checking it.
+                if (StringRep != TentaControllerInstance.state.CurrentStateString && GameLoopTicksBeforeSync > 3)
                 {
                     Debug.Log("Chris StringRep " + StringRep + "does not equal state.Current   "
                         + TentaControllerInstance.state.CurrentStateString);
@@ -87,10 +90,6 @@ namespace SwordClash
                     if (TentaControllerInstance.state.CurrentStateString == "Projectile")
                     {
                         //  //become projectile
-                        //  this.TentaControllerInstance.CurrentTentacleState = new ProjectileState(this,
-                        //TentaControllerInstance.state.LatestSwipe,
-                        //TentaControllerInstance.state.LatestSwipeAngle);
-
                         TentaControllerInstance.CurrentTentacleState = new ProjectileState(TentaControllerInstance);
 
                         StringRep = "Projectile";
@@ -152,6 +151,10 @@ namespace SwordClash
         // Only EVER runs on server side P1 and server side P2; NEVER NEVER on client!!!
         public override void ProcessCommand(TentacleInputCommand command)
         {
+            TentaControllerInstance.state.CurrentStateString = "Coiled";
+            GameLoopTicksBeforeSync++;
+
+
             // Only accept input if NOT in middle of animation
             if (CurrentlyJuking == false)
             {
@@ -191,6 +194,7 @@ namespace SwordClash
                     }
 
                     TentaControllerInstance.state.CurrentStateString = "Projectile";
+                    TentaControllerInstance.SetBoltTentaStateString("Projectile");
 
                 }
 
@@ -213,6 +217,7 @@ namespace SwordClash
             {
                 // Still currently juking
                 CurrentlyJuking = TentaControllerInstance.TT_JumpSideways(WhereJumpingTo);
+               // TentaControllerInstance.state.CurrentStateString = "Coiled";
             }
         }
 
