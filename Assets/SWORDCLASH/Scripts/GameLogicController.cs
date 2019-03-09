@@ -79,6 +79,15 @@ namespace SwordClash
         // Update is called once per frame
         void Update()
         {
+            // Need to set local references too, not just on server????
+            if (SCFoodController == null)
+            {
+                SCFoodController = Snack.GetComponent<SwordClashFoodController>();
+
+                NextRoundFoodInCenter();
+            }
+
+
             // In each player's game local update loop, check the state of shared/synced network variables
             //      to have specific behavior.
             if (state.P1Score >= PointsToWin)

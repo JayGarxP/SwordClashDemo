@@ -121,7 +121,7 @@ namespace SwordClash
             {
                 if (this.entity.isOwner == false && this.entity.hasControl == true)
                 {
-                    Debug.Log("Hi I am player2, " + this.entity.networkId);
+                    Debug.Log("Chris Hi I am player2, " + this.entity.networkId);
                     
                     AmIPlayerTwo = true;
                     WhichPlayerIBe = 2;
@@ -150,6 +150,7 @@ namespace SwordClash
                     AmIPlayerTwo = false;
                     WhichPlayerIBe = 1;
                 }
+               
             }
           
 
@@ -162,22 +163,7 @@ namespace SwordClash
         // SimulateController executes one time per frame.
         public override void SimulateController()
         {
-
-            if (GameWorld == null)
-            {
-                GameWorld = GameObject.FindWithTag("GameWorld");
-
-                if (GameWorld != null && GameWorld.tag != "/")
-                {
-                    GLCInstance = GameWorld.GetComponent<GameLogicController>();
-                    if (GLCInstance == null)
-                    {
-                        // bad thing happen; GLCInstance is still Null somehow
-                    }
-                }
-
-            }
-            else
+            if (GLCInstance != null)
             {
                 ////ACTUAL GAME LOOP:
 
@@ -294,6 +280,23 @@ namespace SwordClash
 
                 }
             }
+
+            if (GLCInstance == null)
+            {
+                GameWorld = GameObject.FindWithTag("GameWorld");
+
+                if (GameWorld != null && GameWorld.tag != "/")
+                {
+                    GLCInstance = GameWorld.GetComponent<GameLogicController>();
+                    if (GLCInstance == null)
+                    {
+                        // bad thing happen; GLCInstance is still Null somehow
+                        Debug.Log("Chris this GLCINstance is still null somehow plz help plz help");
+                    }
+                }
+
+            }
+
 
         }
 
@@ -501,8 +504,7 @@ namespace SwordClash
 
         public void ResetPlayer2EatingZone()
         {
-            //TentacleEatingPosition = new Vector2(TentacleReadyPosition.x, TentacleReadyPosition.y + EatingZoneOffsetFromStart);
-            TentacleEatingPosition = new Vector2(TentacleReadyPosition.x, TentacleReadyPosition.y + 6.0f);
+            TentacleEatingPosition = new Vector2(TentacleReadyPosition.x, TentacleReadyPosition.y + EatingZoneOffsetFromStart);
         }
 
         public void TT_WiggleBackToStartPosition()
@@ -532,22 +534,15 @@ namespace SwordClash
             return (TentacleTipRB2D.position == TentacleEatingPosition);
         }
 
-        public void TTEatFood()
+        public void TTEatFood(string PlayerID)
         {
-            string PlayerID = "Player1";
-            if (AmIPlayerTwo)
-            {
-                PlayerID = "Player2";
-            }
-
-
             if (GLCInstance != null)
             {
                 GLCInstance.OnFoodEaten(PlayerID);
             }
             else
             {
-                Debug.Log("GLCInstance null in TTEatFood()");
+                Debug.Log("GLCInstance null in TTEatFood( " + PlayerID + " )");
             }
         }
 

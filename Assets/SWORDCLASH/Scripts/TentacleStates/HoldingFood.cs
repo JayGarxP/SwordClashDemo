@@ -78,10 +78,6 @@ namespace SwordClash
 
         public override void ProcessCommand(TentacleInputCommand command)
         {
-
-            
-
-
             // move towards start position
             TentaControllerInstance.TTMoveTowardsEatingZone(FoodHeld);
 
@@ -90,7 +86,14 @@ namespace SwordClash
             if (TentaControllerInstance.CheckifTTAtEatingPosition())
             {
                 // Scoring logic here
-                TentaControllerInstance.TTEatFood();
+                if (command.Input.CommandFromP2)
+                {
+                    TentaControllerInstance.TTEatFood("Player2");
+                }
+                else
+                {
+                    TentaControllerInstance.TTEatFood("Player1");
+                }
 
                 OnStateExit();
                 TentaControllerInstance.CurrentTentacleState = new CoiledState(this);
