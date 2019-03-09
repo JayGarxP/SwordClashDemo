@@ -298,39 +298,8 @@ namespace SwordClash
 
                 }
             }
-            //else
-            //{
-            //    // Both Tentacles in scene; check if I am P2 on Client
-            //    // if not Bolt Proxy:
-            //    if (!(!entity.hasControl && !entity.isOwner))
-            //    {
-            //        //Debug.Log("Chris I am suffering.");
-            //        // If I am running on client
-            //        if (BoltNetwork.IsClient && AmIPlayerTwo && LatestStateChangeCommand != null)
-            //        {
-            //            SyncTentacleStateWithClient(LatestStateChangeCommand);
-            //        }
-            //    }
-            //}
 
         }
-
-
-        //void FixedUpdate()
-        //{
-        //    if (this.CurrentTentacleState != null)
-        //    {
-        //        // Actual game loop logic code, contained in each ProcessState() method of concrete TentacleState s 
-        //        this.CurrentTentacleState.ProcessState();
-        //    }
-
-
-        //    //    if (entity.isControllerOrOwner == false)
-        //    //    {
-        //    //        transform.GetChild(0).GetChild(3).transform.rotation = state.lookRotation;
-        //    //    }
-
-        //}
 
         public string SetBoltTentaStateString(string id)
         {
@@ -526,6 +495,7 @@ namespace SwordClash
         // Make me player 2two2
         public void PleaseMakeMePlayerTwo()
         {
+            // TODO: how keep these bools in sync? Boltnetwork.State???
             AmIPlayerTwo = true;
             this.CurrentTentacleState.AmIPlayerTwo = true;
 
@@ -702,9 +672,11 @@ namespace SwordClash
 
         private void ResetTentacleTipSprite()
         {
+
             if (AmIPlayerTwo)
             {
                 TTChangeTentacleSpritetoPlayerTwo();
+                Debug.Log("Chris THE THING I LOVE THE MOST LIVES IN A DEMON HOST");
             }
             else
             {

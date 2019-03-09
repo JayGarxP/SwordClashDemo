@@ -38,11 +38,6 @@ namespace SwordClash
             IsCurrentlyProcessing = false;
             GameLoopTicksBeforeSync = 0;
 
-            //StringRep = "Coiled";
-            //var stateString = TentaControllerInstance.SetBoltTentaStateString("Coiled");
-            //Debug.Log("Chris    StateString is now: " + stateString);
-
-
             // Reset position and sprite of tentacle tip
             TentaControllerInstance.TT_RecoilTentacle();
 
@@ -76,6 +71,9 @@ namespace SwordClash
             // Coiled States ProcessState does NOT block flag changes while executing.
             IsCurrentlyProcessing = false;
             StringRep = "Coiled";
+
+           
+
 
             if (BoltNetwork.IsClient && AmIPlayerTwo)
             {
@@ -154,6 +152,14 @@ namespace SwordClash
             TentaControllerInstance.state.CurrentStateString = "Coiled";
             GameLoopTicksBeforeSync++;
 
+          
+            // Trying to keep P2 sprite orange after CoiledState.cs resets the sprite.
+            // p2 on server; 
+            if (! TentaControllerInstance.entity.hasControl && TentaControllerInstance.entity.isOwner)
+            {
+                TentaControllerInstance.TTChangeTentacleSpritetoPlayerTwo();
+            }
+         
 
             // Only accept input if NOT in middle of animation
             if (CurrentlyJuking == false)
