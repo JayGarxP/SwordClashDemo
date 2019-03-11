@@ -22,6 +22,8 @@ namespace SwordClash
 
         public GameObject LeftTentacle;
 
+        //public GameObject BubbleParticlePrefab;
+
         // ImageScript set in editor, to recognize circles
         public FingersImageGestureHelper_SC_BarrelRoll ImageReconzrScript;
         #endregion
@@ -169,6 +171,10 @@ namespace SwordClash
                     // Code to do something where player touched, show bubbles/sparkles like in Shadowverse for example.
                     //Vector2 touchPosinWorldSpace = CameraReference.ScreenToWorldPoint(new Vector2(gesture.FocusX, gesture.FocusY));
                     //SpawnDot(touchPosinWorldSpace.x, touchPosinWorldSpace.y);
+
+                    //Instantiate(BubbleParticlePrefab,
+                    //    new Vector3(gesture.FocusX, gesture.FocusY, 0),
+                    //    Quaternion.identity);
 
                     // CameraScaledWidth lines up nicely with gesture.Focus units somehow...
                     float screeenWidth = CameraReference.scaledPixelWidth;

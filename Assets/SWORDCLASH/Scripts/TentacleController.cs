@@ -79,6 +79,7 @@ namespace SwordClash
         // private PlayerController PlayerControllerScriptInstance;
         private bool AmIPlayerTwo;
         public short WhichPlayerIBe; // 0 is NOBODY;  1 is p1;   2 is p2
+        public bool HoldingFoodRightNow;
 
         private Command LatestStateChangeCommand;
 
@@ -102,7 +103,7 @@ namespace SwordClash
             maxTentacleLength = StartTentacleLength * 2; //TODO: fix maxtentacleLength solution
             StartTentacleRotation = TentacleTipRB2D.rotation;
             WhichPlayerIBe = 0;
-
+            HoldingFoodRightNow = false;
 
             // Set sprite renderer reference so tentacle can change color
             TTSpriteRenderer = GetComponent<SpriteRenderer>();

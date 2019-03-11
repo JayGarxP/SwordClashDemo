@@ -31,6 +31,7 @@ namespace SwordClash
 
         public override void OnStateEnter()
         {
+            TentaControllerInstance.HoldingFoodRightNow = true;
             TentaControllerInstance.TTPickupFood(FoodHeld);
 
         }
@@ -38,6 +39,8 @@ namespace SwordClash
         public override void OnStateExit()
         {
             LowerAllInputFlags();
+            TentaControllerInstance.HoldingFoodRightNow = false;
+
         }
 
 
