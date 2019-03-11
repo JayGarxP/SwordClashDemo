@@ -561,9 +561,15 @@ namespace SwordClash
 
         public void TTMoveTowardsEatingZone(Rigidbody2D moveMeAsWell)
         {
+            //// Move towards starting position each frame
+            //TentacleTipRB2D.position = Vector2.MoveTowards(TentacleTipRB2D.position, TentacleEatingPosition, Time.fixedDeltaTime);
+            //moveMeAsWell.position = Vector2.MoveTowards(moveMeAsWell.position, TentacleEatingPosition, Time.fixedDeltaTime);
+
             // Move towards starting position each frame
-            TentacleTipRB2D.position = Vector2.MoveTowards(TentacleTipRB2D.position, TentacleEatingPosition, Time.fixedDeltaTime);
-            moveMeAsWell.position = Vector2.MoveTowards(moveMeAsWell.position, TentacleEatingPosition, Time.fixedDeltaTime);
+            TentacleTipRB2D.position = Vector2.MoveTowards(TentacleTipRB2D.position, TentacleEatingPosition, Time.fixedDeltaTime / 2.0f);
+            moveMeAsWell.position = Vector2.MoveTowards(moveMeAsWell.position, TentacleEatingPosition, Time.fixedDeltaTime / 2.0f);
+
+
         }
 
         public void TTPickupFood(Rigidbody2D foodTouching)

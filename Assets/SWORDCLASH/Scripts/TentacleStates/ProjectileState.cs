@@ -15,6 +15,8 @@ namespace SwordClash
         private short BarrelRollCount;
         private int GameLoopTicksBeforeSync;
         private bool BoltStateStringSet;
+        private bool JustCollidedWithFood;
+        private Rigidbody2D FoodHitRef;
 
         /// <summary>  
         ///  Constructor to Initialize this state with another, (transition from coiled probably)
@@ -112,6 +114,7 @@ namespace SwordClash
             //  not needed right now...
             LowerAllInputFlags();
             IsCurrentlyProcessing = false;
+            JustCollidedWithFood = false;
 
             GameLoopTicksBeforeSync = 0;
             StringRep = "Projectile";
@@ -149,16 +152,8 @@ namespace SwordClash
             }
             else if (ObjectHitTag == FoodpickupGameObjectTag)
             {
-                //TODO: turn on boolean and change state in ProcessCommand();
-                // there is bug where P2 has advantage and can snatch food too easily...
-                if (! TentaControllerInstance.OpponentTCInstance.HoldingFoodRightNow)
-                {
-                    // Change state to HoldingFood and give reference to which food hit in constructor
-                    TentaControllerInstance.CurrentTentacleState = new HoldingFoodState(this, objectHit);
-
-                    Debug.Log("Chris Changing to HoldingFoodState... .... ....");
-                }
-             
+                JustCollidedWithFood = true;
+                FoodHitRef = objectHit;
             }
         }
 
@@ -199,14 +194,12 @@ namespace SwordClash
                 //Debug.Log("Chris " + "BoltNetwork.IsClient && state.AmIPlayerTwo");
 
                 // Check if out of sync with server
+                //TODO: see if these sync logics can be refactored with Bolt state callback events
                 if (StringRep != TentaControllerInstance.state.CurrentStateString )
                 {
                     Debug.Log("Chris StringRep " + StringRep + "does not equal state.Current   "
                         + TentaControllerInstance.state.CurrentStateString);
-                    
-                    // removed this delay logic...
-                    //&& GameLoopTicksBeforeSync > 3
-
+                   
                     if (TentaControllerInstance.state.CurrentStateString == "Coiled")
                     {
                         //  //become coiled
@@ -220,16 +213,31 @@ namespace SwordClash
                         TentaControllerInstance.CurrentTentacleState = new BarrelRollState(TentaControllerInstance);
                         Debug.Log("Chris SWITHCING TO BARRELROLL STATE in ProjectileState.ProcState(...)");
                         StringRep = "BarrelRoll";
+                    }
+                    else if (TentaControllerInstance.state.CurrentStateString == "HoldingFood")
+                    {
+                        // holding food, food ref may be null should probably check;
+                        if (FoodHitRef != null)
+                        {
+                            TentaControllerInstance.CurrentTentacleState = new HoldingFoodState(this, FoodHitRef);
+                            Debug.Log("Chris SWITHCING TO holdingfood in ProjectileState.ProcState(...)");
+                            StringRep = "HoldingFood";
 
+                        }
+                        else
+                        {
+                            Debug.Log("Chris FoodHitRef was null sadly, can't change to HoldingFood state yet :(");
+                        }
                     }
 
 
                 }
             }
 
-            var tessssst = (BarrelRollCount < TentaControllerInstance.TimesCanBarrelRoll) &&
-                (InputFlagArray[(int)HotInputs.BarrelRoll]);
-            //Debug.Log("Chris broll check @@@ ProjectileState.ProcessState(Input)::::" + tessssst.ToString());
+            if (JustCollidedWithFood)
+            {
+                input.JustHitFood = true;
+            }
 
             // Check if barrel roll flag and haven't already brolled too much
             if ((BarrelRollCount < TentaControllerInstance.TimesCanBarrelRoll) &&
@@ -277,6 +285,43 @@ namespace SwordClash
                 BoltStateStringSet = true;
             }
 
+            //TODO: turn on boolean and change state in ProcessCommand();
+            // there is bug where P2 has advantage and can snatch food too easily...
+
+            // also need to add holding food to processstate state sync check // can also chekc state from opp. instance
+            if (command.Input.CommandFromP2)
+            {
+                if (command.Input.JustHitFood && TentaControllerInstance.OpponentTCInstance.state.CurrentStateString != "HoldingFood")
+                {
+                    if (FoodHitRef != null)
+                    {
+                        // Only can grab food if it is in fresh position, the state variables are not synced for some reason...
+                        Vector2 freshFoodSpawnPosition = GameLogicController.HardCodedCenterCameraCoord;
+                        if (FoodHitRef.position == freshFoodSpawnPosition)
+                        {
+                            // temporary solution for 3/14 / 2019 DEMO DAY
+                            // Change state to HoldingFood and give reference to which food hit in constructor
+                            TentaControllerInstance.CurrentTentacleState = new HoldingFoodState(this, FoodHitRef);
+
+                            TentaControllerInstance.SetBoltTentaStateString("HoldingFood");
+                            Debug.Log("Chris Changing to HoldingFoodState... .... ....");
+                        }
+                    }
+                 
+                }
+            }
+            else //Commands from player 1 work correctly.
+            {
+                if (command.Input.JustHitFood && TentaControllerInstance.OpponentTCInstance.state.CurrentStateString != "HoldingFood")
+                {
+                    // Change state to HoldingFood and give reference to which food hit in constructor
+                    TentaControllerInstance.CurrentTentacleState = new HoldingFoodState(this, FoodHitRef);
+
+                    TentaControllerInstance.SetBoltTentaStateString("HoldingFood");
+                    Debug.Log("Chris Changing to HoldingFoodState... .... ....");
+                }
+            }
+            
 
             if (CurrentlyJuking == false)
             {

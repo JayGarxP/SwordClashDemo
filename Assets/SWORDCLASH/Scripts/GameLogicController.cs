@@ -22,6 +22,7 @@ namespace SwordClash
 
         // Center of camera game screen in world units
         private Vector3 CenterCameraCoord;
+        public static Vector3 HardCodedCenterCameraCoord;
 
         //private short PlayerOnePoints;
         //private short PlayerTwoPoints;
@@ -44,6 +45,8 @@ namespace SwordClash
 
             // Zero out z coordinate, for some reason setting it to zero in ScreenToWorldPoint results in -10 for z...
             CenterCameraCoord.z = 0;
+
+            HardCodedCenterCameraCoord = CenterCameraCoord;
 
             state.P1Score = 0;
             state.P2Score = 0;
@@ -133,10 +136,13 @@ namespace SwordClash
                 SCFoodController = Snack.GetComponent<SwordClashFoodController>();
 
                 NextRoundFoodInCenter();
+                SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
             }
             else if (FoodSpawned == false)
             {
                 NextRoundFoodInCenter();
+                SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
+
             }
         }
 
@@ -154,6 +160,8 @@ namespace SwordClash
             {
                 SCFoodController.MoveFoodToCenter(CenterCameraCoord);
                 FoodSpawned = true;
+                SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
+
             }
             else
             {
@@ -161,6 +169,8 @@ namespace SwordClash
                 Debug.Log("Chris SCFoodController was null somehow...");
                 SCFoodController.MoveFoodToCenter(CenterCameraCoord);
                 FoodSpawned = true;
+                SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
+
             }
 
         }
@@ -169,6 +179,11 @@ namespace SwordClash
 
         public void OnFoodEaten(string EaterPlayerID)
         {
+            // Spawn in new food
+            NextRoundFoodInCenter();
+            SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
+
+
             if (EaterPlayerID == "Player1")
             {
                 this.state.P1Score += 1;
@@ -183,8 +198,6 @@ namespace SwordClash
                 // Bad playerID ...
             }
 
-            // Spawn in new food
-            NextRoundFoodInCenter();
         }
 
 

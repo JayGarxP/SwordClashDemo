@@ -45,6 +45,11 @@ namespace SwordClash
             return spriteIndex;
         }
 
+        public void MoveFoodToCenterSameSprite(Vector3 ScreenCenterWorldUnits)
+        {
+            SnackBody.position = (ScreenCenterWorldUnits);
+        }
+
         // Returns random index after assigning Snack Sprite
         private int AssignRandomSnackSprite()
         {

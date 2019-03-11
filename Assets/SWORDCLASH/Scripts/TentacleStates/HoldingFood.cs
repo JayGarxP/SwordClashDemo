@@ -83,7 +83,9 @@ namespace SwordClash
         {
             // move towards start position
             TentaControllerInstance.TTMoveTowardsEatingZone(FoodHeld);
-
+           
+            TentaControllerInstance.SetBoltTentaStateString("HoldingFood");
+            
 
             // Check if made it home safe
             if (TentaControllerInstance.CheckifTTAtEatingPosition())
@@ -104,10 +106,7 @@ namespace SwordClash
                 TentaControllerInstance.CurrentTentacleState = new CoiledState(this);
                 TentaControllerInstance.SetBoltTentaStateString("Coiled");
             }
-            else
-            {
-                TentaControllerInstance.SetBoltTentaStateString("HoldingFood");
-            }
+            
         }
 
         public override void ProcessCommandFromPlayerTwo(TentacleInputCommand command)
