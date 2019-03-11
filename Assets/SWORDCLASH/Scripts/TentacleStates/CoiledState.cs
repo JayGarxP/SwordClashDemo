@@ -40,6 +40,8 @@ namespace SwordClash
 
             // Reset position and sprite of tentacle tip
             TentaControllerInstance.TT_RecoilTentacle();
+            StringRep = "Coiled";
+
 
 
         }
@@ -72,14 +74,12 @@ namespace SwordClash
             IsCurrentlyProcessing = false;
             StringRep = "Coiled";
 
-           
-
-
-            if (BoltNetwork.IsClient && AmIPlayerTwo)
+            if (BoltNetwork.IsClient && TentaControllerInstance.state.AmIPlayer2)
             {
+                //Debug.Log("Chris IS this code unreachable???");
+
                 // Check if out of sync with server
-                // Need to block this logic a few times to let the State be synced over the network b4 checking it.
-                if (StringRep != TentaControllerInstance.state.CurrentStateString && GameLoopTicksBeforeSync > 3)
+                if (StringRep != TentaControllerInstance.state.CurrentStateString )//&& GameLoopTicksBeforeSync > 3)
                 {
                     Debug.Log("Chris StringRep " + StringRep + "does not equal state.Current   "
                         + TentaControllerInstance.state.CurrentStateString);
@@ -108,12 +108,12 @@ namespace SwordClash
                 input.SwipeAngle = TentaControllerInstance.TTMoveRotationAngleRequested;
 
 
-                if (BoltNetwork.IsClient)
-                {
-                    Debug.Log("Chris <b>LaunchSwipe in CoiledState.ProcessState(input)</b>");
-                    Debug.Log("Chris <b>Input.UpSwipe = </b>" + input.UpSwipe.ToString());
+                //if (BoltNetwork.IsClient)
+                //{
+                //    Debug.Log("Chris <b>LaunchSwipe in CoiledState.ProcessState(input)</b>");
+                //    Debug.Log("Chris <b>Input.UpSwipe = </b>" + input.UpSwipe.ToString());
 
-                }
+                //}
 
                 // Ok to directly set this like this???
                 InputFlagArray[(int)HotInputs.LaunchSwipe] = false;
@@ -126,20 +126,20 @@ namespace SwordClash
                 input.RightTap = true;
                 InputFlagArray[(int)HotInputs.RudderRight] = false;
 
-                if (BoltNetwork.IsClient)
-                {
-                    Debug.Log("Chris <b>RudderRight in CoiledState.ProcessState(input)</b>");
-                }
+                //if (BoltNetwork.IsClient)
+                //{
+                //    Debug.Log("Chris <b>RudderRight in CoiledState.ProcessState(input)</b>");
+                //}
             }
             else if (InputFlagArray[(int)HotInputs.RudderLeft])
             {
                 input.LeftTap = true;
                 InputFlagArray[(int)HotInputs.RudderLeft] = false;
 
-                if (BoltNetwork.IsClient)
-                {
-                    Debug.Log("Chris <b>RudderLeft in CoiledState.ProcessState(input)</b>");
-                }
+                //if (BoltNetwork.IsClient)
+                //{
+                //    Debug.Log("Chris <b>RudderLeft in CoiledState.ProcessState(input)</b>");
+                //}
 
             }
         }
@@ -172,8 +172,8 @@ namespace SwordClash
 
                 if (command.Input.UpSwipe != Vector3.zero)
                 {
-                    Debug.Log("Chris <b>LaunchSwipe in CoiledState.ProcessCommand(command)</b>");
-                    Debug.Log("Chris <b>Input.UpSwipe = </b>" + command.Input.UpSwipe.ToString());
+                    //Debug.Log("Chris <b>LaunchSwipe in CoiledState.ProcessCommand(command)</b>");
+                    //Debug.Log("Chris <b>Input.UpSwipe = </b>" + command.Input.UpSwipe.ToString());
 
                     TentaControllerInstance.state.LatestSwipe = command.Input.UpSwipe;
                     TentaControllerInstance.state.LatestSwipeAngle = command.Input.SwipeAngle;
@@ -208,7 +208,7 @@ namespace SwordClash
                 // if juke input received, actaully juke using TentacleController callback method
                 if (command.Input.RightTap || command.Input.LeftTap)
                 {
-                    Debug.Log("$$$$$ IN BIKINI BOTTOM IM WITH SANDY $$$$$$$");
+                    //Debug.Log("$$$$$ IN BIKINI BOTTOM IM WITH SANDY $$$$$$$");
 
                     CurrentlyJuking = true;
                     // false parameter to jump RIGHT, true parameter to jump LEFT
@@ -230,52 +230,7 @@ namespace SwordClash
         // Coiled state is NOT the same for P1 and P2
         public override void ProcessCommandFromPlayerTwo(TentacleInputCommand command)
         {
-            //// Only accept input if NOT in middle of animation
-            //if (TentaControllerInstance.IsOtherPlayerJuking() == false)
-            //{
-            //    //Debug.Log("$$$$$ ProcessCommand Up swipe logic reached $$$$$$$");
-
-            //    //// if player up-swipe, they tryna  *L A U N C H*
-            //    if (command.Input.UpSwipe.x != 0 || command.Input.UpSwipe.y != 0)
-            //    {
-            //        Debug.Log("$$$$$ ProcessCommand Up swipe logic P2 reached $$$$$$$");
-
-            //        var JebediahTheProjectileState = new ProjectileState(this,
-            //          command.Input.UpSwipe,
-            //          TentaControllerInstance.GetOtherPlayerRequestedLaunchAngle());
-
-
-            //            Debug.Log("$$$$$ ProcessCommand Up swipe WAS from Player two btw $$$$$$$");
-
-            //            //TentaControllerInstance.ChangeOpponentState(JebediahTheProjectileState);
-            //            this.TentaControllerInstance.ChangeOpponentToProjectile(JebediahTheProjectileState);
-
-            //        //TODO: lower opponent tentacle instance flag with 
-            //        this.TentaControllerInstance.LowerOtherPlayerInputFlag((int)HotInputs.LaunchSwipe);
-
-            //       // InputFlagArray[(int)HotInputs.LaunchSwipe] = false;
-            //    }
-
-
-            //    // if juke input received, actaully juke using TentacleController callback method
-            //    if (command.Input.RightTap || command.Input.LeftTap)
-            //    {
-            //        Debug.Log("$$$$$ IN BIKINI BOTTOM IM WITH SANDY $$$$$$$");
-
-            //        CurrentlyJuking = true;
-            //        // false parameter to jump RIGHT, true parameter to jump LEFT
-            //        WhereJumpingTo = TentaControllerInstance.TT_P2CalculateEndJumpPosition(command.Input.LeftTap);
-            //        // Set CurrentlyJuking to true if still need to keep moving, when done juking set CurrentlyJuking to false
-            //        CurrentlyJuking = TentaControllerInstance.TT_P2JumpSideways(WhereJumpingTo);
-            //    }
-
-
-            //}
-            //else
-            //{
-            //    // Still currently juking
-            //    CurrentlyJuking = TentaControllerInstance.TT_P2JumpSideways(WhereJumpingTo);
-            //}
+           
         }
     }
 }

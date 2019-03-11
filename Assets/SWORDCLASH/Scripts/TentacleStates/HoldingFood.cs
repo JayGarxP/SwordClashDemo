@@ -51,30 +51,30 @@ namespace SwordClash
         public override void ProcessState(ITentacleInputCommandInput input)
         {
             StringRep = "HoldingFood";
+            IsCurrentlyProcessing = false;
 
             // SYNC STATE HERE
-            if (BoltNetwork.IsClient && AmIPlayerTwo)
+            if (BoltNetwork.IsClient && TentaControllerInstance.state.AmIPlayer2)
             {
+
                 // Check if out of sync with server
                 if (StringRep != TentaControllerInstance.state.CurrentStateString)
                 {
                     Debug.Log("Chris StringRep " + StringRep + "does not equal state.Current   "
                         + TentaControllerInstance.state.CurrentStateString);
 
-
                     if (TentaControllerInstance.state.CurrentStateString == "Coiled")
                     {
                         //  //become coiled
                         TentaControllerInstance.CurrentTentacleState = new CoiledState(this);
-
+                        Debug.Log("Chris SWITHCING TO COILED STATE in holdingfood.ProcState(...)");
                         StringRep = "Coiled";
                     }
-
 
                 }
             }
 
-            }
+        }
 
         public override void ProcessCommand(TentacleInputCommand command)
         {

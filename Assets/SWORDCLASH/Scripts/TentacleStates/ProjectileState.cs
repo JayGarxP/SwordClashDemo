@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using com.ootii.Utilities.Debug;
+using UnityEngine;
 
 namespace SwordClash
 {
@@ -12,6 +13,8 @@ namespace SwordClash
         private float SwipeAngle;
         private short JukeCount;
         private short BarrelRollCount;
+        private int GameLoopTicksBeforeSync;
+        private bool BoltStateStringSet;
 
         /// <summary>  
         ///  Constructor to Initialize this state with another, (transition from coiled probably)
@@ -108,9 +111,13 @@ namespace SwordClash
             // Set actual tentacle movement vars, save the previous ones if needed
             //  not needed right now...
             LowerAllInputFlags();
+            IsCurrentlyProcessing = false;
 
-            //StringRep = "Projectile";
-            
+            GameLoopTicksBeforeSync = 0;
+            StringRep = "Projectile";
+            BoltStateStringSet = false;
+
+
         }
 
         // Recoil Tentacle and lower all input flags.
@@ -178,33 +185,51 @@ namespace SwordClash
             IsCurrentlyProcessing = false;
             StringRep = "Projectile";
 
+
             // SYNC STATE HERE
-            if (BoltNetwork.IsClient && AmIPlayerTwo)
+            if (BoltNetwork.IsClient && TentaControllerInstance.state.AmIPlayer2)
             {
+                //Debug.Log("Chris " + "BoltNetwork.IsClient && state.AmIPlayerTwo");
+
                 // Check if out of sync with server
-                if (StringRep != TentaControllerInstance.state.CurrentStateString)
+                if (StringRep != TentaControllerInstance.state.CurrentStateString )
                 {
                     Debug.Log("Chris StringRep " + StringRep + "does not equal state.Current   "
                         + TentaControllerInstance.state.CurrentStateString);
+                    
+                    // removed this delay logic...
+                    //&& GameLoopTicksBeforeSync > 3
 
-
-                    if (TentaControllerInstance.state.CurrentStateString == "Coiled" )
+                    if (TentaControllerInstance.state.CurrentStateString == "Coiled")
                     {
                         //  //become coiled
                         TentaControllerInstance.CurrentTentacleState = new CoiledState(this);
-
+                        Debug.Log("Chris SWITHCING TO COILED STATE in ProjectileState.ProcState(...)");
                         StringRep = "Coiled";
+                    }
+                    else if (TentaControllerInstance.state.CurrentStateString == "BarrelRoll")
+                    {
+                        // barrel roll out
+                        TentaControllerInstance.CurrentTentacleState = new BarrelRollState(TentaControllerInstance);
+                        Debug.Log("Chris SWITHCING TO BARRELROLL STATE in ProjectileState.ProcState(...)");
+                        StringRep = "BarrelRoll";
+
                     }
 
 
                 }
             }
 
+            var tessssst = (BarrelRollCount < TentaControllerInstance.TimesCanBarrelRoll) &&
+                (InputFlagArray[(int)HotInputs.BarrelRoll]);
+            //Debug.Log("Chris broll check @@@ ProjectileState.ProcessState(Input)::::" + tessssst.ToString());
+
             // Check if barrel roll flag and haven't already brolled too much
             if ((BarrelRollCount < TentaControllerInstance.TimesCanBarrelRoll) &&
                 (InputFlagArray[(int)HotInputs.BarrelRoll]))
             {
                 input.BarrelRoll = true;
+                Debug.Log("Chris TRYNA BARRELROLL in ProjectileState.ProcessState(Input)");
             }
 
 
@@ -237,21 +262,27 @@ namespace SwordClash
 
             // Move that tentacle tip baby
             TentaControllerInstance.TT_MoveTentacleTip(SwipeVelocityVector, SwipeAngle);
+            GameLoopTicksBeforeSync++;
 
-            if (StringRep == "Projectile")
+            if (BoltStateStringSet == false)
             {
                 TentaControllerInstance.SetBoltTentaStateString("Projectile");
+                BoltStateStringSet = true;
             }
-
 
 
             if (CurrentlyJuking == false)
             {
-
                 if (command.Input.BarrelRoll)
                 {
+                    TentaControllerInstance.SetBoltTentaStateString("BarrelRoll");
+                    TentaControllerInstance.state.BrollCount = BarrelRollCount;
+                    TentaControllerInstance.state.JukeCount = JukeCount;
+
                     TentaControllerInstance.CurrentTentacleState = new BarrelRollState(this, SwipeVelocityVector,
                         SwipeAngle, BarrelRollCount, JukeCount);
+
+                    Debug.Log("Chris SWITHCING TO BARRELROLL STATE in ProjectileState.ProcCOMMAND(.|.|.)");
                 }
 
 

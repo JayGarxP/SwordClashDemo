@@ -1,4 +1,5 @@
 ﻿using Bolt;
+using com.ootii.Utilities.Debug;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -111,7 +112,7 @@ namespace SwordClash
             // Redundant cast seems to help avoid null reference in update loop
             this.CurrentTentacleState = new CoiledState(((TentacleController)this));
             this.state.CurrentStateString = "Coiled";
-            Debug.Log("Chris Current State string: " + state.CurrentStateString);
+            Debug.Log("Chris Current State string: " + this.state.CurrentStateString);
 
             // Bolt Entity Transform sync; entire point of using Photon Bolt :)
             this.state.SetTransforms(this.state.TTTransform, this.transform);
@@ -122,9 +123,10 @@ namespace SwordClash
                 if (this.entity.isOwner == false && this.entity.hasControl == true)
                 {
                     Debug.Log("Chris Hi I am player2, " + this.entity.networkId);
-                    
+
                     AmIPlayerTwo = true;
                     WhichPlayerIBe = 2;
+                    state.AmIPlayer2 = true;
 
                     // Instantiate P2Pog with tag "Player2" ONLY if player 2
                     Instantiate(P2Pog);
@@ -149,10 +151,12 @@ namespace SwordClash
 
                     AmIPlayerTwo = false;
                     WhichPlayerIBe = 1;
+                    state.AmIPlayer2 = false;
+
                 }
-               
+
             }
-          
+
 
         }
 
@@ -181,6 +185,7 @@ namespace SwordClash
                 {
                     // Actual game loop logic code, contained in each ProcessState() method of concrete TentacleState s 
                     // change values of input
+                    //Debug.Log("Chris Calling ProcessState on: " + gameObject.GetInstanceID().ToString());
                     this.CurrentTentacleState.ProcessState(input);
                 }
 
@@ -243,6 +248,13 @@ namespace SwordClash
         // Update is called once per frame
         void Update()
         {
+                if (this.CurrentTentacleState != null)
+                {
+                    Log.ScreenWriteTop("l: " + this.CurrentTentacleState.StringRep);
+                    Log.ScreenWriteTop("Bolt:       " + state.CurrentStateString);
+                }
+            
+
             //Find reference to other tentacle, if I am player one, change the local p2 sprite to orange
             if (OpponentTCInstance == null)
             {
@@ -338,8 +350,8 @@ namespace SwordClash
         {
             if (AmIPlayerTwo)
             {
-                return  maxTentacleLength >= TentacleTipRB2D.position.magnitude;
-                
+                return maxTentacleLength >= TentacleTipRB2D.position.magnitude;
+
             }
             else
             {
@@ -499,7 +511,7 @@ namespace SwordClash
             this.CurrentTentacleState.AmIPlayerTwo = true;
 
             TTChangeTentacleSpritetoPlayerTwo();
-            ResetPlayer2EatingZone();        
+            ResetPlayer2EatingZone();
         }
 
         public void ResetPlayer2EatingZone()
@@ -642,6 +654,9 @@ namespace SwordClash
             int barrelRollFlagID = (int)TentacleState.HotInputs.BarrelRoll;
             bool successfullyRaised =
             this.CurrentTentacleState.RaiseTentacleFlag_Request(barrelRollFlagID);
+
+            Debug.Log("Chris BarrelRoll_Please() called in TC: " + successfullyRaised.ToString());
+
             return successfullyRaised;
         }
 
@@ -671,7 +686,7 @@ namespace SwordClash
             if (AmIPlayerTwo)
             {
                 TTChangeTentacleSpritetoPlayerTwo();
-                Debug.Log("Chris THE THING I LOVE THE MOST LIVES IN A DEMON HOST");
+                //Debug.Log("Chris THE THING I LOVE THE MOST LIVES IN A DEMON HOST");
             }
             else
             {

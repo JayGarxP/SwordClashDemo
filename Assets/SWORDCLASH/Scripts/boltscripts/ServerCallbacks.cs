@@ -20,6 +20,9 @@ public class ServerCallbacks : Bolt.GlobalEventListener
        BoltEntity playerOne = BoltNetwork.Instantiate(BoltPrefabs.TentacleTipScene, spawnPosition, Quaternion.identity);
         playerOne.TakeControl();
 
+        // nice try kid... this does nothing.
+        //playerOne.GetState<ITentacleTipState>().AmIPlayer2 = false;
+
         BoltEntity SCGameLogic = BoltNetwork.Instantiate(BoltPrefabs.SCGameWorld);
         // TakeControl only needed if controller???
         //SCGameLogic.TakeControl();
@@ -35,6 +38,9 @@ public class ServerCallbacks : Bolt.GlobalEventListener
         //playerTwo.tag = "TentacleTipP2";
         //playerTwo.gameObject.tag = "TentacleTipP2";
         playerTwo.AssignControl(connection);
+        
+        // this will never work....
+        //playerTwo.GetState<ITentacleTipState>().AmIPlayer2 = true;
         //playerTwo.GetState<ITentacleTipState>().AmIPlayer2 = true;
 
 

@@ -80,7 +80,7 @@ namespace SwordClash
             TentaControllerInstance = tc;
             IsCurrentlyProcessing = false;
             AmIPlayerTwo = false;
-            StringRep = "Unknown";
+            StringRep = "$Unknown$";
 
             // initialize input flag array to length of InputFlag_Enum, default value is false.
             InputFlagCount = Enum.GetNames(typeof(HotInputs)).Length;

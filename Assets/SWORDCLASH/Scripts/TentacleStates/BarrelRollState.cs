@@ -24,6 +24,7 @@ namespace SwordClash
 
         // snowboard degrees, 720 == two spins; checked against max value set in public editor field set in TentacleController.cs
         private float CurrentBrollDegreesRotated;
+        private int GameLoopTicksBeforeSync;
 
         // Enter barrel roll from Projectile State, still WIP, so XML comment is coming.
         public BarrelRollState(TentacleState oldState, Vector2 swipeVelocityVector, float swipeAngle, short brollCount, short jukeCount)
@@ -33,6 +34,25 @@ namespace SwordClash
             this.SwipeAngle = swipeAngle;
             this.BarrelRollDuringThisProjectileCount = brollCount;
             this.JukeCount = jukeCount;
+            OnStateEnter();
+        }
+
+        // Player 2 client sync constructor from BoltNetwork State values.
+        public BarrelRollState(TentacleController tc) : base(tc)
+        {
+            this.SwipeVelocityVector = TentaControllerInstance.state.LatestSwipe;
+            this.SwipeAngle = TentaControllerInstance.state.LatestSwipeAngle;
+
+            this.BarrelRollDuringThisProjectileCount = (short)TentaControllerInstance.state.BrollCount;
+            this.JukeCount = (short)TentaControllerInstance.state.JukeCount;
+
+            OnStateEnter();
+
+            SwipeVelocityVector = TentaControllerInstance.state.LatestSwipe;
+            SwipeAngle = TentaControllerInstance.state.LatestSwipeAngle;
+
+            Debug.Log("Chris SYNC CONSTRUCTOR ACTIVATED broll: " + SwipeVelocityVector.ToString());
+      
             OnStateEnter();
         }
 
@@ -53,6 +73,9 @@ namespace SwordClash
         {
             CurrentBrollDegreesRotated = 0.0f;
             LowerAllInputFlags();
+            GameLoopTicksBeforeSync = 0;
+            StringRep = "BarrelRoll";
+            Debug.Log("Chris $$$$$$$ BARREL ROLL OnStateEnter() $$$$$$$$$$$$$");
         }
 
         public override void OnStateExit()
@@ -66,54 +89,70 @@ namespace SwordClash
         // don't check any input flags, don't process any bad collision events, still do good ones tho
         public override void ProcessState()
         {
-            // NOT Free to process here!
-            IsCurrentlyProcessing = true;
-
-            CurrentBrollDegreesRotated = TentaControllerInstance.BarrelRollin_rotate(CurrentBrollDegreesRotated);
-
-            // still move, but more slowly
-            TentaControllerInstance.TT_MoveTentacleTip_WhileBroll(SwipeVelocityVector);
-
-
-            // If the barrelroll is over; the total spin 360, 720, etc. has been overcome by degrees of rotation per frame
-            if (CurrentBrollDegreesRotated >= TentaControllerInstance.BarrelRollEndSpinRotationDegrees)
-            {
-                TentaControllerInstance.ResetTentacleTipRotation();
-                OnStateExit();
-                //increment barrel roll count
-                BarrelRollDuringThisProjectileCount++;
-                TentaControllerInstance.CurrentTentacleState = new ProjectileState(this, SwipeVelocityVector, SwipeAngle, BarrelRollDuringThisProjectileCount, JukeCount);
-            }
+            
         }
 
 
-        // Barrel Roll online input is same as single player barrel roll for now 2/11/2019
+        // Barrel Roll online input is same as single player barrel roll
         public override void ProcessState(ITentacleInputCommandInput input)
         {
-            // NOT Free to process here!
-            IsCurrentlyProcessing = true;
-
-            CurrentBrollDegreesRotated = TentaControllerInstance.BarrelRollin_rotate(CurrentBrollDegreesRotated);
-
-            // still move, but more slowly
-            TentaControllerInstance.TT_MoveTentacleTip_WhileBroll(SwipeVelocityVector);
+            StringRep = "BarrelRoll";
+            IsCurrentlyProcessing = false;
 
 
-            // If the barrelroll is over; the total spin 360, 720, etc. has been overcome by degrees of rotation per frame
-            if (CurrentBrollDegreesRotated >= TentaControllerInstance.BarrelRollEndSpinRotationDegrees)
+            // SYNC STATE HERE
+            if (BoltNetwork.IsClient && TentaControllerInstance.state.AmIPlayer2)
             {
-                TentaControllerInstance.ResetTentacleTipRotation();
-                OnStateExit();
-                //increment barrel roll count
-                BarrelRollDuringThisProjectileCount++;
-                TentaControllerInstance.CurrentTentacleState = new ProjectileState(this, SwipeVelocityVector, SwipeAngle, BarrelRollDuringThisProjectileCount, JukeCount);
+                // Check if out of sync with server
+                if (StringRep != TentaControllerInstance.state.CurrentStateString)
+                {
+                    Debug.Log("Chris StringRep " + StringRep + "does not equal state.Current   "
+                        + TentaControllerInstance.state.CurrentStateString);
+
+                    if (TentaControllerInstance.state.CurrentStateString == "Projectile")
+                    {
+                        // barrel roll out
+                        TentaControllerInstance.CurrentTentacleState = new ProjectileState(TentaControllerInstance);
+                        Debug.Log("Chris SWITHCING TO proj in BarrelRollState.ProcState(...)");
+                        StringRep = "Projectile";
+
+                    }
+
+
+                }
             }
         }
 
         public override void ProcessCommand(TentacleInputCommand command)
         {
-            // no commands to process for now
-            //throw new NotImplementedException();
+            // NOT Free to process here!
+            IsCurrentlyProcessing = true;
+
+            CurrentBrollDegreesRotated = TentaControllerInstance.BarrelRollin_rotate(CurrentBrollDegreesRotated);
+
+            // still move, but more slowly
+            TentaControllerInstance.TT_MoveTentacleTip_WhileBroll(SwipeVelocityVector);
+
+
+            // If the barrelroll is over; the total spin 360, 720, etc. has been overcome by degrees of rotation per frame
+            if (CurrentBrollDegreesRotated >= TentaControllerInstance.BarrelRollEndSpinRotationDegrees)
+            {
+                TentaControllerInstance.ResetTentacleTipRotation();
+                OnStateExit();
+                //increment barrel roll count
+                BarrelRollDuringThisProjectileCount++;
+
+                // Change to projectile state.
+                TentaControllerInstance.CurrentTentacleState = new ProjectileState(this, SwipeVelocityVector, SwipeAngle, BarrelRollDuringThisProjectileCount, JukeCount);
+                TentaControllerInstance.SetBoltTentaStateString("Projectile");
+            }
+            else
+            {
+                TentaControllerInstance.SetBoltTentaStateString("BarrelRoll");
+            }
+
+            GameLoopTicksBeforeSync++;
+
         }
 
         public override void ProcessCommandFromPlayerTwo(TentacleInputCommand command)
