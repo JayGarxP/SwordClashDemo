@@ -154,8 +154,15 @@ namespace SwordClash
             {
                 SCFoodController.MoveFoodToCenter(CenterCameraCoord);
                 FoodSpawned = true;
-
             }
+            else
+            {
+                SCFoodController = Snack.GetComponent<SwordClashFoodController>();
+                Debug.Log("Chris SCFoodController was null somehow...");
+                SCFoodController.MoveFoodToCenter(CenterCameraCoord);
+                FoodSpawned = true;
+            }
+
         }
 
 
@@ -176,8 +183,6 @@ namespace SwordClash
                 // Bad playerID ...
             }
 
-
-
             // Spawn in new food
             NextRoundFoodInCenter();
         }
@@ -186,13 +191,15 @@ namespace SwordClash
         // Clear Winner PopUpText
         IEnumerator WaitUnityCoroutine()
         {
-            print(Time.time);
-            yield return new WaitForSeconds(3);
-            print(Time.time);
+            //print(Time.time);
+            yield return new WaitForSeconds(2);
+            //print(Time.time);
 
             // reset points to zero
             this.state.P1Score = 0;
             this.state.P2Score = 0;
+            //FoodSpawned = false; // causes flicker bug
+            //NextRoundFoodInCenter();
 
             // reset all UI elements 
             if (SCUIManager != null)

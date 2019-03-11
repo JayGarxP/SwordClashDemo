@@ -88,7 +88,9 @@ namespace SwordClash
                 // Scoring logic here
                 if (command.Input.CommandFromP2)
                 {
-                    TentaControllerInstance.TTEatFood("Player2");
+                    //TentaControllerInstance.TTEatFood("Player2");
+                    //attempt to fix flicker bug
+                    TentaControllerInstance.OpponentTCInstance.TTEatFood("Player2");
                 }
                 else
                 {

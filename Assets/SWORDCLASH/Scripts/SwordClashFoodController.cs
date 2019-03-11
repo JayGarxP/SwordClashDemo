@@ -53,6 +53,7 @@ namespace SwordClash
             // UnityEngine.Random.Range is min inclusive; max exlcusive; so it is safe to use length of array as max.
             int randomIndexIntoSnackSpriteArray = UnityEngine.Random.Range(0, SnackSpriteArray.Length);
             SnackSprite.sprite = SnackSpriteArray[randomIndexIntoSnackSpriteArray];
+            
             // Update Bolt Entity State SpriteIndex as well
             state.SpriteIndex = randomIndexIntoSnackSpriteArray;
 
