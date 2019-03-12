@@ -20,70 +20,41 @@ public class ParticleBubsTest : MonoBehaviour {
         {
             //if (touch.phase == TouchPhase.Ended)
             //{
-                //Emit is smart enough to NOT emit if they already exist!!!
-                BubbleParticlePrefab.Emit(1);
+            // Emit is smart enough to NOT emit if they already exist!!!
+            //BubbleParticlePrefab.Emit(1);
             //}
+            EmitBubble();
         }
 
         if (Input.GetMouseButtonDown(0))
         {
-            var emitParams = new ParticleSystem.EmitParams();
-
-            //var clickPosition = new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0);
-            Debug.Log("mousePostion: " + Input.mousePosition.ToString());
-            // Debug.Log("clickPosition: " + clickPosition.ToString());
-            //emitParams.position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-
-            //mousePos.x = currentEvent.mousePosition.x;
-            //mousePos.y = cam.pixelHeight - currentEvent.mousePosition.y;
-            //point = cam.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, cam.nearClipPlane))
-
-            //  float xPoint = Input.mousePosition.x;
-            //  // float yPoint = Camera.main.pixelHeight - Input.mousePosition.y;
-            //  float yPoint =   Input.mousePosition.y - Camera.main.pixelHeight;
-            //  // float yPoint =   Input.mousePosition.y - Camera.main.scaledPixelHeight;
-            //  //float yPoint = Input.mousePosition.y * -1;
-
-
-            //  //var test2 = Camera.main.ScreenToWorldPoint(new Vector3(xPoint * 4, yPoint * 2, 0));
-
-            ////  test2.y += 10;
-
-
-            //  var test = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            //  //Debug.Log(test);
-            //  test.y += 10;
-            //  //Debug.Log(test);
-
-            // emitParams.position = (test2);
-
-            //// Get the mouse position in pixels, and convert to camera view by dividing by the number of pixels the camera is displaying.
-            //var x = Input.mousePosition.x / Camera.main.scaledPixelWidth;
-            //var y = Input.mousePosition.y / Camera.main.scaledPixelHeight;
-            //emitParams.position = new Vector3(x, y, 0);
-
-
-            emitParams.position = Camera.main.ScreenToWorldPoint((Input.mousePosition + 
-                new Vector3(0, 0, 5f)));
-
-            Quaternion rotation = Quaternion.Euler(90f, 0, 0);
-            //Vector3 myVector = Vector3.one;
-            Vector3 rotateVector = rotation * emitParams.position;
-
-            emitParams.position = rotateVector;
-
-            //emitParams.position
-
-
-            Debug.Log("emitParams.postion: " + emitParams.position.ToString());
-
-            //emitParams.velocity = new Vector3(0.0f, 0.0f, -2.0f);
-            BubbleParticlePrefab.Emit(emitParams, 1);
-
-
-
+            EmitBubble();
         }
-
-
     }
+
+    public void EmitBubble()
+    {
+        var emitParams = new ParticleSystem.EmitParams();
+
+        //Debug.Log("mousePostion: " + Input.mousePosition.ToString());
+
+        emitParams.position = Camera.main.ScreenToWorldPoint((Input.mousePosition +
+            new Vector3(0, 0, 5f)));
+
+        // Quaternion to 'undo' -90.0f x rotation units of GameObject transform, or anything with world units.
+        Quaternion rotation = Quaternion.Euler(90f, 0, 0);
+        //  Particle system prefabs like the one used here often are rotated -90 degrees to float 'up';
+        //  this undoes that to work with ScreenToWorldPoint() more naturally without messing with emitParams.rotation
+
+        // Quaternion * vector you're rotating; QuatIdentity must be on LEFT side of multiplication!!!
+        Vector3 rotateVector = rotation * emitParams.position;
+
+        emitParams.position = rotateVector;
+        
+
+        Debug.Log("emitParams.postion: " + emitParams.position.ToString());
+
+        BubbleParticlePrefab.Emit(emitParams, 1);
+    }
+
 }

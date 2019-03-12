@@ -22,7 +22,8 @@ namespace SwordClash
 
         public GameObject LeftTentacle;
 
-        //public GameObject BubbleParticlePrefab;
+        // set manually in editor; did not put prefab in resources folder, but it is in scene
+        public ParticleSystem BubbleParticlePrefab;
 
         // ImageScript set in editor, to recognize circles
         public FingersImageGestureHelper_SC_BarrelRoll ImageReconzrScript;
@@ -166,6 +167,10 @@ namespace SwordClash
         {
             if (TentaController != null)
             {
+
+                //PARTICLE EFFECT TEST //FAILED did not show up; probably needs to be in update() OR was on wrong layer
+                //BubbleParticlePrefab.Emit(4);
+
                 if (gesture.State == GestureRecognizerState.Ended)
                 {
                     // Code to do something where player touched, show bubbles/sparkles like in Shadowverse for example.
