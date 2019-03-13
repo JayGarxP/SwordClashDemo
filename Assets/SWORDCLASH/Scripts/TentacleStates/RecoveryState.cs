@@ -42,6 +42,45 @@ namespace SwordClash
 
         public override void ProcessState()
         {
+           
+            TentaControllerInstance.PleaseDarkenTentacleSprite();
+
+
+          
+        }
+
+        public override void ProcessState(ITentacleInputCommandInput input)
+        {
+            // SYNC STATE HERE
+            if (BoltNetwork.IsClient && TentaControllerInstance.state.AmIPlayer2)
+            {
+                //Debug.Log("Chris " + "BoltNetwork.IsClient && state.AmIPlayerTwo");
+
+                // Check if out of sync with server
+                //TODO: see if these sync logics can be refactored with Bolt state callback events
+                if (StringRep != TentaControllerInstance.state.CurrentStateString)
+                {
+                    Debug.Log("Chris StringRep " + StringRep + "does not equal state.Current   "
+                        + TentaControllerInstance.state.CurrentStateString);
+
+                    if (TentaControllerInstance.state.CurrentStateString == "Coiled")
+                    {
+                        //  //become coiled
+                        TentaControllerInstance.CurrentTentacleState = new CoiledState(this);
+                        Debug.Log("Chris SWITHCING TO COILED STATE in Recovery.ProcState(...)");
+                        StringRep = "Coiled";
+                    }
+                   
+
+
+                }
+            }
+
+            ProcessState();
+        }
+
+        public override void ProcessCommand(TentacleInputCommand command)
+        {
             // move towards start position slowly, while wiggling
             TentaControllerInstance.TT_WiggleBackToStartPosition();
 
@@ -50,17 +89,9 @@ namespace SwordClash
             {
                 OnStateExit();
                 TentaControllerInstance.CurrentTentacleState = new CoiledState(this);
+                TentaControllerInstance.state.CurrentStateString = "Coiled";
             }
-        }
 
-        public override void ProcessState(ITentacleInputCommandInput input)
-        {
-            ProcessState();
-        }
-
-        public override void ProcessCommand(TentacleInputCommand command)
-        {
-            //throw new NotImplementedException();
         }
 
         public override void ProcessCommandFromPlayerTwo(TentacleInputCommand command)

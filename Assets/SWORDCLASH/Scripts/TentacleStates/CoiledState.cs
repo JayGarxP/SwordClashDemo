@@ -5,7 +5,6 @@ namespace SwordClash
     // possible this could be a static state, since all instances of it are the same...
     public class CoiledState : TentacleState
     {
-
         // Can't do anything until finished with side-to-side movement
         public bool CurrentlyJuking;
         Vector2 WhereJumpingTo;
@@ -73,6 +72,8 @@ namespace SwordClash
             // Coiled States ProcessState does NOT block flag changes while executing.
             IsCurrentlyProcessing = false;
             StringRep = "Coiled";
+
+            TentaControllerInstance.ResetTentacleTipSprite();
 
             if (BoltNetwork.IsClient && TentaControllerInstance.state.AmIPlayer2)
             {

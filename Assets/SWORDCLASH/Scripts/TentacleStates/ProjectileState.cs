@@ -16,6 +16,7 @@ namespace SwordClash
         private int GameLoopTicksBeforeSync;
         private bool BoltStateStringSet;
         private bool JustCollidedWithFood;
+        private bool JustStung;
         private Rigidbody2D FoodHitRef;
 
         /// <summary>  
@@ -115,6 +116,7 @@ namespace SwordClash
             LowerAllInputFlags();
             IsCurrentlyProcessing = false;
             JustCollidedWithFood = false;
+            JustStung = false;
 
             GameLoopTicksBeforeSync = 0;
             StringRep = "Projectile";
@@ -147,8 +149,10 @@ namespace SwordClash
                 TentaControllerInstance.PleaseStingTentacleSprite();
                 // Play shock noise sound effect
                 SoundManagerScript.PlaySound("taser");
-                // change into RecoveryState
-                TentaControllerInstance.CurrentTentacleState = new RecoveryState(this);
+
+                // change into RecoveryState flag; sprites happen in ProcessState(); physics movement in ProcessCommand();
+                JustStung = true;
+
             }
             else if (ObjectHitTag == FoodpickupGameObjectTag)
             {
@@ -229,6 +233,12 @@ namespace SwordClash
                             Debug.Log("Chris FoodHitRef was null sadly, can't change to HoldingFood state yet :(");
                         }
                     }
+                    else if (TentaControllerInstance.state.CurrentStateString == "Recovery")
+                    {
+                        TentaControllerInstance.CurrentTentacleState = new RecoveryState(this);
+                        StringRep = "Recovery";
+                        Debug.Log("Chris Changing to RecoveryState... in Projectile.ProcState ....");
+                    }
 
 
                 }
@@ -237,6 +247,12 @@ namespace SwordClash
             if (JustCollidedWithFood)
             {
                 input.JustHitFood = true;
+            }
+            else if (JustStung)
+            {
+                // Now in command loop the input from p2 on client can be synced with p2 proxy on server
+                input.JustStung = true;
+
             }
 
             // Check if barrel roll flag and haven't already brolled too much
@@ -321,7 +337,18 @@ namespace SwordClash
                     Debug.Log("Chris Changing to HoldingFoodState... .... ....");
                 }
             }
-            
+
+            if (command.Input.JustStung)
+            {
+                //TODO: refactor all state change logic into something better
+                //OnStateExit();
+                TentaControllerInstance.CurrentTentacleState = new RecoveryState(this);
+                TentaControllerInstance.SetBoltTentaStateString("Recovery");
+                Debug.Log("Chris Changing to RecoveryState... .... ....");
+
+            }
+
+
 
             if (CurrentlyJuking == false)
             {

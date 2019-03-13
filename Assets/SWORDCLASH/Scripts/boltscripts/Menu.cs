@@ -33,7 +33,9 @@ public class Menu : Bolt.GlobalEventListener
             string matchName = Guid.NewGuid().ToString();
 
             BoltNetwork.SetServerInfo(matchName, null);
-            BoltNetwork.LoadScene("MultiplayerDemo");
+            //TODO: ifdef debug flags set here to quickly test scenes; also need to do some single player only tests
+            // BoltNetwork.LoadScene("MultiplayerDemo");
+            BoltNetwork.LoadScene("MultiplayerDemoJellyfish");
         }
     }
 

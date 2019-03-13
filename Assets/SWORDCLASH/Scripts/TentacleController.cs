@@ -208,21 +208,12 @@ namespace SwordClash
         // But IsServer check ensures this is Server Authoritative....
         public override void ExecuteCommand(Command command, bool resetState)
         {
-
-            //// if not Bolt Proxy:
-            //if (!(!this.entity.hasControl && !this.entity.isOwner))
-            //{
-
             TentacleInputCommand cmd = (TentacleInputCommand)command;
-
 
             if (BoltNetwork.IsServer)
             {
                 if (cmd.Input.CommandFromP2)
                 {
-                    //not working????/
-                    // this.CurrentTentacleState.ProcessCommandFromPlayerTwo(cmd);
-
                     OpponentTCInstance.CurrentTentacleState.ProcessCommand(cmd);
                 }
                 else
@@ -253,6 +244,23 @@ namespace SwordClash
                 {
                     Log.ScreenWriteTop("l: " + this.CurrentTentacleState.StringRep);
                     Log.ScreenWriteTop("Bolt:       " + state.CurrentStateString);
+
+                if (BoltNetwork.IsClient)
+                {
+                    // p1 proxy on client is not synced because processstate() is only called by controller!!!
+                    if (! entity.hasControl)
+                    {
+                        if (state.CurrentStateString == "Recovery")
+                        {
+                            PleaseDarkenTentacleSprite();
+                        }
+                        else if (state.CurrentStateString == "Coiled")
+                        {
+                            ResetTentacleTipSprite();
+                        }
+                    }
+                }
+
                 }
             
 
@@ -687,7 +695,7 @@ namespace SwordClash
             TentacleTipRB2D.rotation = StartTentacleRotation;
         }
 
-        private void ResetTentacleTipSprite()
+        public void ResetTentacleTipSprite()
         {
 
             if (AmIPlayerTwo)
