@@ -179,7 +179,6 @@ namespace SwordClash
                     this.state.CurrentStateString = "Coiled";
                 }
 
-                // IrigidbodyPlayerCommandInput input = rigidbodyPlayerCommand.Create();
                 ITentacleInputCommandInput input = TentacleInputCommand.Create();
 
                 if (this.CurrentTentacleState != null && GLCInstance != null)
@@ -190,7 +189,7 @@ namespace SwordClash
                     this.CurrentTentacleState.ProcessState(input);
                 }
 
-                // BoltNetwork.isClient could work too?
+                // Specially mark commands send from player 2
                 if (AmIPlayerTwo && BoltNetwork.IsClient)
                 {
                     input.CommandFromP2 = true;
@@ -242,8 +241,8 @@ namespace SwordClash
         {
                 if (this.CurrentTentacleState != null)
                 {
-                    Log.ScreenWriteTop("l: " + this.CurrentTentacleState.StringRep);
-                    Log.ScreenWriteTop("Bolt:       " + state.CurrentStateString);
+                   // Log.ScreenWriteTop("l: " + this.CurrentTentacleState.StringRep);
+                   // Log.ScreenWriteTop("Bolt:       " + state.CurrentStateString);
 
                 if (BoltNetwork.IsClient)
                 {
@@ -569,13 +568,14 @@ namespace SwordClash
 
         public void TTMoveTowardsEatingZone(Rigidbody2D moveMeAsWell)
         {
-            //// Move towards starting position each frame
-            //TentacleTipRB2D.position = Vector2.MoveTowards(TentacleTipRB2D.position, TentacleEatingPosition, Time.fixedDeltaTime);
-            //moveMeAsWell.position = Vector2.MoveTowards(moveMeAsWell.position, TentacleEatingPosition, Time.fixedDeltaTime);
-
             // Move towards starting position each frame
-            TentacleTipRB2D.position = Vector2.MoveTowards(TentacleTipRB2D.position, TentacleEatingPosition, Time.fixedDeltaTime / 2.0f);
-            moveMeAsWell.position = Vector2.MoveTowards(moveMeAsWell.position, TentacleEatingPosition, Time.fixedDeltaTime / 2.0f);
+            TentacleTipRB2D.position = Vector2.MoveTowards(TentacleTipRB2D.position, TentacleEatingPosition, Time.fixedDeltaTime);
+            moveMeAsWell.position = Vector2.MoveTowards(moveMeAsWell.position, TentacleEatingPosition, Time.fixedDeltaTime);
+
+
+            //// Move towards starting position each frame
+            //TentacleTipRB2D.position = Vector2.MoveTowards(TentacleTipRB2D.position, TentacleEatingPosition, Time.fixedDeltaTime / 2.0f);
+            //moveMeAsWell.position = Vector2.MoveTowards(moveMeAsWell.position, TentacleEatingPosition, Time.fixedDeltaTime / 2.0f);
 
 
         }

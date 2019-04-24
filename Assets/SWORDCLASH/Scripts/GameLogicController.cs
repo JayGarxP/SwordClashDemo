@@ -137,10 +137,15 @@ namespace SwordClash
 
                 NextRoundFoodInCenter();
                 SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
+                SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
+                SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
+
             }
             else if (FoodSpawned == false)
             {
                 NextRoundFoodInCenter();
+                SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
+                SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
                 SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
 
             }
@@ -161,6 +166,9 @@ namespace SwordClash
                 SCFoodController.MoveFoodToCenter(CenterCameraCoord);
                 FoodSpawned = true;
                 SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
+                SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
+                SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
+
 
             }
             else
@@ -170,6 +178,9 @@ namespace SwordClash
                 SCFoodController.MoveFoodToCenter(CenterCameraCoord);
                 FoodSpawned = true;
                 SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
+                SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
+                SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
+
 
             }
 
@@ -182,6 +193,9 @@ namespace SwordClash
             // Spawn in new food
             NextRoundFoodInCenter();
             SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
+            SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
+            SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
+
 
 
             if (EaterPlayerID == "Player1")
