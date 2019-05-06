@@ -2,6 +2,7 @@
 
 namespace SwordClash
 {
+   
     class SwordClashFoodController : Bolt.EntityEventListener<ITentacleFoodState>
     {
         [SerializeField]

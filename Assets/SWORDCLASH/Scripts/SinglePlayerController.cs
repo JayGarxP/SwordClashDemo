@@ -38,7 +38,7 @@ namespace SwordClash
         private SwipeGestureRecognizer DownSwipeGesture; //Reel in tentacle
 
 
-        private TentacleController TentaController;
+        private SinglePlayerTentaController TentaController;
         private Vector2 TentacleTipStartPosition;
         private bool TTPrefabset;
         //private short TTInSceneCount;
@@ -70,7 +70,7 @@ namespace SwordClash
             if (TentaController == null)
             {
                 var TENT = GameObject.FindGameObjectWithTag("TentacleTip");
-                var TCInstance = TENT.GetComponent<TentacleController>();
+                var TCInstance = TENT.GetComponent<SinglePlayerTentaController>();
                 if (TCInstance != null)
                 {
                    TentaController = TCInstance;

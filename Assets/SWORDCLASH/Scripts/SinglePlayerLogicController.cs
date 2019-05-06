@@ -19,7 +19,7 @@ namespace SwordClash
         // Food tentacles fight over
         [SerializeField]
         private GameObject Snack;
-        private SwordClashFoodController SCFoodController;
+        private SinglePlayerFoodController SCFoodController;
 
         // Center of camera game screen in world units
         private Vector3 CenterCameraCoord;
@@ -91,7 +91,7 @@ namespace SwordClash
             {
                 if (Snack != null)
                 {
-                    SCFoodController = Snack.GetComponent<SwordClashFoodController>();
+                    SCFoodController = Snack.GetComponent<SinglePlayerFoodController>();
 
                     NextRoundFoodInCenter();
                     SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
@@ -168,7 +168,7 @@ namespace SwordClash
             }
             else
             {
-                SCFoodController = Snack.GetComponent<SwordClashFoodController>();
+                SCFoodController = Snack.GetComponent<SinglePlayerFoodController>();
                 Debug.Log("Chris SCFoodController was null somehow...");
                 SCFoodController.MoveFoodToCenter(CenterCameraCoord);
                 FoodSpawned = true;
