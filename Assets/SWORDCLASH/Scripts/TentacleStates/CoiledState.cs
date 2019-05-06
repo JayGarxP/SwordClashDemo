@@ -24,6 +24,11 @@ namespace SwordClash
             OnStateEnter();
         }
 
+        public CoiledState(SinglePlayerTentaController stsc) : base(stsc)
+        {
+            OnStateEnter();
+        }
+
         public override void HandleCollisionByTag(string ObjectHitTag, Rigidbody2D ObjectHitRB2D)
         {
             //throw new NotImplementedException();
@@ -38,7 +43,16 @@ namespace SwordClash
             GameLoopTicksBeforeSync = 0;
 
             // Reset position and sprite of tentacle tip
-            TentaControllerInstance.TT_RecoilTentacle();
+            if (TentaControllerInstance != null)
+            {
+                TentaControllerInstance.TT_RecoilTentacle();
+            }
+            else if (SPTentaControllerInstance != null)
+            {
+                //TODO: need better solution for callback methods, either Provider pattern or refactor into child parent classes
+                SPTentaControllerInstance.TT_RecoilTentacle();
+            }
+            
             StringRep = "Coiled";
 
 
@@ -64,7 +78,57 @@ namespace SwordClash
         /// </remarks>
         public override void ProcessState()
         {
+            // Coiled States ProcessState does NOT block flag changes while executing.
+            IsCurrentlyProcessing = false;
+            StringRep = "Coiled";
 
+            SPTentaControllerInstance.ResetTentacleTipSprite();
+
+            // if player up-swipe, they tryna  *L A U N C H*
+            if (InputFlagArray[(int)HotInputs.LaunchSwipe])
+            {
+                var UpSwipe = new Vector3(SPTentaControllerInstance.TTMovePositionVelocityRequested.x,
+                    SPTentaControllerInstance.TTMovePositionVelocityRequested.y, 0);
+
+
+                var SwipeAngle = SPTentaControllerInstance.TTMoveRotationAngleRequested;
+
+                //actually move tentacle here:
+                SPTentaControllerInstance.CurrentTentacleState = new ProjectileState(this,
+                         UpSwipe,
+                         SwipeAngle);
+
+
+                // Ok to directly set this like this???
+                InputFlagArray[(int)HotInputs.LaunchSwipe] = false;
+
+            }
+
+            // if juke-right input received, actaully juke right using TentacleController callback method
+            if (InputFlagArray[(int)HotInputs.RudderRight])
+            {
+                // actually move tentacle:
+                CurrentlyJuking = true;
+                // false parameter to jump RIGHT, true parameter to jump LEFT
+                WhereJumpingTo = SPTentaControllerInstance.TT_CalculateEndJumpPosition(false);
+                // Set CurrentlyJuking to true if still need to keep moving, when done juking set CurrentlyJuking to false
+                CurrentlyJuking = SPTentaControllerInstance.TT_JumpSideways(WhereJumpingTo);
+
+
+                InputFlagArray[(int)HotInputs.RudderRight] = false;             
+            }
+            else if (InputFlagArray[(int)HotInputs.RudderLeft])
+            {
+                // actually move tentacle:
+                CurrentlyJuking = true;
+                // false parameter to jump RIGHT, true parameter to jump LEFT
+                WhereJumpingTo = SPTentaControllerInstance.TT_CalculateEndJumpPosition(true);
+                // Set CurrentlyJuking to true if still need to keep moving, when done juking set CurrentlyJuking to false
+                CurrentlyJuking = SPTentaControllerInstance.TT_JumpSideways(WhereJumpingTo);
+
+
+                InputFlagArray[(int)HotInputs.RudderLeft] = false;
+            }
         }
 
         public override void ProcessState(ITentacleInputCommandInput input)

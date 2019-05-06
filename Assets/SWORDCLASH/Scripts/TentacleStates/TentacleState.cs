@@ -14,6 +14,9 @@ namespace SwordClash
     {
         public TentacleController TentaControllerInstance;
 
+        //TODO: refactor to have singleplayer TC be base class to multiplayer TC
+        public SinglePlayerTentaController SPTentaControllerInstance;
+
         /*raised flags == true; means that player controller has received a gesture and set the appropriate values, flags, scalars, coords, etc.
           The tentaclecontroller responds in different ways to the same inputs (same flags) depending on tentacle state machine, see Game Design Doc. 
              */
@@ -89,7 +92,17 @@ namespace SwordClash
             //OnStateEnter(); not working if abstract method; must be VIRTUAL to work
         }
 
+        public TentacleState(SinglePlayerTentaController stc)
+        {
+            SPTentaControllerInstance = stc;
+            IsCurrentlyProcessing = false;
+            AmIPlayerTwo = false;
+            StringRep = "SinglePlayer";
 
+            // initialize input flag array to length of InputFlag_Enum, default value is false.
+            InputFlagCount = Enum.GetNames(typeof(HotInputs)).Length;
+            InputFlagArray = new bool[InputFlagCount];
+        }
 
         /// <summary>  
         /// <para>Used by other classes to attempt to raise a flag.</para>  

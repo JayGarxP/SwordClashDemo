@@ -41,8 +41,8 @@ namespace SwordClash
         private TentacleController TentaController;
         private Vector2 TentacleTipStartPosition;
         private bool TTPrefabset;
-        private short TTInSceneCount;
-        private bool AmIPlayerTwo;
+        //private short TTInSceneCount;
+       // private bool AmIPlayerTwo;
 
         // Use this for initialization
         void Start()
@@ -55,8 +55,8 @@ namespace SwordClash
 
             LeftTentacle = null;
             TTPrefabset = false;
-            TTInSceneCount = 0;
-            AmIPlayerTwo = false;
+            //TTInSceneCount = 0;
+            //AmIPlayerTwo = false;
         }
 
         ////FixedUpdate is called at a fixed interval and is independent of frame rate. Put physics code here.
@@ -67,67 +67,79 @@ namespace SwordClash
 
         private void Update()
         {
+            if (TentaController == null)
+            {
+                var TENT = GameObject.FindGameObjectWithTag("TentacleTip");
+                var TCInstance = TENT.GetComponent<TentacleController>();
+                if (TCInstance != null)
+                {
+                   TentaController = TCInstance;
+                }
+            }
+
+            //////////////////////old multiplayer only logic below
+            //////////////////////////////////////////////////////////
             // Get references to player one TT and p2 TentacleTip
             // Make player two orange
             // Flip da board for P2 so it lookin red100
 
-            if (TTInSceneCount != 2)
-            {
+            //if (TTInSceneCount != 2)
+            //{
 
-                var tentaclesInScene = GameObject.FindGameObjectsWithTag("TentacleTip");
+            //    var tentaclesInScene = GameObject.FindGameObjectsWithTag("TentacleTip");
 
-                if (tentaclesInScene.Length == 2)
-                {
-                    //Debug.Log("@@@@ TWO TENTS IN SCENE @@@@");
-                    //Debug.Log("@@ my ID: " + gameObject.GetInstanceID().ToString());
+            //    if (tentaclesInScene.Length == 2)
+            //    {
+            //        //Debug.Log("@@@@ TWO TENTS IN SCENE @@@@");
+            //        //Debug.Log("@@ my ID: " + gameObject.GetInstanceID().ToString());
 
-                    // If player two object is intantiated, we are player2
-                    var Player2DummyObject = GameObject.FindWithTag("Player2");
-                    if (Player2DummyObject != null && Player2DummyObject.tag != "/")
-                    {
-                        AmIPlayerTwo = true;
-                    }
-                    // This is working!!!! YAYAY
-                    //Debug.Log("AmIPlayerTwo: " + AmIPlayerTwo.ToString());
+            //        // If player two object is intantiated, we are player2
+            //        var Player2DummyObject = GameObject.FindWithTag("Player2");
+            //        if (Player2DummyObject != null && Player2DummyObject.tag != "/")
+            //        {
+            //            AmIPlayerTwo = true;
+            //        }
+            //        // This is working!!!! YAYAY
+            //        //Debug.Log("AmIPlayerTwo: " + AmIPlayerTwo.ToString());
 
-                    foreach (var TENT in tentaclesInScene)
-                    {
-                        //OpponentTentacleGO = TENT;
-                        var TCInstance = TENT.GetComponent<TentacleController>();
-                        //Debug.Log("@@ TENTA ID: " + TENT.GetInstanceID().ToString());
-                        //Debug.Log("@@ WhichPlayerIBe: " + TCInstance.WhichPlayerIBe.ToString());
+            //        foreach (var TENT in tentaclesInScene)
+            //        {
+            //            //OpponentTentacleGO = TENT;
+            //            var TCInstance = TENT.GetComponent<TentacleController>();
+            //            //Debug.Log("@@ TENTA ID: " + TENT.GetInstanceID().ToString());
+            //            //Debug.Log("@@ WhichPlayerIBe: " + TCInstance.WhichPlayerIBe.ToString());
 
-                        if (TentaController == null)
-                        {
-
-
-                            if (TCInstance.WhichPlayerIBe == 1 && AmIPlayerTwo == false)
-                            {
-                                //We are player 1
-                                Debug.Log("$$$ I am Player 1 $$$");
-                                TentaController = TCInstance;
-                                TTInSceneCount = 2;
-
-                            }
-                            else if (TCInstance.WhichPlayerIBe == 2 && AmIPlayerTwo == true)
-                            {
-                                //We are player 2
-                                Debug.Log("$ I am Player 22222 $");
-                                TentaController = TCInstance;
-                                TTInSceneCount = 2;
-
-                                FlipCameraUpsideDown();
-                            }
-                        }
-
-                    }
-                }
-            }
+            //            if (TentaController == null)
+            //            {
 
 
+            //                if (TCInstance.WhichPlayerIBe == 1 && AmIPlayerTwo == false)
+            //                {
+            //                    //We are player 1
+            //                    Debug.Log("$$$ I am Player 1 $$$");
+            //                    TentaController = TCInstance;
+            //                    TTInSceneCount = 2;
+
+            //                }
+            //                else if (TCInstance.WhichPlayerIBe == 2 && AmIPlayerTwo == true)
+            //                {
+            //                    //We are player 2
+            //                    Debug.Log("$ I am Player 22222 $");
+            //                    TentaController = TCInstance;
+            //                    TTInSceneCount = 2;
+
+            //                    FlipCameraUpsideDown();
+            //                }
+            //            }
+
+            //        }
+            //    }
+            //}
 
 
-        }
+
+
+        } // end unity update
 
 
         // after MonoBehavior.Update(); see https://docs.unity3d.com/Manual/ExecutionOrder.html
@@ -188,28 +200,11 @@ namespace SwordClash
                     //Determine what side of screen is tapped, 'juke' to that side.
                     if (gesture.FocusX >= screeenWidth)
                     {
-                        // Player 2 camera is upside down, the gestures use Screen Space coordinates;
-                        if (AmIPlayerTwo)
-                        {
-                            TentaController.JukeLeft_Please();
-
-                        }
-                        else
-                        {
                             TentaController.JukeRight_Please();
-                        }
                     }
                     else
                     {
-                        if (AmIPlayerTwo)
-                        {
-                            TentaController.JukeRight_Please();
-                        }
-                        else
-                        {
                             TentaController.JukeLeft_Please();
-
-                        }
                     }
                 }
             }
@@ -355,6 +350,7 @@ namespace SwordClash
             UPSwipeGestureDirectionThreshold = 1;
             LeftRightDownSwipeGestureDirectionThreshold = 3;
             DoubleTapTimeThreshold = 1;
+            swipeCircleRayCastRadius = 0.2f;
         }
 
 
