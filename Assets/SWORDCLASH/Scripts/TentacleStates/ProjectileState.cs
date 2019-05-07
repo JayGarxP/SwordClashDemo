@@ -51,9 +51,9 @@ namespace SwordClash
             JukeCount = 0;
         }
 
-        // single player constructor
-        public ProjectileState(TentacleState oldState, SinglePlayerTentaController SPTC, Vector2 swipeNormalVector, float swipeAngle)
-            : base(SPTC)
+        public ProjectileState(TentacleState oldState, SinglePlayerTentaController SPTC,
+            Vector2 swipeNormalVector, float swipeAngle)
+           : base(SPTC)
         {
             SwipeVelocityVector = swipeNormalVector;
             SwipeAngle = swipeAngle;
@@ -61,7 +61,7 @@ namespace SwordClash
 
             SwipeVelocityVector = MultiplyVectorComponentsBySpeed(
                 SwipeVelocityVector,
-                SPTentaControllerInstance.UPswipeSpeedConstant + SPTentaControllerInstance.UPswipeSpeedModifier
+                SPTC.UPswipeSpeedConstant + SPTC.UPswipeSpeedModifier
                 );
 
             Debug.Log("Chris SwipeVelocityVector in ProjectileState Constructor: " + SwipeVelocityVector.ToString());
@@ -97,6 +97,23 @@ namespace SwordClash
         public ProjectileState(TentacleState oldState, Vector2 swipeVelocityVector, float swipeAngle,
             short BrollCount, short jukeCount)
             : base(oldState.TentaControllerInstance)
+        {
+            SwipeVelocityVector = swipeVelocityVector;
+            SwipeAngle = swipeAngle;
+            //check if in bad range here???
+            //TODO: fix tight coupling of Moving and Barrel Roll state
+            BarrelRollCount = BrollCount;
+            // BarrelRolling does NOT reset jukeCount
+            JukeCount = jukeCount;
+            OnStateEnter();
+
+        }
+
+        // SinglePlayer initialize from BarrelRollState which increments BrollCount as side-effect; BAD CODE
+        public ProjectileState(TentacleState oldState, SinglePlayerTentaController SPTC,
+            Vector2 swipeVelocityVector, float swipeAngle,
+            short BrollCount, short jukeCount)
+            : base(SPTC)
         {
             SwipeVelocityVector = swipeVelocityVector;
             SwipeAngle = swipeAngle;
@@ -149,7 +166,16 @@ namespace SwordClash
         public override void OnStateExit()
         {
             //just teleport for now
-            TentaControllerInstance.PleaseRecoilTentacle();
+            if (TentaControllerInstance != null)
+            {
+                TentaControllerInstance.PleaseRecoilTentacle();
+
+            }
+            else
+            {
+                // single player TC instance reset tentatip position
+                SPTentaControllerInstance.PleaseRecoilTentacle();
+            }
             LowerAllInputFlags();
 
 
@@ -166,7 +192,14 @@ namespace SwordClash
             if (ObjectHitTag == JellyfishEnemyGameObjectTag)
             {
                 // Change color/ZAP! also go into recovery state
-                TentaControllerInstance.PleaseStingTentacleSprite();
+                if (TentaControllerInstance != null)
+                {
+                    TentaControllerInstance.PleaseStingTentacleSprite();
+                }
+                else
+                {
+                    SPTentaControllerInstance.PleaseStingTentacleSprite();
+                }
                 // Play shock noise sound effect
                 SoundManagerScript.PlaySound("taser");
 
@@ -202,39 +235,63 @@ namespace SwordClash
             }
             else if (JustStung)
             {
-                SPTentaControllerInstance.CurrentTentacleState = new RecoveryState(this);
+                SPTentaControllerInstance.CurrentTentacleState = new RecoveryState(this, SPTentaControllerInstance);
                 Debug.Log("Chris Changing to RecoveryState... .... ....");
             }
 
-            // Check if barrel roll flag and haven't already brolled too much
-            if ((BarrelRollCount < SPTentaControllerInstance.TimesCanBarrelRoll) &&
-                (InputFlagArray[(int)HotInputs.BarrelRoll]))
+
+            if (CurrentlyJuking == false)
             {
-                //input.BarrelRoll = true;
-                Debug.Log("Chris TRYNA BARRELROLL in ProjectileState.ProcessState(Input)");
+                // Check if barrel roll flag and haven't already brolled too much
+                if ((BarrelRollCount < SPTentaControllerInstance.TimesCanBarrelRoll) &&
+                    (InputFlagArray[(int)HotInputs.BarrelRoll]))
+                {
+                    SPTentaControllerInstance.CurrentTentacleState = new BarrelRollState(this, SPTentaControllerInstance,
+                        SwipeVelocityVector,
+                        SwipeAngle, BarrelRollCount, JukeCount);
+
+                }
+
+                // check if tapping after checking if tapped out
+                if (JukeCount < SPTentaControllerInstance.TTTimesAllowedToJuke)
+                {
+
+                    // if juke - right input received
+                    if (InputFlagArray[(int)HotInputs.RudderRight])
+                    {
+
+                        CurrentlyJuking = true;
+                        // false parameter to jump RIGHT, true parameter to jump LEFT
+                        WhereJumpingTo = SPTentaControllerInstance.TT_CalculateEndJumpPosition(false);
+                        // Set CurrentlyJuking to true if still need to keep moving, when done juking set CurrentlyJuking to false
+                        CurrentlyJuking = SPTentaControllerInstance.TT_JumpSideways(WhereJumpingTo);
+                        InputFlagArray[(int)HotInputs.RudderRight] = false;
+                        ++JukeCount;
+                    }
+
+                    if (InputFlagArray[(int)HotInputs.RudderLeft])
+                    {
+                        CurrentlyJuking = true;
+                        // false parameter to jump RIGHT, true parameter to jump LEFT
+                        WhereJumpingTo = SPTentaControllerInstance.TT_CalculateEndJumpPosition(true);
+                        // Set CurrentlyJuking to true if still need to keep moving, when done juking set CurrentlyJuking to false
+                        CurrentlyJuking = SPTentaControllerInstance.TT_JumpSideways(WhereJumpingTo);
+                        InputFlagArray[(int)HotInputs.RudderLeft] = false;
+                        ++JukeCount;
+                    }
+
+                }
+
+            
+            }
+            else
+            {
+                // Keep moving sideways
+                CurrentlyJuking = SPTentaControllerInstance.TT_JumpSideways(WhereJumpingTo);
             }
 
 
-            // check if tapping after checking if tapped out
-            if (JukeCount < SPTentaControllerInstance.TTTimesAllowedToJuke)
-            {
-                // if juke - right input received
-                if (InputFlagArray[(int)HotInputs.RudderRight])
-                {
-                    
-                   // input.RightTap = true;
-                    InputFlagArray[(int)HotInputs.RudderRight] = false;
-                    ++JukeCount;
-                }
-
-                if (InputFlagArray[(int)HotInputs.RudderLeft])
-                {
-                   // input.LeftTap = true;
-                    InputFlagArray[(int)HotInputs.RudderLeft] = false;
-                    ++JukeCount;
-                }
-
-            }
+            
 
             // Check if done moving
             if (SPTentaControllerInstance.IsTentacleAtMaxExtension())

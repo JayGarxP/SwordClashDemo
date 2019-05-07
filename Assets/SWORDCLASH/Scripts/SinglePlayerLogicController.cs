@@ -79,9 +79,10 @@ namespace SwordClash
 
         private void SpawnSnack()
         {
-
-             Snack = Instantiate(Snack, CenterCameraCoord * 10.0f, Quaternion.identity);
-            
+            if (Snack == null)
+            {
+                Snack = Instantiate(Snack, CenterCameraCoord * 10.0f, Quaternion.identity);
+            }
         }
 
         // Update is called once per frame
@@ -160,9 +161,9 @@ namespace SwordClash
             {
                 SCFoodController.MoveFoodToCenter(CenterCameraCoord);
                 FoodSpawned = true;
-                SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
-                SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
-                SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
+                //SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
+                //SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
+                //SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
 
 
             }
@@ -172,9 +173,9 @@ namespace SwordClash
                 Debug.Log("Chris SCFoodController was null somehow...");
                 SCFoodController.MoveFoodToCenter(CenterCameraCoord);
                 FoodSpawned = true;
-                SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
-                SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
-                SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
+                //SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
+                //SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
+                //SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
 
 
             }
@@ -187,9 +188,9 @@ namespace SwordClash
         {
             // Spawn in new food
             NextRoundFoodInCenter();
-            SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
-            SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
-            SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
+            //SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
+            //SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
+           // SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
 
 
 

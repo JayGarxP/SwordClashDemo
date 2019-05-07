@@ -21,6 +21,14 @@ namespace SwordClash
 
         }
 
+        // initialize with another state to enter recovery state
+        public RecoveryState(TentacleState oldState, SinglePlayerTentaController SPTC)
+            : base(SPTC)
+        {
+            OnStateEnter();
+
+        }
+
         public override void HandleCollisionByTag(string ObjectHitTag, Rigidbody2D ObjectHitRB2D)
         {
             //throw new NotImplementedException();
@@ -29,7 +37,16 @@ namespace SwordClash
         public override void OnStateEnter()
         {
             // change sprite to deflated
-            TentaControllerInstance.PleaseDarkenTentacleSprite();
+            if (TentaControllerInstance != null)
+            {
+                TentaControllerInstance.PleaseDarkenTentacleSprite();
+
+            }
+            else
+            {
+                SPTentaControllerInstance.PleaseDarkenTentacleSprite();
+
+            }
 
         }
 
@@ -42,11 +59,29 @@ namespace SwordClash
 
         public override void ProcessState()
         {
-           
-            TentaControllerInstance.PleaseDarkenTentacleSprite();
+            if (TentaControllerInstance != null)
+            {
+                TentaControllerInstance.PleaseDarkenTentacleSprite();
+
+            }
+            else
+            {  
+                // single player logic solution for now, will change later after project symposium
+                SPTentaControllerInstance.PleaseDarkenTentacleSprite();
+
+                // move towards start position slowly, while wiggling
+                SPTentaControllerInstance.TT_WiggleBackToStartPosition();
+
+                // Check if made it home safe
+                if (SPTentaControllerInstance.CheckifTTAtStartPosition())
+                {
+                    OnStateExit();
+                    SPTentaControllerInstance.CurrentTentacleState = new CoiledState(this, SPTentaControllerInstance);
+                }
+            }
 
 
-          
+
         }
 
         public override void ProcessState(ITentacleInputCommandInput input)

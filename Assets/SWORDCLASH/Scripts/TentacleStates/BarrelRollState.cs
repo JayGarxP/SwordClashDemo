@@ -37,6 +37,18 @@ namespace SwordClash
             OnStateEnter();
         }
 
+        // Enter barrel roll from Projectile State, still WIP, so XML comment is coming.
+        public BarrelRollState(TentacleState oldState, SinglePlayerTentaController SPTC,
+            Vector2 swipeVelocityVector, float swipeAngle, short brollCount, short jukeCount)
+              : base(SPTC)
+        {
+            this.SwipeVelocityVector = swipeVelocityVector;
+            this.SwipeAngle = swipeAngle;
+            this.BarrelRollDuringThisProjectileCount = brollCount;
+            this.JukeCount = jukeCount;
+            OnStateEnter();
+        }
+
         // Player 2 client sync constructor from BoltNetwork State values.
         public BarrelRollState(TentacleController tc) : base(tc)
         {
@@ -89,7 +101,33 @@ namespace SwordClash
         // don't check any input flags, don't process any bad collision events, still do good ones tho
         public override void ProcessState()
         {
-            
+            StringRep = "BarrelRoll";
+            IsCurrentlyProcessing = false;
+
+            // NOT Free to process here!
+            IsCurrentlyProcessing = true;
+
+            CurrentBrollDegreesRotated = SPTentaControllerInstance.BarrelRollin_rotate(CurrentBrollDegreesRotated);
+
+            // still move, but more slowly
+            SPTentaControllerInstance.TT_MoveTentacleTip_WhileBroll(SwipeVelocityVector);
+
+
+            // If the barrelroll is over; the total spin 360, 720, etc. has been overcome by degrees of rotation per frame
+            if (CurrentBrollDegreesRotated >= SPTentaControllerInstance.BarrelRollEndSpinRotationDegrees)
+            {
+                SPTentaControllerInstance.ResetTentacleTipRotation();
+                OnStateExit();
+                //increment barrel roll count
+                BarrelRollDuringThisProjectileCount++;
+
+                // Change to projectile state.
+                SPTentaControllerInstance.CurrentTentacleState = new ProjectileState(this, SPTentaControllerInstance, SwipeVelocityVector, SwipeAngle, BarrelRollDuringThisProjectileCount, JukeCount);
+            }
+           
+
+            //GameLoopTicksBeforeSync++;
+
         }
 
 

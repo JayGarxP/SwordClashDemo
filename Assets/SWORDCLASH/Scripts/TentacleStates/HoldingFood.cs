@@ -59,7 +59,14 @@ namespace SwordClash
         public override void OnStateExit()
         {
             LowerAllInputFlags();
-            TentaControllerInstance.HoldingFoodRightNow = false;
+            if (TentaControllerInstance != null)
+            {
+                TentaControllerInstance.HoldingFoodRightNow = false;
+            }
+            else
+            {
+                SPTentaControllerInstance.HoldingFoodRightNow = false;
+            }
 
         }
 

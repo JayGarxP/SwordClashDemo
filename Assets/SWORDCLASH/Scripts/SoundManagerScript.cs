@@ -18,7 +18,15 @@ public class SoundManagerScript : MonoBehaviour
     {
         if (soundToPlay == "taser")
         {
-            AudioSrc.PlayOneShot(JellyStingNoise);
+            if (AudioSrc != null)
+            {
+                AudioSrc.PlayOneShot(JellyStingNoise);
+            }
+            else
+            {
+                // You forgot to set JellyStingNoise in SoundManagerScript in Unity props editor!!!
+                //Debug.Log("");
+            }
         }
     }
 
