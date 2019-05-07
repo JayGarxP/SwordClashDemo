@@ -51,6 +51,26 @@ namespace SwordClash
             JukeCount = 0;
         }
 
+        // single player constructor
+        public ProjectileState(TentacleState oldState, SinglePlayerTentaController SPTC, Vector2 swipeNormalVector, float swipeAngle)
+            : base(SPTC)
+        {
+            SwipeVelocityVector = swipeNormalVector;
+            SwipeAngle = swipeAngle;
+            BarrelRollCount = 0;
+
+            SwipeVelocityVector = MultiplyVectorComponentsBySpeed(
+                SwipeVelocityVector,
+                SPTentaControllerInstance.UPswipeSpeedConstant + SPTentaControllerInstance.UPswipeSpeedModifier
+                );
+
+            Debug.Log("Chris SwipeVelocityVector in ProjectileState Constructor: " + SwipeVelocityVector.ToString());
+
+            OnStateEnter();
+            // Set JukeCount to zero
+            JukeCount = 0;
+        }
+
         public ProjectileState(TentacleController tc) : base(tc)
         {
             SwipeVelocityVector = TentaControllerInstance.state.LatestSwipe;
@@ -165,16 +185,77 @@ namespace SwordClash
         // code summary here for projectile.processstate()
         public override void ProcessState()
         {
+            // Free to process here,
+            IsCurrentlyProcessing = false;
+            StringRep = "Projectile";
+
+            SPTentaControllerInstance.TT_MoveTentacleTip(SwipeVelocityVector, SwipeAngle);
+            // LoopTicks needed in singleplayer ProcessState()???
+            //GameLoopTicksBeforeSync++;
+
+            if (JustCollidedWithFood)
+            {
+                // Change state to HoldingFood and give reference to which food hit in constructor
+                SPTentaControllerInstance.CurrentTentacleState = new HoldingFoodState(this, SPTentaControllerInstance, FoodHitRef);
+
+                Debug.Log("Chris Changing to HoldingFoodState... .... ....");
+            }
+            else if (JustStung)
+            {
+                SPTentaControllerInstance.CurrentTentacleState = new RecoveryState(this);
+                Debug.Log("Chris Changing to RecoveryState... .... ....");
+            }
+
+            // Check if barrel roll flag and haven't already brolled too much
+            if ((BarrelRollCount < SPTentaControllerInstance.TimesCanBarrelRoll) &&
+                (InputFlagArray[(int)HotInputs.BarrelRoll]))
+            {
+                //input.BarrelRoll = true;
+                Debug.Log("Chris TRYNA BARRELROLL in ProjectileState.ProcessState(Input)");
+            }
+
+
+            // check if tapping after checking if tapped out
+            if (JukeCount < SPTentaControllerInstance.TTTimesAllowedToJuke)
+            {
+                // if juke - right input received
+                if (InputFlagArray[(int)HotInputs.RudderRight])
+                {
+                    
+                   // input.RightTap = true;
+                    InputFlagArray[(int)HotInputs.RudderRight] = false;
+                    ++JukeCount;
+                }
+
+                if (InputFlagArray[(int)HotInputs.RudderLeft])
+                {
+                   // input.LeftTap = true;
+                    InputFlagArray[(int)HotInputs.RudderLeft] = false;
+                    ++JukeCount;
+                }
+
+            }
+
+            // Check if done moving
+            if (SPTentaControllerInstance.IsTentacleAtMaxExtension())
+            {
+
+                OnStateExit();
+                //TODO: Recovery mode state
+                SPTentaControllerInstance.CurrentTentacleState = new CoiledState(this, SPTentaControllerInstance);
+            }
+
+
 
         }
 
-        //private Vector2 MultiplyVectorYComponentBySpeed(Vector2 DirectionVector, float speed)
-        //{
-        //    //Return velocity vector with [x, y*=speed]
-        //    return new Vector2(DirectionVector.x, DirectionVector.y * speed);
-        //}
+    //private Vector2 MultiplyVectorYComponentBySpeed(Vector2 DirectionVector, float speed)
+    //{
+    //    //Return velocity vector with [x, y*=speed]
+    //    return new Vector2(DirectionVector.x, DirectionVector.y * speed);
+    //}
 
-        private Vector2 MultiplyVectorComponentsBySpeed(Vector2 DirectionVector, float speed)
+    private Vector2 MultiplyVectorComponentsBySpeed(Vector2 DirectionVector, float speed)
         {
             //Return velocity vector with [x*=speed, y*=speed]
             var velocityVector =  new Vector2(DirectionVector.x * speed, DirectionVector.y * speed);

@@ -18,6 +18,14 @@ namespace SwordClash
 
         }
 
+        // single player resume coiled state constructor
+        public CoiledState(TentacleState oldState, SinglePlayerTentaController SPTC)
+          : base(SPTC)
+        {
+            OnStateEnter();
+
+        }
+
         // initialize with new tentacle controller, first coil of game
         public CoiledState(TentacleController tsc) : base(tsc)
         {
@@ -94,7 +102,7 @@ namespace SwordClash
                 var SwipeAngle = SPTentaControllerInstance.TTMoveRotationAngleRequested;
 
                 //actually move tentacle here:
-                SPTentaControllerInstance.CurrentTentacleState = new ProjectileState(this,
+                SPTentaControllerInstance.CurrentTentacleState = new ProjectileState(this, SPTentaControllerInstance,
                          UpSwipe,
                          SwipeAngle);
 

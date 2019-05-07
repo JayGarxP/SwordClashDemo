@@ -24,6 +24,15 @@ namespace SwordClash
 
         }
 
+        // single player constructor
+        public HoldingFoodState(TentacleState oldState, SinglePlayerTentaController SPTC, UnityEngine.Rigidbody2D foodToHold)
+           : base(SPTC)
+        {
+            this.FoodHeld = foodToHold;
+            OnStateEnter();
+
+        }
+
         public override void HandleCollisionByTag(string ObjectHitTag, Rigidbody2D ObjectHitRB2D)
         {
             //throw new NotImplementedException();
@@ -31,8 +40,19 @@ namespace SwordClash
 
         public override void OnStateEnter()
         {
-            TentaControllerInstance.HoldingFoodRightNow = true;
-            TentaControllerInstance.TTPickupFood(FoodHeld);
+            // trash code; will fix later hopefully
+            if (TentaControllerInstance != null)
+            {
+                TentaControllerInstance.HoldingFoodRightNow = true;
+                TentaControllerInstance.TTPickupFood(FoodHeld);
+            }
+            else
+            {
+                // still want it to crash if SPTC is null
+                SPTentaControllerInstance.HoldingFoodRightNow = true;
+                SPTentaControllerInstance.TTPickupFood(FoodHeld);
+            }
+           
 
         }
 
@@ -47,7 +67,30 @@ namespace SwordClash
 
         public override void ProcessState()
         {
-            
+            StringRep = "HoldingFood";
+            IsCurrentlyProcessing = false;
+
+            // move towards start position
+            SPTentaControllerInstance.TTMoveTowardsEatingZone(FoodHeld);
+
+            // Check if made it home safe
+            if (SPTentaControllerInstance.CheckifTTAtEatingPosition())
+            {
+                //// Scoring logic here
+                //if (command.Input.CommandFromP2)
+                //{
+                //    //TentaControllerInstance.TTEatFood("Player2");
+                //    //attempt to fix flicker bug
+                //    TentaControllerInstance.OpponentTCInstance.TTEatFood("Player2");
+                //}
+                //else
+                //{
+                SPTentaControllerInstance.TTEatFood("Player1");
+                //}
+
+                OnStateExit();
+                SPTentaControllerInstance.CurrentTentacleState = new CoiledState(this, SPTentaControllerInstance);
+            }
         }
 
         // Called from Bolt.SimulateController()
