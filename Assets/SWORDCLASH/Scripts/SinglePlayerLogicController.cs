@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -59,8 +60,8 @@ namespace SwordClash
 
             SpawnSnack();
             InsertPlayerTable(1);
-            PrintPlayerTable();
-
+            //PrintPlayerTable();
+            
             if (UIManager == null)
             {
                 UIManager = GameObject.FindWithTag("UIMan");
@@ -89,6 +90,10 @@ namespace SwordClash
         // Update is called once per frame
         void Update()
         {
+
+            PrintPlayerTable();
+
+
             if (SCFoodController == null)
             {
                 if (Snack != null)
@@ -190,15 +195,11 @@ namespace SwordClash
         {
             // Spawn in new food
             NextRoundFoodInCenter();
-            //SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
-            //SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
-            // SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
-
-
 
             if (EaterPlayerID == "Player1")
             {
                 PlayerOnePoints += 1;
+                UpdatePlayerTableWinsInLocalDatabase(1);
             }
             else if (EaterPlayerID == "Player2")
             {
@@ -210,6 +211,16 @@ namespace SwordClash
                 // Bad playerID ...
             }
 
+        }
+
+        private void UpdatePlayerTableWinsInLocalDatabase(int PlayerID)
+        {
+            string sql = "UPDATE " + PlayerStatsTableName +
+//" SET TotalWins = TotalWins + 1 " + //TODO: col + 1 seems to not work if never updated before? is default val not bein set? need to test on actual phone
+" SET TotalWins = TotalWins + 1 " +
+"WHERE " +
+"PlayerID = ?";
+            dbManager.Execute(sql, PlayerID);
         }
 
 
@@ -259,7 +270,7 @@ namespace SwordClash
                 outputText.text += "<color=#1abc9c>ID</color>: '" + weaponRecord.PlayerID.ToString() + "' " +
                                     "<color=#1abc9c>LvlsBeat</color>:" + weaponRecord.HighestLevelComplete.ToString() + " " +
                                     "<color=#1abc9c>Deaths</color>:" + weaponRecord.TotalDeaths.ToString() + "\n" +
-                                    "<color=#1abc9c>Wins</color>:" + weaponRecord.TotalWins.ToString() + " " +
+                                    "<color=#33ff00>Wins</color>:" + weaponRecord.TotalWins.ToString() + " " +
                                     "<color=#1abc9c>GamesPlayed</color>:" + weaponRecord.TotalGamesPlayed.ToString() + "\n";
             }
 
