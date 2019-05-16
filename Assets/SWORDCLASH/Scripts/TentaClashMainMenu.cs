@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class MainMenu : MonoBehaviour {
+public class TentaClashMainMenu : MonoBehaviour {
 
     // editor fields
     // public Sprite []backgrounds;
@@ -24,11 +24,15 @@ public class MainMenu : MonoBehaviour {
     public GameObject SettingsCanvasGO;
     private Canvas SettingsCanvasRef;
 
+    public GameObject PlayCanvasGO;
+    private Canvas PlayCanvasRef;
+
     private Sprite ActiveEyeSprite;
 
     private SpriteRenderer EyeSpriteRenderer;
 
     private bool SettingsOpen;
+    private bool PlayMenuOpen;
 
     // Use this for initialization
     void Start()
@@ -46,6 +50,14 @@ public class MainMenu : MonoBehaviour {
             SettingsOpen = false;
             SettingsCanvasRef.gameObject.SetActive(false);
         }
+
+        PlayCanvasRef = PlayCanvasGO.GetComponent<Canvas>();
+        if (PlayCanvasRef != null)
+        {
+            // disable canvas u find;
+            PlayMenuOpen = false;
+            PlayCanvasRef.gameObject.SetActive(false);
+        }
     }
 
     private void ToggleSettingsMenu()
@@ -53,6 +65,13 @@ public class MainMenu : MonoBehaviour {
         // flip boolean
         SettingsOpen = !SettingsOpen; 
         SettingsCanvasRef.gameObject.SetActive(SettingsOpen);
+    }
+
+    private void TogglePlayMenu()
+    {
+        // flip boolean
+        PlayMenuOpen = !PlayMenuOpen;
+        PlayCanvasRef.gameObject.SetActive(PlayMenuOpen);
     }
 
     // Not sure if this is back button; also using it for outside of settings window clicks
@@ -69,19 +88,38 @@ public class MainMenu : MonoBehaviour {
 
     public void PlayButton_OnClicked()
     {
+        if (EyeSpriteRenderer != null)
+        {
+            OnEyePoked();
+        }
+
         if (SettingsOpen)
         {
             // close the settings bubs
             ToggleSettingsMenu();
         }
 
+        if (PlayMenuOpen == false)
+        {
+            TogglePlayMenu();
+        }
+
+        // LoadSceneByIndex();
+        //StartCoroutine(DelaySceneLoad());
+
+       
+    }
+
+    public void SinglePlayerButton_OnClicked()
+    {
         // LoadSceneByIndex();
         StartCoroutine(DelaySceneLoad());
+    }
 
-        if (EyeSpriteRenderer != null)
-        {
-            OnEyePoked();
-        }
+    public void MultiPlayerButton_OnClicked()
+    {
+        // LoadSceneByIndex(2);
+        StartCoroutine(DelaySceneLoad(2));
     }
 
     // pop open settings overlay
@@ -94,7 +132,7 @@ public class MainMenu : MonoBehaviour {
     // menu is assumed to be index 0 in build order, so 1 is game...
     private void LoadSceneByIndex(int index = 1)
     {
-        // load topmost scene index
+        // load scene index
         SceneManager.LoadScene(index);
     }
 
@@ -109,7 +147,14 @@ IEnumerator DelaySceneLoad()
         LoadSceneByIndex();
 }
 
-private void OnEyePoked() {
+    IEnumerator DelaySceneLoad(int sceneIndex)
+    {
+        // wait for float seconds b4 switching to new scene
+        yield return new WaitForSeconds(1.5f);
+        LoadSceneByIndex(sceneIndex);
+    }
+
+    private void OnEyePoked() {
         // just switch sprite for now.
         ActiveEyeSprite = PokedEyeSprite;
 

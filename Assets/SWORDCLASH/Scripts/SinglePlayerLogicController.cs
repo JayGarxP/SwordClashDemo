@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace SwordClash
 {
@@ -12,6 +12,12 @@ namespace SwordClash
     public class SinglePlayerLogicController : MonoBehaviour
     {
         public short NumberofRounds;
+
+        // reference to our database manager object in the scene
+        public SimpleSQL.SimpleSQLManager dbManager;
+
+        // reference to the gui text object in our scene that will be used for output
+        public Text outputText;
 
         private GameObject UIManager;
         private SwordClashUIManager SCUIManager;
@@ -29,6 +35,8 @@ namespace SwordClash
         private short PlayerTwoPoints;
         private bool FoodSpawned;
         private short PointsToWin;
+
+        private const string PlayerStatsTableName = "Player";
 
         // Use this for initialization
         void Start()
@@ -49,16 +57,9 @@ namespace SwordClash
             FoodSpawned = false;
 
 
-            //// Spawn in snack just off screen.
-            //if (this.entity.isOwner)
-            //{
-            //    Snack = BoltNetwork.Instantiate(Snack, CenterCameraCoord * 10.0f, Quaternion.identity);
-            //}
-
-
             SpawnSnack();
-
-
+            InsertPlayerTable(1);
+            PrintPlayerTable();
 
             if (UIManager == null)
             {
@@ -88,7 +89,7 @@ namespace SwordClash
         // Update is called once per frame
         void Update()
         {
-           if (SCFoodController == null)
+            if (SCFoodController == null)
             {
                 if (Snack != null)
                 {
@@ -141,8 +142,9 @@ namespace SwordClash
 
             if (SCUIManager != null)
             {
-                SCUIManager.UpdatePlayerOneScore(this.PlayerOnePoints.ToString());
-                SCUIManager.UpdatePlayerTwoScore(PlayerTwoPoints.ToString());
+                SCUIManager.UpdatePlayerOneScore(PlayerOnePoints.ToString());
+                //SCUIManager.UpdatePlayerTwoScore(PlayerTwoPoints.ToString());
+                SCUIManager.UpdateSinglePlayerLevel(" One ");
 
             }
         }
@@ -190,7 +192,7 @@ namespace SwordClash
             NextRoundFoodInCenter();
             //SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
             //SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
-           // SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
+            // SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
 
 
 
@@ -233,6 +235,67 @@ namespace SwordClash
                 SCUIManager.UpdatePlayerTwoScore("");
             }
         }
+
+        void PrintPlayerTable()
+        {
+            // Gather a list of weapons and their type names pulled from the weapontype table		
+            List<PlayerTable> weaponList = dbManager.Query<PlayerTable>(
+                                                            "SELECT " +
+                                                                "W.PlayerID, " +
+                                                                "W.HighestLevelComplete, " +
+                                                                "W.TotalDeaths, " +
+                                                                "W.TotalWins, " +
+                                                                "W.TotalGamesPlayed " +
+                                                            "FROM " +
+                                                                "Player W " +
+                                                            "ORDER BY " +
+                                                                "W.PlayerID "
+                                                            );
+
+            // output the list of weapons
+            outputText.text = "PLAYERS: \n\n";
+            foreach (PlayerTable weaponRecord in weaponList)
+            {
+                outputText.text += "<color=#1abc9c>ID</color>: '" + weaponRecord.PlayerID.ToString() + "' " +
+                                    "<color=#1abc9c>LvlsBeat</color>:" + weaponRecord.HighestLevelComplete.ToString() + " " +
+                                    "<color=#1abc9c>Deaths</color>:" + weaponRecord.TotalDeaths.ToString() + "\n" +
+                                    "<color=#1abc9c>Wins</color>:" + weaponRecord.TotalWins.ToString() + " " +
+                                    "<color=#1abc9c>GamesPlayed</color>:" + weaponRecord.TotalGamesPlayed.ToString() + "\n";
+            }
+
+
+            //// get the first weapon record that has a WeaponID > 4
+            //outputText.text += "\nFirst weapon record where the WeaponID > 4: ";
+            //bool recordExists;
+            //Weapon firstWeaponRecord = dbManager.QueryFirstRecord<Weapon>(out recordExists, "SELECT WeaponName FROM Weapon WHERE WeaponID > 4");
+            //if (recordExists)
+            //    outputText.text += firstWeaponRecord.WeaponName + "\n";
+            //else
+            //    outputText.text += "No record found\n";
+        }
+
+        void InsertPlayerTable(int PlayerID)
+        {
+            /*
+             * 
+
+INSERT INTO TABLENAME (PK Column)
+SELECT 'new value'
+WHERE NOT EXISTS (SELECT 1 FROM TABLENAME WHERE PKColumn = 'new value');
+ 
+             */
+
+            string sqlInsertIfNotAlreadyExist = "INSERT INTO " + PlayerStatsTableName +
+" (PlayerID) " +
+                " SELECT '" + PlayerID.ToString() + "'" +
+                "WHERE NOT EXISTS (SELECT 1 FROM " + PlayerStatsTableName + " WHERE PlayerID = '" +
+                PlayerID.ToString() + "')";
+
+
+            dbManager.Execute(sqlInsertIfNotAlreadyExist, PlayerID);
+
+        }
+
 
     }
 }
