@@ -119,7 +119,7 @@ public class TentaClashMainMenu : MonoBehaviour {
     public void MultiPlayerButton_OnClicked()
     {
         // LoadSceneByIndex(2);
-        StartCoroutine(DelaySceneLoad(2));
+        StartCoroutine(DelaySceneLoad(3));
     }
 
     // pop open settings overlay

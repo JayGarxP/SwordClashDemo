@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace SwordClash
@@ -13,12 +14,16 @@ namespace SwordClash
     public class SinglePlayerLogicController : MonoBehaviour
     {
         public short NumberofRounds;
+ // what level we are in 
+        public short LevelIndex;
 
         // reference to our database manager object in the scene
         public SimpleSQL.SimpleSQLManager dbManager;
 
         // reference to the gui text object in our scene that will be used for output
         public Text outputText;
+        // reference to popup win message
+        public Image happySquidPopupImage;
 
         private GameObject UIManager;
         private SwordClashUIManager SCUIManager;
@@ -26,11 +31,16 @@ namespace SwordClash
         // Food tentacles fight over
         [SerializeField]
         private GameObject Snack;
+        private bool SnackInstantiated;
         private SinglePlayerFoodController SCFoodController;
 
         // Center of camera game screen in world units
         private Vector3 CenterCameraCoord;
         public static Vector3 HardCodedCenterCameraCoord;
+        public Vector3 LevelTwoFoodSpawnPosition;
+
+        // use this vector3 to reposition food
+        private Vector3 FoodSpawnPosition;
 
         private short PlayerOnePoints;
         private short PlayerTwoPoints;
@@ -44,6 +54,8 @@ namespace SwordClash
         {
             // Best outta 3 rounds means whoever hits 2 wins is the big match winner.
             PointsToWin = (short)((NumberofRounds / 2) + 1);
+
+            SnackInstantiated = false;
 
             CenterCameraCoord = Camera.main.ScreenToWorldPoint(new Vector2((Screen.width / 2),
                 (Screen.height / 2)));
@@ -59,6 +71,7 @@ namespace SwordClash
 
 
             SpawnSnack();
+            Debug.Log("Chris Inserting into PlayerTable: ");
             InsertPlayerTable(1);
             //PrintPlayerTable();
             
@@ -81,10 +94,31 @@ namespace SwordClash
 
         private void SpawnSnack()
         {
-            if (Snack == null)
+            if (SnackInstantiated == false)
             {
-                Snack = Instantiate(Snack, CenterCameraCoord * 10.0f, Quaternion.identity);
+                switch (LevelIndex)
+                {
+                    case 1:
+                        InstantiateFood(CenterCameraCoord);
+                        break;
+                    case 2:
+                        InstantiateFood(LevelTwoFoodSpawnPosition);
+                        break;
+                    default:
+                        Console.WriteLine("Level Index in Inspector for GameWorld object not set correctly!!!");
+                        break;
+                }
+
+
+
             }
+        }
+
+        private void InstantiateFood(Vector3 newFoodSpawnPosition)
+        {
+            Snack = Instantiate(Snack, newFoodSpawnPosition, Quaternion.identity);
+            FoodSpawnPosition = newFoodSpawnPosition;
+            SnackInstantiated = true;
         }
 
         // Update is called once per frame
@@ -101,9 +135,8 @@ namespace SwordClash
                     SCFoodController = Snack.GetComponent<SinglePlayerFoodController>();
 
                     NextRoundFoodInCenter();
-                    SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
-                    SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
-                    SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
+                    SCFoodController.MoveFoodToCenterSameSprite(FoodSpawnPosition);
+                   
                 }
                 else
                 {
@@ -114,9 +147,8 @@ namespace SwordClash
             else if (FoodSpawned == false)
             {
                 NextRoundFoodInCenter();
-                SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
-                SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
-                SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
+                SCFoodController.MoveFoodToCenterSameSprite(FoodSpawnPosition);
+               
 
             }
 
@@ -148,8 +180,19 @@ namespace SwordClash
             if (SCUIManager != null)
             {
                 SCUIManager.UpdatePlayerOneScore(PlayerOnePoints.ToString());
-                //SCUIManager.UpdatePlayerTwoScore(PlayerTwoPoints.ToString());
-                SCUIManager.UpdateSinglePlayerLevel(" One ");
+                switch (LevelIndex)
+                {
+                    case 1:
+                        SCUIManager.UpdateSinglePlayerLevel(" One ");
+                        break;
+                    case 2:
+                        SCUIManager.UpdateSinglePlayerLevel("@ Two @");
+                        break;
+                    default:
+                        Console.WriteLine("Level Index in Inspector for GameWorld object not set correctly!!!");
+                        break;
+                }
+               
 
             }
         }
@@ -158,6 +201,8 @@ namespace SwordClash
         void Reset()
         {
             NumberofRounds = 3;
+            LevelTwoFoodSpawnPosition = new Vector3(-4.2f, 0.2f, 0.0f);
+            LevelIndex = 1;
         }
 
         // For inbetween rounds
@@ -166,26 +211,18 @@ namespace SwordClash
             // Use SC controller methods to assign sprite and move food to center
             if (SCFoodController != null)
             {
-                SCFoodController.MoveFoodToCenter(CenterCameraCoord);
+                SCFoodController.MoveFoodToCenter(FoodSpawnPosition);
                 FoodSpawned = true;
-                //SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
-                //SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
-                //SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
-
-
+                
             }
             else
             {
                 SCFoodController = Snack.GetComponent<SinglePlayerFoodController>();
                 Debug.Log("Chris SCFoodController was null somehow...");
-                SCFoodController.MoveFoodToCenter(CenterCameraCoord);
+                SCFoodController.MoveFoodToCenter(FoodSpawnPosition);
                 FoodSpawned = true;
-                //SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
-                //SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
-                //SCFoodController.MoveFoodToCenterSameSprite(CenterCameraCoord);
-
-
-            }
+                            
+                            }
 
         }
 
@@ -200,6 +237,22 @@ namespace SwordClash
             {
                 PlayerOnePoints += 1;
                 UpdatePlayerTableWinsInLocalDatabase(1);
+
+                // Hardcoded scene indexes found in File -> Build Settings
+                switch (LevelIndex)
+                {
+                    case 1:
+                        DisplayWinPopupGotoNextLevel(2);
+                        break;
+                    case 2:
+                        DisplayWinPopupGotoNextLevel(0); // 0 is main menu
+                        break;
+                    default:
+                        Console.WriteLine("Level Index in Inspector for GameWorld object not set correctly!!!");
+                        break;
+                }
+                
+                
             }
             else if (EaterPlayerID == "Player2")
             {
@@ -215,12 +268,41 @@ namespace SwordClash
 
         private void UpdatePlayerTableWinsInLocalDatabase(int PlayerID)
         {
-            string sql = "UPDATE " + PlayerStatsTableName +
-//" SET TotalWins = TotalWins + 1 " + //TODO: col + 1 seems to not work if never updated before? is default val not bein set? need to test on actual phone
+            // first test if totalWins is null or zero; set it to zero before updating then.
+            // Gather a list of Players from their table in localDB	
+            List<PlayerTable> playerList = dbManager.Query<PlayerTable>(
+                                                            "SELECT *" +
+                                                            "FROM " +
+                                                                "Player W " +
+                                                            "WHERE " +
+                                                                "W.PlayerID = 1 AND (W.TotalWins = 0 OR W.TotalWins is null)"
+                                                            );
+
+            if (playerList.Count == 1)
+            {
+                // column + 1 seems to not work if null; defualt value of TotalWins is not being set on Insert
+                // test null with 'is null' on sqlite3.dll strings loaded by dbManager.Query()
+                Debug.Log("Chris unset Playerwins conditoin hit!!!!!!!!!!!!!!!!!!!");
+                string sql = "UPDATE " + PlayerStatsTableName +
+//" SET TotalWins = TotalWins + 1 " + 
+" SET TotalWins = 1 " +
+"WHERE " +
+"PlayerID = ?";
+                dbManager.Execute(sql, PlayerID);
+            }
+            else
+            {
+                Debug.Log("Chris normal Playerwins condishun @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+
+                string sql = "UPDATE " + PlayerStatsTableName +
 " SET TotalWins = TotalWins + 1 " +
 "WHERE " +
 "PlayerID = ?";
-            dbManager.Execute(sql, PlayerID);
+                dbManager.Execute(sql, PlayerID);
+            }
+
+
+         
         }
 
 
@@ -249,8 +331,8 @@ namespace SwordClash
 
         void PrintPlayerTable()
         {
-            // Gather a list of weapons and their type names pulled from the weapontype table		
-            List<PlayerTable> weaponList = dbManager.Query<PlayerTable>(
+            // Gather a list of Players from their table in localDB	
+            List<PlayerTable> playerList = dbManager.Query<PlayerTable>(
                                                             "SELECT " +
                                                                 "W.PlayerID, " +
                                                                 "W.HighestLevelComplete, " +
@@ -265,24 +347,15 @@ namespace SwordClash
 
             // output the list of weapons
             outputText.text = "PLAYERS: \n\n";
-            foreach (PlayerTable weaponRecord in weaponList)
+            foreach (PlayerTable playerRecord in playerList)
             {
-                outputText.text += "<color=#1abc9c>ID</color>: '" + weaponRecord.PlayerID.ToString() + "' " +
-                                    "<color=#1abc9c>LvlsBeat</color>:" + weaponRecord.HighestLevelComplete.ToString() + " " +
-                                    "<color=#1abc9c>Deaths</color>:" + weaponRecord.TotalDeaths.ToString() + "\n" +
-                                    "<color=#33ff00>Wins</color>:" + weaponRecord.TotalWins.ToString() + " " +
-                                    "<color=#1abc9c>GamesPlayed</color>:" + weaponRecord.TotalGamesPlayed.ToString() + "\n";
+                outputText.text += "<color=#1abc9c>ID</color>: '" + playerRecord.PlayerID.ToString() + "' " +
+                                    "<color=#1abc9c>LvlsBeat</color>:" + playerRecord.HighestLevelComplete.ToString() + " " +
+                                    "<color=#1abc9c>Deaths</color>:" + playerRecord.TotalDeaths.ToString() + "\n" +
+                                    "<color=#33ff00>Wins</color>:" + playerRecord.TotalWins.ToString() + " " +
+                                    "<color=#1abc9c>GamesPlayed</color>:" + playerRecord.TotalGamesPlayed.ToString() + "\n";
             }
 
-
-            //// get the first weapon record that has a WeaponID > 4
-            //outputText.text += "\nFirst weapon record where the WeaponID > 4: ";
-            //bool recordExists;
-            //Weapon firstWeaponRecord = dbManager.QueryFirstRecord<Weapon>(out recordExists, "SELECT WeaponName FROM Weapon WHERE WeaponID > 4");
-            //if (recordExists)
-            //    outputText.text += firstWeaponRecord.WeaponName + "\n";
-            //else
-            //    outputText.text += "No record found\n";
         }
 
         void InsertPlayerTable(int PlayerID)
@@ -302,9 +375,31 @@ WHERE NOT EXISTS (SELECT 1 FROM TABLENAME WHERE PKColumn = 'new value');
                 "WHERE NOT EXISTS (SELECT 1 FROM " + PlayerStatsTableName + " WHERE PlayerID = '" +
                 PlayerID.ToString() + "')";
 
-
             dbManager.Execute(sqlInsertIfNotAlreadyExist, PlayerID);
+        }
 
+        void DisplayWinPopupGotoNextLevel(int sceneIndex)
+        {
+            if (happySquidPopupImage != null)
+            {
+                happySquidPopupImage.gameObject.SetActive(true);
+                StartCoroutine(DelaySceneLoad(sceneIndex));
+            }
+        }
+
+        IEnumerator DelaySceneLoad(int sceneIndex)
+        {
+            // wait for float seconds b4 switching to new scene
+            yield return new WaitForSeconds(2.0f);
+            LoadSceneByIndex(sceneIndex);
+        }
+
+        private void LoadSceneByIndex(int index)
+        {
+            happySquidPopupImage.gameObject.SetActive(false);
+
+            // load scene index
+            SceneManager.LoadScene(index);
         }
 
 
