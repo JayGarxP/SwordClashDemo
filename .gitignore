@@ -47,3 +47,4 @@ sysinfo.txt
 
 # Libraries
 *.dll
+/user.keystore

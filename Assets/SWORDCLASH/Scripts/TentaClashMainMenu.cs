@@ -2,12 +2,17 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using GooglePlayGames;
+using UnityEngine.SocialPlatforms;
+using UnityEngine.UI;
+using TMPro;
 
 public class TentaClashMainMenu : MonoBehaviour {
 
-    // editor fields
-    // public Sprite []backgrounds;
-    // GetComponent<SpriteRenderer>().sprite = backgrounds[index];
+    // sign out ui; should group these somehow
+    public Image AvatarImage;
+    public Image SignOutBackground;
+    public TMP_Text SignOutText;
 
     public Sprite UnPokedEyeSprite; //TODO: make this actually animated one day... one glorious day
     // what sprite changes to when poked I guess for now.
@@ -37,7 +42,10 @@ public class TentaClashMainMenu : MonoBehaviour {
     // Use this for initialization
     void Start()
     {
-        // Set sprite renderer reference so tentacle can change color
+        // Select the Google Play Games platform as our social platform implementation
+        GooglePlayGames.PlayGamesPlatform.Activate();
+
+        // Set sprite renderer reference so eye can change color
         EyeSpriteRenderer = GetComponent<SpriteRenderer>();
         UnPokedEyeSprite = EyeSpriteRenderer.sprite;
         ActiveEyeSprite = UnPokedEyeSprite;
@@ -65,6 +73,14 @@ public class TentaClashMainMenu : MonoBehaviour {
         // flip boolean
         SettingsOpen = !SettingsOpen; 
         SettingsCanvasRef.gameObject.SetActive(SettingsOpen);
+        if (Social.localUser.authenticated)
+        {
+            DisplayPlayerAvatarAndSignOutButton();
+        }
+        else
+        {
+            HidePlayerAvatarAndSignOutButton();
+        }
     }
 
     private void TogglePlayMenu()
@@ -127,6 +143,56 @@ public class TentaClashMainMenu : MonoBehaviour {
     {
         // make settings canvas enabled/active/appear or go away if it is there;
         ToggleSettingsMenu();
+    }
+
+    // sign in to google play games
+    public void SignInButton_OnClicked()
+    {
+        if (Social.localUser.authenticated == false)
+        {
+            // authenticate user:
+            Social.localUser.Authenticate((bool success) => {
+                // handle success or failure
+                Debug.Log("Chris authentication: " + success.ToString());
+                if (success)
+                {
+                    Debug.Log("Chris Welcome: " + Social.localUser.userName);
+
+                    DisplayPlayerAvatarAndSignOutButton();
+                }
+                else
+                {
+                    //"Authentication failed.";
+                }
+
+            });
+        }
+        else
+        {
+            //// sign out
+            //PlayGamesPlatform.Instance.SignOut();
+            ((GooglePlayGames.PlayGamesPlatform)Social.Active).SignOut();
+            HidePlayerAvatarAndSignOutButton();
+        }
+
+    }
+
+    private void DisplayPlayerAvatarAndSignOutButton()
+    {
+        var avatar = Social.localUser.image;
+        Sprite sprite = Sprite.Create(avatar, new Rect(0, 0, avatar.width, avatar.height), new Vector2(.5f, .5f));
+
+        AvatarImage.sprite = sprite;
+        AvatarImage.gameObject.SetActive(true);
+        SignOutBackground.gameObject.SetActive(true);
+        SignOutText.gameObject.SetActive(true);
+    }
+
+    private void HidePlayerAvatarAndSignOutButton()
+    {
+        AvatarImage.gameObject.SetActive(false);
+        SignOutBackground.gameObject.SetActive(false);
+        SignOutText.gameObject.SetActive(false);
     }
 
     // menu is assumed to be index 0 in build order, so 1 is game...
