@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class SwordClashUIManager : MonoBehaviour {
     public Text P1Score;
     private string P1ScoreString;
+    private string P1UserName;
     public Text P2Score;
     private string P2ScoreString;
     public Text WinnerPopup;
@@ -16,6 +17,15 @@ public class SwordClashUIManager : MonoBehaviour {
     {
         // setup the strings at first	
         P1ScoreString = "P1: ";
+        if (Social.localUser.authenticated)
+        {
+            P1UserName = Social.localUser.userName;
+        }
+        else
+        {
+            P1UserName = "P1";
+        }
+
         P2ScoreString = "P2: ";
         WinnerPopupString = "";
     	}
@@ -31,7 +41,7 @@ public class SwordClashUIManager : MonoBehaviour {
 
     public void UpdatePlayerOneScore(string p1Score)
     {
-        P1ScoreString = "P1: " + p1Score;
+        P1ScoreString = P1UserName +": " + p1Score;
     }
 
     public void UpdatePlayerTwoScore(string p2Score)

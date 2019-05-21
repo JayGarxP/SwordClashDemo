@@ -35,7 +35,26 @@ namespace SwordClash
 
         public override void HandleCollisionByTag(string ObjectHitTag, Rigidbody2D ObjectHitRB2D)
         {
-            //throw new NotImplementedException();
+            // Both players stop moving; 
+            // back swipe prompt on screen tug of war ~3 seconds with half sec pause
+
+            if (ObjectHitTag == OtherPlayerGameObjectTag)
+            {
+                if (TentaControllerInstance != null)
+                {
+                    Debug.Log("Maria holding food tent: " + TentaControllerInstance.entity.networkId + "hit by enemy player!!!!" 
+                        + TentaControllerInstance.OpponentTCInstance.entity.networkId);
+                }
+                else
+                {
+                    // single player mode can ignore this...
+                }
+                
+                
+            }
+
+            //TODO: HoldingFood and hit by enemy collision
+
         }
 
         public override void OnStateEnter()
@@ -83,17 +102,7 @@ namespace SwordClash
             // Check if made it home safe
             if (SPTentaControllerInstance.CheckifTTAtEatingPosition())
             {
-                //// Scoring logic here
-                //if (command.Input.CommandFromP2)
-                //{
-                //    //TentaControllerInstance.TTEatFood("Player2");
-                //    //attempt to fix flicker bug
-                //    TentaControllerInstance.OpponentTCInstance.TTEatFood("Player2");
-                //}
-                //else
-                //{
                 SPTentaControllerInstance.TTEatFood("Player1");
-                //}
 
                 OnStateExit();
                 SPTentaControllerInstance.CurrentTentacleState = new CoiledState(this, SPTentaControllerInstance);

@@ -461,7 +461,19 @@ namespace SwordClash
                             Debug.Log("Chris Changing to HoldingFoodState... .... ....");
                         }
                     }
-                 
+
+                }
+                else if (command.Input.JustHitFood && TentaControllerInstance.OpponentTCInstance.state.CurrentStateString == "HoldingFood")
+                {
+                    // opponent is holding food
+                    // freeze; show backswipe prompt
+                    // if win then now holding food
+                    // if lose, go to zapped state I guess.
+                    //TODO: this code is unreachable right now, need better soultion for collision,
+                    // probably need flags in ProcessState or more bolt variables
+                    // also UI is not syncing properly now UI manager needs some help.
+                    //    probably not syning over bolt network only doing it locally.
+                    Debug.Log("Maria I have hit the enemy player, they are holding food fufufufufufuff hahahaha");
                 }
             }
             else //Commands from player 1 work correctly.
