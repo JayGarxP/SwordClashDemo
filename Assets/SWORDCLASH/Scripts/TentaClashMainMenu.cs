@@ -220,9 +220,15 @@ IEnumerator DelaySceneLoad()
         LoadSceneByIndex(sceneIndex);
     }
 
+    // eye might be a bit too creepy changing it to algae slime lifeform that rearranges to spell english words for humans.
     private void OnEyePoked() {
-        // just switch sprite for now.
-        ActiveEyeSprite = PokedEyeSprite;
+        //// just switch sprite for now.
+        //ActiveEyeSprite = PokedEyeSprite;
+
+        // change color
+        EyeSpriteRenderer.
+        GetComponent<SpriteRenderer>().color = Color.blue;
+
 
     }
 
