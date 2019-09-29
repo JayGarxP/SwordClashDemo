@@ -33,6 +33,7 @@ namespace SwordClash
         protected string JellyfishEnemyGameObjectTag = "JellyfishEnemy";
         protected string FoodpickupGameObjectTag = "FoodPickup";
         protected string OtherPlayerGameObjectTag = "TentacleTip";
+        protected string WallGameObjectTag = "BouncyWall";
 
         // HotInputs is a way to map input flags to ints, used by other classes to index into InputFlagArray
         public enum HotInputs

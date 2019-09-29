@@ -188,6 +188,23 @@ namespace SwordClash
         // ProjectileState hits many things
         public override void HandleCollisionByTag(string ObjectHitTag, UnityEngine.Rigidbody2D objectHit)
         {
+            if (ObjectHitTag == WallGameObjectTag)
+            {
+                // Bounce tentacle off in opposite direction
+                Debug.Log("Angel SwipeVelocityVector httting wall: " + SwipeVelocityVector.ToString());
+                Debug.Log("Angel SwipeAngle httting wall: " + SwipeAngle.ToString());
+
+                // Switch Velocity vector using reflection vector, https://math.stackexchange.com/questions/13261/how-to-get-a-reflection-vector
+                // Unity2D collider does not have surface normals, or contact point averaging, so I will hardcode the perpindicular "normal vector" to be UP for now
+                // rV = d - 2(d dotprodct n)*n
+                SwipeVelocityVector = SwipeVelocityVector - (2 * (Vector2.Dot(SwipeVelocityVector, Vector2.up)) * Vector2.up);
+            
+
+            // try just -neg flipping for angle?
+            SwipeAngle = SwipeAngle * -1;
+
+            }
+
             // Get stung and change sprite + recover
             if (ObjectHitTag == JellyfishEnemyGameObjectTag)
             {
