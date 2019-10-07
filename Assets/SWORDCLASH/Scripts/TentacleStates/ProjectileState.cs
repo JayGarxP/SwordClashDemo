@@ -190,19 +190,12 @@ namespace SwordClash
         {
             if (ObjectHitTag == WallGameObjectTag)
             {
-                // Bounce tentacle off in opposite direction
-                Debug.Log("Angel SwipeVelocityVector httting wall: " + SwipeVelocityVector.ToString());
-                Debug.Log("Angel SwipeAngle httting wall: " + SwipeAngle.ToString());
-
-                // Switch Velocity vector using reflection vector, https://math.stackexchange.com/questions/13261/how-to-get-a-reflection-vector
-                // Unity2D collider does not have surface normals, or contact point averaging, so I will hardcode the perpindicular "normal vector" to be UP for now
-                // rV = d - 2(d dotprodct n)*n
-                SwipeVelocityVector = SwipeVelocityVector - (2 * (Vector2.Dot(SwipeVelocityVector, Vector2.up)) * Vector2.up);
-            
-
-            // try just -neg flipping for angle?
-            SwipeAngle = SwipeAngle * -1;
-
+                // also makes swipe angle = - swipe angle for now as side effect.
+                ReflectTentacleVelocity(Vector2.up);
+            }
+            else if (ObjectHitTag == WallVerticalGameObjectTag)
+            {
+                ReflectTentacleVelocity(Vector2.left);
             }
 
             // Get stung and change sprite + recover
@@ -567,5 +560,23 @@ namespace SwordClash
         {
             //throw new System.NotImplementedException();
         }
+
+        // helper method will probably move later
+        // Bounce tentacle off in opposite direction
+        public void ReflectTentacleVelocity(Vector2 surfaceNormal)
+        {
+            //Debug.Log("Angel SwipeVelocityVector httting wall: " + SwipeVelocityVector.ToString());
+            //Debug.Log("Angel SwipeAngle httting wall: " + SwipeAngle.ToString());
+
+            // Switch Velocity vector using reflection vector, https://math.stackexchange.com/questions/13261/how-to-get-a-reflection-vector
+            // Unity2D collider does not have surface normals, or contact point averaging, so I will hardcode the perpindicular "normal vector" to be UP for now
+            // rV = d - 2(d dotprodct n)*n
+            SwipeVelocityVector = SwipeVelocityVector - (2 * (Vector2.Dot(SwipeVelocityVector, surfaceNormal)) * surfaceNormal);
+
+
+            // try just -neg flipping for angle?
+            SwipeAngle = SwipeAngle * -1;
+        }
+
     }
 }
