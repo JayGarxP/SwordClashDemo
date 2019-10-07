@@ -96,32 +96,6 @@ namespace SwordClash
             this.CurrentTentacleState = new CoiledState(this);
         }
 
-        
-
-
-        //// Bolt method called after SimulateController() sends commands based on Queued inputs.
-        //// Execute command is called on Owner (P1) and Controller (p1 & P2)
-        //// But IsServer check ensures this is Server Authoritative....
-        //public override void ExecuteCommand(Command command, bool resetState)
-        //{
-        //    TentacleInputCommand cmd = (TentacleInputCommand)command;
-
-        //    if (BoltNetwork.IsServer)
-        //    {
-        //        if (cmd.Input.CommandFromP2)
-        //        {
-        //            OpponentTCInstance.CurrentTentacleState.ProcessCommand(cmd);
-        //        }
-        //        else
-        //        {
-        //            this.CurrentTentacleState.ProcessCommand(cmd);
-        //        }
-        //    }
-
-
-
-        //}
-
         // Update is called once per frame
         void Update()
         {
@@ -293,6 +267,24 @@ namespace SwordClash
                 Time.time) * 0.01f)
                 , TentacleTipRB2D.position.y));
 
+        }
+
+        public void TT_ReelBackToStartPosition()
+        {
+            // Higher floating point scalar multiplier means faster MoveTowards()
+            float step = 0.98f * Time.fixedDeltaTime;
+            // Move towards start position, slowly.
+            TentacleTipRB2D.position = Vector2.MoveTowards(TentacleTipRB2D.position, TentacleReadyPosition, step);
+
+            float targetX = TentacleReadyPosition.x - TentacleTipRB2D.position.x;
+            float targetY = TentacleReadyPosition.y - TentacleTipRB2D.position.y;
+
+            // actually working pretty good! snaps right to correct position, but needs to be lerped over time to be more smooth.
+            float angle = (Mathf.Atan2(targetY, targetX) * Mathf.Rad2Deg) + 90f;
+
+            // TODO: copy gradual rotation method in BarrelRollin_rotate(degrees) OR find a suitable lerp / slerp to make the rotation smooth.
+
+            TentacleTipRB2D.rotation = angle;
         }
 
         // Return True means that yes, the tentacle tip is near start position

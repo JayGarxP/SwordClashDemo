@@ -233,20 +233,23 @@ namespace SwordClash
             StringRep = "Projectile";
 
             SPTentaControllerInstance.TT_MoveTentacleTip(SwipeVelocityVector, SwipeAngle);
-            // LoopTicks needed in singleplayer ProcessState()???
-            //GameLoopTicksBeforeSync++;
+            
 
             if (JustCollidedWithFood)
             {
                 // Change state to HoldingFood and give reference to which food hit in constructor
                 SPTentaControllerInstance.CurrentTentacleState = new HoldingFoodState(this, SPTentaControllerInstance, FoodHitRef);
 
-                Debug.Log("Chris Changing to HoldingFoodState... .... ....");
+                //Debug.Log("Chris Changing to HoldingFoodState... .... ....");
             }
             else if (JustStung)
             {
                 SPTentaControllerInstance.CurrentTentacleState = new RecoveryState(this, SPTentaControllerInstance);
-                Debug.Log("Chris Changing to RecoveryState... .... ....");
+               // Debug.Log("Chris Changing to RecoveryState... .... ....");
+            }else if (InputFlagArray[(int)HotInputs.ReelBack])
+            {
+                short voluntaryReelBack = 1;
+                SPTentaControllerInstance.CurrentTentacleState = new RecoveryState(this, SPTentaControllerInstance, voluntaryReelBack);
             }
 
 
@@ -562,7 +565,8 @@ namespace SwordClash
         }
 
         // helper method will probably move later
-        // Bounce tentacle off in opposite direction
+        // Bounce tentacle off in opposite direction same speed "successful bounce" from state diagram
+        // later will add a 'crumple' wall that scrunches you and slows you down if you don't bounce off it (slime vs. steel)
         public void ReflectTentacleVelocity(Vector2 surfaceNormal)
         {
             //Debug.Log("Angel SwipeVelocityVector httting wall: " + SwipeVelocityVector.ToString());

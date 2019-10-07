@@ -8,6 +8,9 @@ namespace SwordClash
 {
     class RecoveryState : TentacleState
     {
+        // 1 means voluntary 0 means involuntary (stung)
+        private short ReelBackStatus;
+
         public RecoveryState(TentacleController tc) : base(tc)
         {
             OnStateEnter();
@@ -28,6 +31,12 @@ namespace SwordClash
             OnStateEnter();
 
         }
+        // not actually using oldstate???
+        public RecoveryState(TentacleState oldState, SinglePlayerTentaController SPTC, short voluntaryReelBack) : this(oldState, SPTC)
+        {
+            // base constructor is called first, then : this() then the one this comment is in right now.
+            this.ReelBackStatus = voluntaryReelBack;
+        }
 
         public override void HandleCollisionByTag(string ObjectHitTag, Rigidbody2D ObjectHitRB2D)
         {
@@ -36,22 +45,23 @@ namespace SwordClash
 
         public override void OnStateEnter()
         {
+            // defaul reel back status is 0; involuntary; will need to rework these disaster constructors later.
+            ReelBackStatus = 0;
+
             // change sprite to deflated
             if (TentaControllerInstance != null)
             {
+                // to help multiplayer sprite darken
                 TentaControllerInstance.PleaseDarkenTentacleSprite();
 
             }
-            else
-            {
-                SPTentaControllerInstance.PleaseDarkenTentacleSprite();
-
-            }
+          
 
         }
 
         public override void OnStateExit()
         {
+            ReelBackStatus = 0;
             LowerAllInputFlags();
         }
 
@@ -65,12 +75,22 @@ namespace SwordClash
 
             }
             else
-            {  
-                // single player logic solution for now, will change later after project symposium
-                SPTentaControllerInstance.PleaseDarkenTentacleSprite();
+            {
+                // stung, wiggle back slowly.
+                if (ReelBackStatus == 0)
+                {
+                    // single player logic solution for now
+                    SPTentaControllerInstance.PleaseDarkenTentacleSprite();
 
-                // move towards start position slowly, while wiggling
-                SPTentaControllerInstance.TT_WiggleBackToStartPosition();
+                    // move towards start position slowly, while wiggling
+                    SPTentaControllerInstance.TT_WiggleBackToStartPosition();
+                } else if (ReelBackStatus == 1)
+                {
+                    // voluntarily reeled in, move back fast but collide with things
+                    SPTentaControllerInstance.TT_ReelBackToStartPosition();
+
+                }
+              
 
                 // Check if made it home safe
                 if (SPTentaControllerInstance.CheckifTTAtStartPosition())

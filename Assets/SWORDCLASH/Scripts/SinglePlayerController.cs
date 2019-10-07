@@ -77,68 +77,6 @@ namespace SwordClash
                 }
             }
 
-            //////////////////////old multiplayer only logic below
-            //////////////////////////////////////////////////////////
-            // Get references to player one TT and p2 TentacleTip
-            // Make player two orange
-            // Flip da board for P2 so it lookin red100
-
-            //if (TTInSceneCount != 2)
-            //{
-
-            //    var tentaclesInScene = GameObject.FindGameObjectsWithTag("TentacleTip");
-
-            //    if (tentaclesInScene.Length == 2)
-            //    {
-            //        //Debug.Log("@@@@ TWO TENTS IN SCENE @@@@");
-            //        //Debug.Log("@@ my ID: " + gameObject.GetInstanceID().ToString());
-
-            //        // If player two object is intantiated, we are player2
-            //        var Player2DummyObject = GameObject.FindWithTag("Player2");
-            //        if (Player2DummyObject != null && Player2DummyObject.tag != "/")
-            //        {
-            //            AmIPlayerTwo = true;
-            //        }
-            //        // This is working!!!! YAYAY
-            //        //Debug.Log("AmIPlayerTwo: " + AmIPlayerTwo.ToString());
-
-            //        foreach (var TENT in tentaclesInScene)
-            //        {
-            //            //OpponentTentacleGO = TENT;
-            //            var TCInstance = TENT.GetComponent<TentacleController>();
-            //            //Debug.Log("@@ TENTA ID: " + TENT.GetInstanceID().ToString());
-            //            //Debug.Log("@@ WhichPlayerIBe: " + TCInstance.WhichPlayerIBe.ToString());
-
-            //            if (TentaController == null)
-            //            {
-
-
-            //                if (TCInstance.WhichPlayerIBe == 1 && AmIPlayerTwo == false)
-            //                {
-            //                    //We are player 1
-            //                    Debug.Log("$$$ I am Player 1 $$$");
-            //                    TentaController = TCInstance;
-            //                    TTInSceneCount = 2;
-
-            //                }
-            //                else if (TCInstance.WhichPlayerIBe == 2 && AmIPlayerTwo == true)
-            //                {
-            //                    //We are player 2
-            //                    Debug.Log("$ I am Player 22222 $");
-            //                    TentaController = TCInstance;
-            //                    TTInSceneCount = 2;
-
-            //                    FlipCameraUpsideDown();
-            //                }
-            //            }
-
-            //        }
-            //    }
-            //}
-
-
-
-
         } // end unity update
 
 
