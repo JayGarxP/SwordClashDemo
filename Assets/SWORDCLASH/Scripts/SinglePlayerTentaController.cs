@@ -153,6 +153,7 @@ namespace SwordClash
             TentacleTipRB2D.MovePosition(TentacleTipRB2D.position + swipePositionVelocity * Time.fixedDeltaTime);
             //Set in PlayerController, updated here, consider adding if(bool angleSet), here it doesn't need to change, not sure which is faster...
             TentacleTipRB2D.rotation = swipeAngle;
+            // TODO: consider seperataitng rotation from position in movement
         }
 
         public void TT_MoveTentacleTip_WhileBroll(Vector2 swipePositionVelocity)
@@ -204,18 +205,42 @@ namespace SwordClash
             return whereToJumpTo;
         }
 
-       
 
+
+
+        //// For now is x position '-' instead of rights '+'; but juking may change in future, so leave as
+        //// two seperate methods.
+        //public bool TT_JumpSideways(Vector2 endOfJumpPosition)
+        //{
+        //    //Vector2 whereToJumpTo = new Vector2(TentacleTipRB2D.position.x - TTJukePosLeftAmount, TentacleTipRB2D.position.y);
+
+        //    TentacleTip_JumpSideways(endOfJumpPosition);
+
+        //    bool HaventReachedEndJumpPosition = true;
+
+        //    if (TentacleTipRB2D.position == endOfJumpPosition)
+        //    {
+        //        HaventReachedEndJumpPosition = false;
+        //    }
+
+        //    return HaventReachedEndJumpPosition;
+        //}
+        //private void TentacleTip_JumpSideways(Vector2 whereToJumpTo)
+        //{
+        //    // RB2D.position means teleport, which means a discrete collision can be skipped over...
+        //    TentacleTipRB2D.position = Vector2.MoveTowards(TentacleTipRB2D.position, whereToJumpTo, Time.fixedDeltaTime * TTJumpSpeed);
+
+        //}
 
         // For now is x position '-' instead of rights '+'; but juking may change in future, so leave as
         // two seperate methods.
         public bool TT_JumpSideways(Vector2 endOfJumpPosition)
         {
-            //Vector2 whereToJumpTo = new Vector2(TentacleTipRB2D.position.x - TTJukePosLeftAmount, TentacleTipRB2D.position.y);
 
-            TentacleTip_JumpSideways(endOfJumpPosition);
+            TentacleTip_MoveSideways(Vector2.left);
 
             bool HaventReachedEndJumpPosition = true;
+            bool CancelJump = false;
 
             if (TentacleTipRB2D.position == endOfJumpPosition)
             {
@@ -224,12 +249,28 @@ namespace SwordClash
 
             return HaventReachedEndJumpPosition;
         }
+
+        private void TentacleTip_MoveSideways(Vector2 velocity)
+        {
+            // Moveposition moves gradually and does trigger discrete collisions
+            TentacleTipRB2D.MovePosition(TentacleTipRB2D.position + velocity * Time.fixedDeltaTime * TTJumpSpeed);
+        }
+
         private void TentacleTip_JumpSideways(Vector2 whereToJumpTo)
         {
-
+            // RB2D.position means teleport, which means a discrete collision can be skipped over...
             TentacleTipRB2D.position = Vector2.MoveTowards(TentacleTipRB2D.position, whereToJumpTo, Time.fixedDeltaTime * TTJumpSpeed);
 
         }
+
+        public bool TT_HitPosition(Vector2 Position)
+        {
+            return (TentacleTipRB2D.position == Position);
+            
+        }
+
+
+
 
         public void PleaseStingTentacleSprite()
         {
