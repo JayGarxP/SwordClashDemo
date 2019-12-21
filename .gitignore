@@ -48,3 +48,6 @@ sysinfo.txt
 # Libraries
 *.dll
 /user.keystore
+
+# Google Play Store
+GPGSIds.cs
