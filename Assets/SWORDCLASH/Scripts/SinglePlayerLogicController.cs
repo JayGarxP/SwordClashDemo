@@ -25,6 +25,8 @@ namespace SwordClash
         // reference to popup win message
         public Image happySquidPopupImage;
 
+        public bool VerboseGameStateTextON;
+
         private GameObject UIManager;
         private SwordClashUIManager SCUIManager;
 
@@ -124,8 +126,10 @@ namespace SwordClash
         // Update is called once per frame
         void Update()
         {
-
-            PrintPlayerTable();
+            if (VerboseGameStateTextON)
+            {
+                PrintPlayerTable();
+            }
 
 
             if (SCFoodController == null)
