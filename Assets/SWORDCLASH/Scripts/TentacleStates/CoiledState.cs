@@ -120,10 +120,13 @@ namespace SwordClash
                 // false parameter to jump RIGHT, true parameter to jump LEFT
                 WhereJumpingTo = SPTentaControllerInstance.TT_CalculateEndJumpPosition(false);
                 // Set CurrentlyJuking to true if still need to keep moving, when done juking set CurrentlyJuking to false
-                CurrentlyJuking = SPTentaControllerInstance.TT_JumpSideways(WhereJumpingTo);
+                CurrentlyJuking = ! SPTentaControllerInstance.TT_MoveSideWays_TillEnd(WhereJumpingTo, Vector2.right);
 
 
-                InputFlagArray[(int)HotInputs.RudderRight] = false;             
+                InputFlagArray[(int)HotInputs.RudderRight] = false;
+
+                Debug.Log("MARIA RudderRight reached in Coiled State: " + WhereJumpingTo);
+
             }
             else if (InputFlagArray[(int)HotInputs.RudderLeft])
             {
@@ -132,10 +135,12 @@ namespace SwordClash
                 // false parameter to jump RIGHT, true parameter to jump LEFT
                 WhereJumpingTo = SPTentaControllerInstance.TT_CalculateEndJumpPosition(true);
                 // Set CurrentlyJuking to true if still need to keep moving, when done juking set CurrentlyJuking to false
-                CurrentlyJuking = SPTentaControllerInstance.TT_JumpSideways(WhereJumpingTo);
+                CurrentlyJuking = ! SPTentaControllerInstance.TT_MoveSideWays_TillEnd(WhereJumpingTo, Vector2.left);
 
 
                 InputFlagArray[(int)HotInputs.RudderLeft] = false;
+
+                Debug.Log("MARIA RddrLEFT rchd n Coiled State: " + WhereJumpingTo);
             }
         }
 

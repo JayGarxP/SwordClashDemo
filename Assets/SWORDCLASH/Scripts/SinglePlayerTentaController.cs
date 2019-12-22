@@ -191,7 +191,7 @@ namespace SwordClash
         {
             Vector2 whereToJumpTo;
 
-            if (YesJumpingLeft)
+            if (YesJumpingLeft == true)
             {
                 whereToJumpTo = new Vector2(TentacleTipRB2D.position.x - TTJukePosLeftAmount, TentacleTipRB2D.position.y);
 
@@ -200,54 +200,23 @@ namespace SwordClash
             {
                 // jumping right
                 whereToJumpTo = new Vector2(TentacleTipRB2D.position.x + TTJukePosRightAmount, TentacleTipRB2D.position.y);
+                Debug.Log("MARIA jumping right EndJumpPos ");
             }
 
             return whereToJumpTo;
         }
 
 
-
-
-        //// For now is x position '-' instead of rights '+'; but juking may change in future, so leave as
-        //// two seperate methods.
-        //public bool TT_JumpSideways(Vector2 endOfJumpPosition)
-        //{
-        //    //Vector2 whereToJumpTo = new Vector2(TentacleTipRB2D.position.x - TTJukePosLeftAmount, TentacleTipRB2D.position.y);
-
-        //    TentacleTip_JumpSideways(endOfJumpPosition);
-
-        //    bool HaventReachedEndJumpPosition = true;
-
-        //    if (TentacleTipRB2D.position == endOfJumpPosition)
-        //    {
-        //        HaventReachedEndJumpPosition = false;
-        //    }
-
-        //    return HaventReachedEndJumpPosition;
-        //}
-        //private void TentacleTip_JumpSideways(Vector2 whereToJumpTo)
-        //{
-        //    // RB2D.position means teleport, which means a discrete collision can be skipped over...
-        //    TentacleTipRB2D.position = Vector2.MoveTowards(TentacleTipRB2D.position, whereToJumpTo, Time.fixedDeltaTime * TTJumpSpeed);
-
-        //}
-
-        // For now is x position '-' instead of rights '+'; but juking may change in future, so leave as
-        // two seperate methods.
-        public bool TT_JumpSideways(Vector2 endOfJumpPosition)
+        public bool TT_MoveSideWays_TillEnd(Vector2 endOfJumpPosition, Vector2 direction)
         {
+            
+            TentacleTip_MoveSideways(direction);
 
-            TentacleTip_MoveSideways(Vector2.left);
+            //bool CancelJump = false;
 
-            bool HaventReachedEndJumpPosition = true;
-            bool CancelJump = false;
-
-            if (TentacleTipRB2D.position == endOfJumpPosition)
-            {
-                HaventReachedEndJumpPosition = false;
-            }
-
-            return HaventReachedEndJumpPosition;
+            // TRUE means the endOfJumpPosition has been reached
+            return (TentacleTipRB2D.position == endOfJumpPosition);
+            
         }
 
         private void TentacleTip_MoveSideways(Vector2 velocity)
