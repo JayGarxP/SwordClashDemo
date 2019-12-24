@@ -44,12 +44,13 @@ namespace SwordClash
             RudderLeft = 1,
             BarrelRoll = 2,
             ReelBack = 3,
-            LaunchSwipe = 4
+            LaunchSwipe = 4,
+            DragSway = 5 // Use boat terms  (yaw, etc.) and add to END of this enum in future.
         };
 
         // Inputs received each frame of physics FixedUpdate (for now)
         protected bool[] InputFlagArray;
-
+        
         // Not property??? JP comes from CPP you see
         public bool[] GetInputFlagArray()
         {
