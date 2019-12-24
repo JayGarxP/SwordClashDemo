@@ -82,7 +82,8 @@ namespace SwordClash
 
         }
 
-        // TODO: massage this method to eventually move DAT MF THANG in coiled state.
+        // TODO: Make this method use callbacks in SPTC and integrated with TS state machine; only drag in coiled state;
+        // juking; projectile.
         private void LongPress_StateUpdated(DigitalRubyShared.GestureRecognizer gesture)
         {
           
