@@ -8,6 +8,8 @@ namespace SwordClash
     public class SinglePlayerController : MonoBehaviour
     {
         #region EDITOR_FIELDS
+        public bool DebugShowTouches;
+        public float DragInitSeconds;
         public float swipeCircleRayCastRadius; //~10.0f
 
         //TODO: need more fine-grained control than just dividend, need clamp and smoothing + better gesture properties to not have deadzones!
@@ -77,44 +79,11 @@ namespace SwordClash
             //AmIPlayerTwo = false;
 
             ////////////////////// SHOW TOUCHES
-            FingersScript.Instance.ShowTouches = true;
+            FingersScript.Instance.ShowTouches = DebugShowTouches;
             ///////////////////
 
         }
 
-        // TODO: Make this method use callbacks in SPTC and integrated with TS state machine; only drag in coiled state;
-        // juking; projectile.
-        private void LongPress_StateUpdated(DigitalRubyShared.GestureRecognizer gesture)
-        {
-          
-            if (gesture.State == GestureRecognizerState.Began)
-            {
-                Vector3 gestureWorldPos = Camera.main.ScreenToWorldPoint(new Vector3(gesture.FocusX, gesture.FocusY, 0.0f));
-               
-            //    // apply an offset from the center of the card so it drags from wherever it was touched on the card
-                dragOffset = TentaController.TentacleTip.transform.position - Camera.main.ScreenToWorldPoint(new Vector3(gesture.FocusX, gesture.FocusY, 0.0f));
-                dragOffset.z = 0.0f;
-
-                startDragPosition = TentaController.TentacleTip.transform.position;
-            }
-            else if (gesture.State == GestureRecognizerState.Executing)
-            {
-                // drag the card
-                Vector3 dragCurrent = Camera.main.ScreenToWorldPoint(new Vector3(gesture.FocusX,
-                    gesture.FocusY, 0.0f));
-                dragCurrent.z = TentaController.TentacleTip.transform.position.z;
-
-                TentaController.TentacleTip.transform.position = 
-                    new Vector3(dragCurrent.x + dragOffset.x, startDragPosition.y, dragCurrent.z);
-
-            }
-            else
-            {
-                // if not begin or execute state, null out the dragging card
-                // reset gesture, the swipe away finishes the gesture
-                //gesture.Reset(); // ERROR causes STack Overflow bug by resetting too often
-            }
-        }
 
         ////FixedUpdate is called at a fixed interval and is independent of frame rate. Put physics code here.
         //void FixedUpdate()
@@ -131,6 +100,8 @@ namespace SwordClash
                 if (TCInstance != null)
                 {
                    TentaController = TCInstance;
+                    // TODO: can have a null check start() method here that starts event publishers AFTER TT found in scene
+                   TentaController.SetDrawSwipeAbility(longPress);
                 }
             }
 
@@ -140,6 +111,8 @@ namespace SwordClash
         // after MonoBehavior.Update(); see https://docs.unity3d.com/Manual/ExecutionOrder.html
         private void LateUpdate()
         {
+            // TODO: Barrel roll can be initiated by just waggling back and forth FAST, don't need to do two lil circles
+            //      This may actually be more fun and does not need to change however.
             ImageGestureImage match = ImageReconzrScript.CheckForImageMatch();
             if (match != null && match.Name == "Circle")
             {
@@ -150,6 +123,41 @@ namespace SwordClash
                 ImageReconzrScript.ResetMatchedImage();
             }
 
+        }
+
+
+        // TODO: Make this method use callbacks in SPTC and integrated with TS state machine; only drag in coiled state;
+        // juking; projectile. ALSO look into allowing simultaneous execution with new single swipe gesture
+        private void LongPress_StateUpdated(DigitalRubyShared.GestureRecognizer gesture)
+        {
+
+            if (gesture.State == GestureRecognizerState.Began)
+            {
+                Vector3 gestureWorldPos = Camera.main.ScreenToWorldPoint(new Vector3(gesture.FocusX, gesture.FocusY, 0.0f));
+
+                //    // apply an offset from the center of the card so it drags from wherever it was touched on the card
+                dragOffset = TentaController.TentacleTip.transform.position - Camera.main.ScreenToWorldPoint(new Vector3(gesture.FocusX, gesture.FocusY, 0.0f));
+                dragOffset.z = 0.0f;
+
+                startDragPosition = TentaController.TentacleTip.transform.position;
+            }
+            else if (gesture.State == GestureRecognizerState.Executing)
+            {
+                // drag the card
+                Vector3 dragCurrent = Camera.main.ScreenToWorldPoint(new Vector3(gesture.FocusX,
+                    gesture.FocusY, 0.0f));
+                dragCurrent.z = TentaController.TentacleTip.transform.position.z;
+
+                TentaController.TTTeleportPosition(
+                    new Vector3(dragCurrent.x + dragOffset.x, startDragPosition.y, dragCurrent.z));
+
+            }
+            else
+            {
+                // if not begin or execute state, null out the dragging card
+                // reset gesture, the swipe away finishes the gesture
+                //gesture.Reset(); // ERROR causes STack Overflow bug by resetting too often
+            }
         }
 
         // Call create swipe gesture methods or all-in-one swipe gesture here
@@ -168,7 +176,9 @@ namespace SwordClash
             // create a long press gesture to drag and swipe cards around
             longPress = new LongPressGestureRecognizer();
             longPress.StateUpdated += LongPress_StateUpdated;
+            longPress.MinimumDurationSeconds = DragInitSeconds;
             FingersScript.Instance.AddGesture(longPress);
+            
         }
 
         private void CreateTapGesture()
@@ -351,6 +361,8 @@ namespace SwordClash
             // as quick way to tweak the editor fields.
 
             // Default values of editor fields:
+            DebugShowTouches = false;
+            DragInitSeconds = 0.5f;
             UPSwipeGestureDirectionThreshold = 1;
             LeftRightDownSwipeGestureDirectionThreshold = 3;
             DoubleTapTimeThreshold = 1;

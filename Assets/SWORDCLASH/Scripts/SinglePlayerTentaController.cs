@@ -46,7 +46,7 @@ namespace SwordClash
 
         // Gang of Four State pattern, state machine for inputs allowed during tentacle movement
         public TentacleState CurrentTentacleState { get; set; }
-
+        private DigitalRubyShared.GestureRecognizer DrawSwipeBroadcaster;
         private JellyfishController JelFishController;
 
         // for training mode 'ghosts', possibly save last input swipe?
@@ -327,13 +327,11 @@ namespace SwordClash
             // Move towards starting position each frame
             TentacleTipRB2D.position = Vector2.MoveTowards(TentacleTipRB2D.position, TentacleEatingPosition, Time.fixedDeltaTime);
             moveMeAsWell.position = Vector2.MoveTowards(moveMeAsWell.position, TentacleEatingPosition, Time.fixedDeltaTime);
+        }
 
-
-            //// Move towards starting position each frame
-            //TentacleTipRB2D.position = Vector2.MoveTowards(TentacleTipRB2D.position, TentacleEatingPosition, Time.fixedDeltaTime / 2.0f);
-            //moveMeAsWell.position = Vector2.MoveTowards(moveMeAsWell.position, TentacleEatingPosition, Time.fixedDeltaTime / 2.0f);
-
-
+        public void TTTeleportPosition(Vector3 unityWorldCoordPosition)
+        {
+            this.TentacleTip.transform.position = unityWorldCoordPosition;
         }
 
         public void TTPickupFood(Rigidbody2D foodTouching)
@@ -419,6 +417,20 @@ namespace SwordClash
 
             // default sprite color in Unity is white, undoing black burnt sprite from being zapped.
             TTSpriteRenderer.color = Color.white;
+        }
+
+        public void SetDrawSwipeAbility(DigitalRubyShared.GestureRecognizer DrawSwipeBroadcaster)
+        {
+            this.DrawSwipeBroadcaster = DrawSwipeBroadcaster;
+        }
+
+        public void DisableDragSwipeGesture()
+        {
+            this.DrawSwipeBroadcaster.Enabled = false;
+        }
+        public void EnableDragSwipeGesture()
+        {
+            this.DrawSwipeBroadcaster.Enabled = true;
         }
 
         // Monobehavior reset when component is first dropped into scene, set default editor fields here

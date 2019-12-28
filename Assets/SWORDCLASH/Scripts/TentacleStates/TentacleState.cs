@@ -99,6 +99,9 @@ namespace SwordClash
 
         public TentacleState(SinglePlayerTentaController stc)
         {
+            //TODO: possible to call stc.OnStateExit() HERE in constructor!?!?!?
+            // could simplify a lot of code :)
+
             SPTentaControllerInstance = stc;
             IsCurrentlyProcessing = false;
             AmIPlayerTwo = false;

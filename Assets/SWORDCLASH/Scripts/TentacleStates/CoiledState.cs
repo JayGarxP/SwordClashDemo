@@ -50,6 +50,9 @@ namespace SwordClash
             IsCurrentlyProcessing = false;
             GameLoopTicksBeforeSync = 0;
 
+            // Allow drag gesture to fire in SinglePlayerController
+            SPTentaControllerInstance.EnableDragSwipeGesture();
+
             // Reset position and sprite of tentacle tip
             if (TentaControllerInstance != null)
             {
@@ -69,6 +72,11 @@ namespace SwordClash
 
         public override void OnStateExit()
         {
+            // Disable drag gesture.
+            SPTentaControllerInstance.DisableDragSwipeGesture();
+
+            LowerAllInputFlags();
+
             //StringRep = "Unknown";
             //var stateString = TentaControllerInstance.SetBoltTentaStateString("Unknown");
             //Debug.Log("Chris    StateString is now: " + stateString);
@@ -101,14 +109,13 @@ namespace SwordClash
 
                 var SwipeAngle = SPTentaControllerInstance.TTMoveRotationAngleRequested;
 
+                // probably should connect this to constructor some how
+                OnStateExit();
+
                 //actually move tentacle here:
                 SPTentaControllerInstance.CurrentTentacleState = new ProjectileState(this, SPTentaControllerInstance,
                          UpSwipe,
                          SwipeAngle);
-
-
-                // Ok to directly set this like this???
-                InputFlagArray[(int)HotInputs.LaunchSwipe] = false;
 
             }
 
