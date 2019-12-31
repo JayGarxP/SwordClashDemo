@@ -22,6 +22,10 @@ namespace SwordClash
 
         // Might put enum direction lookup here later to have an oldschool compass NE SW D-pad way to juke
 
+        private bool JustCollidedWithFood;
+        private bool JustCollidedWithWall;
+        private bool JustCollidedWithWallVert;
+        private Rigidbody2D FoodHitRef;
 
         public JukingState(TentacleController tc) : base(tc)
         {
@@ -56,15 +60,47 @@ namespace SwordClash
 
         public override void HandleCollisionByTag(string ObjectHitTag, Rigidbody2D ObjectHitRB2D)
         {
-            //throw new NotImplementedException();
+            if (ObjectHitTag == WallGameObjectTag)
+            {
+
+                JustCollidedWithWall = true;
+            }
+            else if (ObjectHitTag == WallVerticalGameObjectTag)
+            {
+                JustCollidedWithWallVert = true;
+            }
+            else if (ObjectHitTag == JellyfishEnemyGameObjectTag)
+            {
+                // Play oregon duck whoop cant catch me sound effect
+                SoundManagerScript.PlaySound("miss");
+
+            }
+            else if (ObjectHitTag == FoodpickupGameObjectTag)
+            {
+                JustCollidedWithFood = true;
+                FoodHitRef = ObjectHitRB2D;
+            }
+
+
+
+
+            //TODO: collision handling and wall bounce support; restore jukes etc.
+
+            // Consider looking up having debug constants in Unity;
+            // can i do that with a global deltatime modifier or having a simple reset preset but for debug
+
         }
 
         public override void OnStateEnter()
         {
             LowerAllInputFlags();
+            JustCollidedWithFood = false ;
+         JustCollidedWithWall = false;
+        JustCollidedWithWallVert = false;
+        Rigidbody2D FoodHitRef = null;
 
-            // Set travel time of JUKE
-            JukeTravelTime = SPTentaControllerInstance.TTJukeTravelTime;
+        // Set travel time of JUKE
+        JukeTravelTime = SPTentaControllerInstance.TTJukeTravelTime;
             CurrentJukeTravelTime = 0.0f;
 
         }
@@ -82,7 +118,25 @@ namespace SwordClash
         {
             // Always move every frame.
             SPTentaControllerInstance.TT_MoveTentacleTip(JukeDirection, JukeAngle);
-           
+
+
+            // drop a frame input processing if hit wall, so players can't glitch past it.
+            if (JustCollidedWithWall)
+            {
+                OnWallCollision();
+                // also makes swipe angle = - swipe angle for now as side effect.
+                ReflectTentacleVelocity(Vector2.up);
+                JustCollidedWithWall = false;
+
+
+            }
+            else if (JustCollidedWithWallVert)
+            {
+                OnWallCollision();
+
+                ReflectTentacleVelocity(Vector2.left);
+                JustCollidedWithWallVert = false;
+            }
 
 
             // increment distance traveled
@@ -128,6 +182,32 @@ namespace SwordClash
                 // set angle here too 
 
             }
+
+            // juke should move faster
+            JukeDirection *= SPTentaControllerInstance.UPswipeSpeedModifier * 1.5f;
+
+        }
+
+        // Bounce tentacle off in opposite direction same speed "successful bounce" from state diagram
+        // later will add a 'crumple' wall that scrunches you and slows you down if you don't bounce off it (slime vs. steel)
+        public void ReflectTentacleVelocity(Vector2 surfaceNormal)
+        {
+
+            JukeDirection = CalcVelocityVectorReflection(JukeDirection, surfaceNormal);
+
+            // try just -neg flipping for angle?
+            JukeAngle = JukeAngle * -1;
+        }
+        // TODO: refactor these to have additional penalties for crashing/juking INTO a wall and reward for juking away / swiping away from wall
+        private void OnWallCollision()
+        {
+            // No need to exit juking state for now...
+            // JUKING its own state, so if you juke into a wall, you get extra crumpled.
+
+            LowerAllInputFlags(); // drop frame of human input
+
+            //TODO: display  EXPLOSION animation and sound effect enter recovery mode (burnt sprite)
+
         }
 
         public override void ProcessCommandFromPlayerTwo(TentacleInputCommand command)

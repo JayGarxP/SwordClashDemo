@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UnityEngine;
 
 namespace SwordClash
 {
@@ -186,6 +187,17 @@ namespace SwordClash
                 yesFlagLowered = true;
             }
             return yesFlagLowered;
+        }
+
+        public Vector2 CalcVelocityVectorReflection(Vector2 inputVector, Vector2 surfaceNormal)
+        {
+            /// rV = d - 2(d dotprodct n)*n
+
+            // Switch Velocity vector using reflection vector, https://math.stackexchange.com/questions/13261/how-to-get-a-reflection-vector
+            // Unity2D collider does not have surface normals, or contact point averaging, so pass the perpindicular "normal vector" in as parameter
+
+             return inputVector - (2 * (Vector2.Dot(inputVector, surfaceNormal)) * surfaceNormal);
+
         }
 
         // Consider making this a virtual method that gets called by 

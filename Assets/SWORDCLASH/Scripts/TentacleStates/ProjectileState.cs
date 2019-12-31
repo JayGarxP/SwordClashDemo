@@ -10,7 +10,7 @@ namespace SwordClash
 
         private Vector2 SwipeVelocityVector;
         private float SwipeAngle;
-        
+
         private short JukeCount;
         private short BarrelRollCount;
         private int GameLoopTicksBeforeSync;
@@ -19,7 +19,7 @@ namespace SwordClash
         private bool JustCollidedWithWall;
         private bool JustCollidedWithWallVert;
         private bool JustStung;
-        
+
         private Rigidbody2D FoodHitRef;
 
         /// <summary>  
@@ -248,7 +248,7 @@ namespace SwordClash
                 // also makes swipe angle = - swipe angle for now as side effect.
                 ReflectTentacleVelocity(Vector2.up);
                 JustCollidedWithWall = false;
-               
+
 
             }
             else if (JustCollidedWithWallVert)
@@ -260,7 +260,7 @@ namespace SwordClash
             }
             else
             {
-          
+
                 if (JustCollidedWithFood)
                 {
                     // Change state to HoldingFood and give reference to which food hit in constructor
@@ -280,34 +280,34 @@ namespace SwordClash
                 }
 
 
-                    // Check if barrel roll flag and haven't already brolled too much
-                    if ((BarrelRollCount < SPTentaControllerInstance.TimesCanBarrelRoll) &&
-                        (InputFlagArray[(int)HotInputs.BarrelRoll]))
+                // Check if barrel roll flag and haven't already brolled too much
+                if ((BarrelRollCount < SPTentaControllerInstance.TimesCanBarrelRoll) &&
+                    (InputFlagArray[(int)HotInputs.BarrelRoll]))
+                {
+                    SPTentaControllerInstance.CurrentTentacleState = new BarrelRollState(this, SPTentaControllerInstance,
+                        SwipeVelocityVector,
+                        SwipeAngle, BarrelRollCount, JukeCount);
+
+                }
+
+                // check if tapping after checking if tapped out; in future make wall bounces restore one juke?
+                if (JukeCount < SPTentaControllerInstance.TTTimesAllowedToJuke)
+                {
+
+                    // if juke - right input received
+                    if (InputFlagArray[(int)HotInputs.RudderRight])
                     {
-                        SPTentaControllerInstance.CurrentTentacleState = new BarrelRollState(this, SPTentaControllerInstance,
-                            SwipeVelocityVector,
-                            SwipeAngle, BarrelRollCount, JukeCount);
+                        InputFlagArray[(int)HotInputs.RudderRight] = false;
+                        ++JukeCount;
 
-                    }
-
-                    // check if tapping after checking if tapped out; in future make wall bounces restore one juke?
-                    if (JukeCount < SPTentaControllerInstance.TTTimesAllowedToJuke)
-                    {
-
-                        // if juke - right input received
-                        if (InputFlagArray[(int)HotInputs.RudderRight])
-                        {
-                            InputFlagArray[(int)HotInputs.RudderRight] = false;
-                            ++JukeCount;
-
-                        SPTentaControllerInstance.CurrentTentacleState = new JukingState(this, 
+                        SPTentaControllerInstance.CurrentTentacleState = new JukingState(this,
                             SPTentaControllerInstance,
                             SwipeVelocityVector,
                             SwipeAngle, BarrelRollCount, JukeCount, 2);
 
                     }
-                        else if (InputFlagArray[(int)HotInputs.RudderLeft])
-                        {
+                    else if (InputFlagArray[(int)HotInputs.RudderLeft])
+                    {
 
                         InputFlagArray[(int)HotInputs.RudderLeft] = false;
                         ++JukeCount;
@@ -317,15 +317,15 @@ namespace SwordClash
                       SwipeVelocityVector,
                       SwipeAngle, BarrelRollCount, JukeCount, 1);
 
-                       
-                        }
 
                     }
 
+                }
 
-               
-                   
-                
+
+
+
+
 
 
 
@@ -590,34 +590,22 @@ namespace SwordClash
             //throw new System.NotImplementedException();
         }
 
-        // helper method will probably move later
         // Bounce tentacle off in opposite direction same speed "successful bounce" from state diagram
         // later will add a 'crumple' wall that scrunches you and slows you down if you don't bounce off it (slime vs. steel)
         public void ReflectTentacleVelocity(Vector2 surfaceNormal)
         {
-            //Debug.Log("Angel SwipeVelocityVector httting wall: " + SwipeVelocityVector.ToString());
-            //Debug.Log("Angel SwipeAngle httting wall: " + SwipeAngle.ToString());
 
-            // Switch Velocity vector using reflection vector, https://math.stackexchange.com/questions/13261/how-to-get-a-reflection-vector
-            // Unity2D collider does not have surface normals, or contact point averaging, so I will hardcode the perpindicular "normal vector" to be UP for now
-            // rV = d - 2(d dotprodct n)*n
-            SwipeVelocityVector = SwipeVelocityVector - (2 * (Vector2.Dot(SwipeVelocityVector, surfaceNormal)) * surfaceNormal);
-
+            SwipeVelocityVector = CalcVelocityVectorReflection(SwipeVelocityVector, surfaceNormal);
 
             // try just -neg flipping for angle?
             SwipeAngle = SwipeAngle * -1;
         }
 
         private void OnWallCollision()
-            {
+        {
             // No need to exit juking state for now...
-            //TODO: in future make JUKING its own state, so if you juke into a wall, you get extra crumpled.
-            //if (CurrentlyJuking)
-            //{
-            //    //SwipeVelocityVector = SwipeVelocityVector_before;
-            //    CurrentlyJuking = false;
-            //}
-           
+            // JUKING its own state, so if you juke into a wall, you get extra crumpled.
+
             LowerAllInputFlags(); // drop frame of human input
 
         }
