@@ -37,6 +37,9 @@ namespace SwordClash
         //3 means 3 taps can happen in one 'strike' or projectile state
         public float TTTimesAllowedToJuke;
 
+        
+        public float TTJukeTravelTime;
+
         // Sprite to change TentacleTip sprite into after colliding with jellyfish
         public Sprite TTStungSprite;
 
@@ -449,6 +452,7 @@ namespace SwordClash
             TTJukePosRightAmount = 1;
             TTJumpSpeed = 10.0f;
             TTTimesAllowedToJuke = 3;
+            TTJukeTravelTime = 0.7f;
         }
 
      

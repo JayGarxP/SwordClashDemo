@@ -128,6 +128,7 @@ namespace SwordClash
 
         // TODO: Make this method use callbacks in SPTC and integrated with TS state machine; only drag in coiled state;
         // juking; projectile. ALSO look into allowing simultaneous execution with new single swipe gesture
+        // Right now, CoiledState will enable / disable this gesture -----------------
         private void LongPress_StateUpdated(DigitalRubyShared.GestureRecognizer gesture)
         {
 

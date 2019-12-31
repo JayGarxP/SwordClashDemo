@@ -103,6 +103,11 @@ namespace SwordClash
             // could simplify a lot of code :)
 
             SPTentaControllerInstance = stc;
+
+            // TODO: refactor OnStateEnter and Exit to be automatic and consider having null guard clauses
+            // can i do this??? YES YOU CAN!!!! INCREDIBLE!
+            //OnStateEnter();
+
             IsCurrentlyProcessing = false;
             AmIPlayerTwo = false;
             StringRep = "SinglePlayer";
@@ -183,6 +188,7 @@ namespace SwordClash
             return yesFlagLowered;
         }
 
+        // Consider making this a virtual method that gets called by 
         public abstract void OnStateEnter();
         public abstract void OnStateExit();
         public abstract void ProcessState();

@@ -7,14 +7,10 @@ namespace SwordClash
         // Can't do anything until finished with side-to-side movement
         private bool CurrentlyJuking;
         private Vector2 WhereJumpingTo;
-        // TODO: JUKING must be its own state now, logic too complex. It moves differenlty and has different behavior with certain collisions. (like wall)
-        private const float jukeTravelTime = 0.7f;
 
         private Vector2 SwipeVelocityVector;
         private float SwipeAngle;
-        private Vector2 SwipeVelocityVector_before; // for juking.
-        private float SwipeAngle_before;
-
+        
         private short JukeCount;
         private short BarrelRollCount;
         private int GameLoopTicksBeforeSync;
@@ -23,7 +19,7 @@ namespace SwordClash
         private bool JustCollidedWithWall;
         private bool JustCollidedWithWallVert;
         private bool JustStung;
-        private float CurrentJukeTravelTime;
+        
         private Rigidbody2D FoodHitRef;
 
         /// <summary>  
@@ -198,7 +194,6 @@ namespace SwordClash
         // ProjectileState hits many things
         public override void HandleCollisionByTag(string ObjectHitTag, UnityEngine.Rigidbody2D objectHit)
         {
-            // TODO: needs to be refactored to use flags like juking, since i can tap to juke beyond the wall to not bounce off it.
             if (ObjectHitTag == WallGameObjectTag)
             {
 
@@ -285,11 +280,6 @@ namespace SwordClash
                 }
 
 
-                /*
-                 * change juking so that it only changes the veloctiy, then resets it back to waht it was
-                 * */
-                if (CurrentlyJuking == false)
-                {
                     // Check if barrel roll flag and haven't already brolled too much
                     if ((BarrelRollCount < SPTentaControllerInstance.TimesCanBarrelRoll) &&
                         (InputFlagArray[(int)HotInputs.BarrelRoll]))
@@ -307,56 +297,35 @@ namespace SwordClash
                         // if juke - right input received
                         if (InputFlagArray[(int)HotInputs.RudderRight])
                         {
-
-                            CurrentlyJuking = true;
-                            CurrentJukeTravelTime = 0.0f;
-                            // false parameter to jump RIGHT, true parameter to jump LEFT
-                           // WhereJumpingTo = SPTentaControllerInstance.TT_CalculateEndJumpPosition(false);
-                            // check if WhereJumpingTo position is in wall here???
-                            // Set CurrentlyJuking to true if still need to keep moving, when done juking set CurrentlyJuking to false
-                            //CurrentlyJuking = SPTentaControllerInstance.TT_JumpSideways(WhereJumpingTo);
-
-                            SwipeVelocityVector_before = SwipeVelocityVector;
-                            SwipeVelocityVector = Vector2.right;
-
                             InputFlagArray[(int)HotInputs.RudderRight] = false;
                             ++JukeCount;
-                        }
+
+                        SPTentaControllerInstance.CurrentTentacleState = new JukingState(this, 
+                            SPTentaControllerInstance,
+                            SwipeVelocityVector,
+                            SwipeAngle, BarrelRollCount, JukeCount, 2);
+
+                    }
                         else if (InputFlagArray[(int)HotInputs.RudderLeft])
                         {
-                            CurrentlyJuking = true;
-                            CurrentJukeTravelTime = 0.0f;
-                            // false parameter to jump RIGHT, true parameter to jump LEFT
-                            //WhereJumpingTo = SPTentaControllerInstance.TT_CalculateEndJumpPosition(true);
-                            // Set CurrentlyJuking to true if still need to keep moving, when done juking set CurrentlyJuking to false
-                            // CurrentlyJuking = SPTentaControllerInstance.TT_JumpSideways(WhereJumpingTo);
 
+                        InputFlagArray[(int)HotInputs.RudderLeft] = false;
+                        ++JukeCount;
 
-                            SwipeVelocityVector_before = SwipeVelocityVector;
-                            SwipeVelocityVector = Vector2.left;
+                        SPTentaControllerInstance.CurrentTentacleState = new JukingState(this,
+                      SPTentaControllerInstance,
+                      SwipeVelocityVector,
+                      SwipeAngle, BarrelRollCount, JukeCount, 1);
 
-                            InputFlagArray[(int)HotInputs.RudderLeft] = false;
-                            ++JukeCount;
+                       
                         }
 
                     }
 
 
-                }
-                else // currently juking is true
-                {
-                    // Keep moving sideways until hit wall or have traveled juke distance.
-                    //CurrentlyJuking = SPTentaControllerInstance.TT_HitPosition(WhereJumpingTo);
-
-                    // increment distance traveled
-                    CurrentJukeTravelTime += Time.fixedDeltaTime;
-                    // if travel time >= jumpdistance, stop juking
-                    if (CurrentJukeTravelTime >= jukeTravelTime)
-                    {
-                        CurrentlyJuking = false;
-                        SwipeVelocityVector = SwipeVelocityVector_before; // reset velocity to upswipes
-                    }
-                }
+               
+                   
+                
 
 
 
@@ -388,7 +357,7 @@ namespace SwordClash
             var velocityVector = new Vector2(DirectionVector.x * speed, DirectionVector.y * speed);
 
 
-            Debug.Log("Chris velocityVector: " + velocityVector.ToString());
+            //Debug.Log("Chris velocityVector: " + velocityVector.ToString());
             return velocityVector;
 
         }
