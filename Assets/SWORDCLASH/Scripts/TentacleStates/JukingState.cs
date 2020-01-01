@@ -13,7 +13,7 @@ namespace SwordClash
       
         private int JukeDirCode;
 
-        private Vector2 JukeDirection;
+        private Vector2 JukeVelocity;
         //TODO: put rotation angle on a wave function to make it diddle diddle shake
         private float JukeAngle;
 
@@ -116,9 +116,14 @@ namespace SwordClash
 
         public override void ProcessState()
         {
-            // Always move every frame.
-            SPTentaControllerInstance.TT_MoveTentacleTip(JukeDirection, JukeAngle);
+            float angleModifier = Random.Range(-5f, 5f);
+            //float angleModifier += Mathf.Cos(Time.fixedDeltaTime) * 2.0f;
 
+            // Always move every frame.
+            SPTentaControllerInstance.TT_MoveTentacleTip(JukeVelocity, JukeAngle + angleModifier);
+
+            
+           
 
             // drop a frame input processing if hit wall, so players can't glitch past it.
             if (JustCollidedWithWall)
@@ -172,19 +177,22 @@ namespace SwordClash
 
             if (JukeDirCode == 1)
             {
-                JukeDirection = Vector2.left;
+                JukeVelocity = Vector2.left;
                 // set angle here too 
-                
+                JukeAngle = 90f; // 90 is left
             }
             else if (JukeDirCode == 2)
             {
-                JukeDirection = Vector2.right;
+                JukeVelocity = Vector2.right;
                 // set angle here too 
+                JukeAngle = -90f;
 
             }
 
+            // TODO: connect constants into unity editor and work on a debug switch that moves game at halfspeed; turns on god mode etc. to not have to recompile scripts
             // juke should move faster
-            JukeDirection *= SPTentaControllerInstance.UPswipeSpeedModifier * 1.5f;
+            JukeVelocity = new Vector2(
+                JukeVelocity.x * 2.5f, JukeVelocity.y);
 
         }
 
@@ -193,7 +201,7 @@ namespace SwordClash
         public void ReflectTentacleVelocity(Vector2 surfaceNormal)
         {
 
-            JukeDirection = CalcVelocityVectorReflection(JukeDirection, surfaceNormal);
+            JukeVelocity = CalcVelocityVectorReflection(JukeVelocity, surfaceNormal);
 
             // try just -neg flipping for angle?
             JukeAngle = JukeAngle * -1;
