@@ -116,8 +116,11 @@ namespace SwordClash
 
         public override void ProcessState()
         {
-            float angleModifier = Random.Range(-5f, 5f);
-            //float angleModifier += Mathf.Cos(Time.fixedDeltaTime) * 2.0f;
+            // cool rentering atmosphere shake apart effect if just use random vals.
+            //float angleModifier = Random.Range(-5f, 5f);
+
+            // A * Cos(f) + c = yHeight;_; Amplitude makes it shake more/further Freq (period w/shift) makes it wiggle faster 
+            float angleModifier = 2.0f * Mathf.Cos(Time.time * 20.0f);
 
             // Always move every frame.
             SPTentaControllerInstance.TT_MoveTentacleTip(JukeVelocity, JukeAngle + angleModifier);
