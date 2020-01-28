@@ -26,12 +26,11 @@ namespace SwordClash
 
         // initialize with another state to enter recovery state
         public RecoveryState(TentacleState oldState, SinglePlayerTentaController SPTC)
-            : base(SPTC)
+            : base(oldState, SPTC)
         {
-            OnStateEnter();
 
         }
-        // not actually using oldstate???
+      
         public RecoveryState(TentacleState oldState, SinglePlayerTentaController SPTC, short voluntaryReelBack) : this(oldState, SPTC)
         {
             // base constructor is called first, then : this() then the one this comment is in right now.
@@ -90,12 +89,10 @@ namespace SwordClash
                     SPTentaControllerInstance.TT_ReelBackToStartPosition();
 
                 }
-              
 
                 // Check if made it home safe
                 if (SPTentaControllerInstance.CheckifTTAtStartPosition())
                 {
-                    OnStateExit();
                     SPTentaControllerInstance.CurrentTentacleState = new CoiledState(this, SPTentaControllerInstance);
                 }
             }

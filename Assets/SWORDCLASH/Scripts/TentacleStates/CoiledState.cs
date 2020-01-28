@@ -20,9 +20,8 @@ namespace SwordClash
 
         // single player resume coiled state constructor
         public CoiledState(TentacleState oldState, SinglePlayerTentaController SPTC)
-          : base(SPTC)
+          : base(oldState, SPTC)
         {
-            OnStateEnter();
 
         }
 
@@ -32,9 +31,10 @@ namespace SwordClash
             OnStateEnter();
         }
 
+        // Special constructor for round start
         public CoiledState(SinglePlayerTentaController stsc) : base(stsc)
         {
-            OnStateEnter();
+          
         }
 
         public override void HandleCollisionByTag(string ObjectHitTag, Rigidbody2D ObjectHitRB2D)
@@ -108,9 +108,6 @@ namespace SwordClash
 
 
                 var SwipeAngle = SPTentaControllerInstance.TTMoveRotationAngleRequested;
-
-                // probably should connect this to constructor some how
-                OnStateExit();
 
                 //actually move tentacle here:
                 SPTentaControllerInstance.CurrentTentacleState = new ProjectileState(this, SPTentaControllerInstance,

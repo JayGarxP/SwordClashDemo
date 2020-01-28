@@ -40,13 +40,12 @@ namespace SwordClash
         // Enter barrel roll from Projectile State, still WIP, so XML comment is coming.
         public BarrelRollState(TentacleState oldState, SinglePlayerTentaController SPTC,
             Vector2 swipeVelocityVector, float swipeAngle, short brollCount, short jukeCount)
-              : base(SPTC)
+              : base(oldState, SPTC)
         {
             this.SwipeVelocityVector = swipeVelocityVector;
             this.SwipeAngle = swipeAngle;
             this.BarrelRollDuringThisProjectileCount = brollCount;
             this.JukeCount = jukeCount;
-            OnStateEnter();
         }
 
         // Player 2 client sync constructor from BoltNetwork State values.
@@ -117,15 +116,13 @@ namespace SwordClash
             if (CurrentBrollDegreesRotated >= SPTentaControllerInstance.BarrelRollEndSpinRotationDegrees)
             {
                 SPTentaControllerInstance.ResetTentacleTipRotation();
-                OnStateExit();
+                
                 //increment barrel roll count
                 BarrelRollDuringThisProjectileCount++;
 
                 // Change to projectile state.
                 SPTentaControllerInstance.CurrentTentacleState = new ProjectileState(this, SPTentaControllerInstance, SwipeVelocityVector, SwipeAngle, BarrelRollDuringThisProjectileCount, JukeCount);
             }
-           
-
             //GameLoopTicksBeforeSync++;
 
         }

@@ -56,7 +56,7 @@ namespace SwordClash
 
         public ProjectileState(TentacleState oldState, SinglePlayerTentaController SPTC,
             Vector2 swipeNormalVector, float swipeAngle)
-           : base(SPTC)
+           : base(oldState, SPTC)
         {
             SwipeVelocityVector = swipeNormalVector;
             SwipeAngle = swipeAngle;
@@ -67,9 +67,8 @@ namespace SwordClash
                 SPTC.UPswipeSpeedConstant + SPTC.UPswipeSpeedModifier
                 );
 
-            Debug.Log("Chris SwipeVelocityVector in ProjectileState Constructor: " + SwipeVelocityVector.ToString());
+            //Debug.Log("Chris SwipeVelocityVector in ProjectileState Constructor: " + SwipeVelocityVector.ToString());
 
-            OnStateEnter();
             // Set JukeCount to zero
             JukeCount = 0;
         }
@@ -116,7 +115,7 @@ namespace SwordClash
         public ProjectileState(TentacleState oldState, SinglePlayerTentaController SPTC,
             Vector2 swipeVelocityVector, float swipeAngle,
             short BrollCount, short jukeCount)
-            : base(SPTC)
+            : base(oldState, SPTC)
         {
             SwipeVelocityVector = swipeVelocityVector;
             SwipeAngle = swipeAngle;
@@ -126,8 +125,6 @@ namespace SwordClash
             BarrelRollCount = BrollCount;
             // BarrelRolling does NOT reset jukeCount
             JukeCount = jukeCount;
-            OnStateEnter();
-
         }
 
         public ProjectileState(ProjectileState copy, TentacleController copyTC)
@@ -322,19 +319,9 @@ namespace SwordClash
 
                 }
 
-
-
-
-
-
-
-
-
                 // Check if done moving
                 if (SPTentaControllerInstance.IsTentacleAtMaxExtension())
                 {
-
-                    OnStateExit();
                     //TODO: Recovery mode state
                     SPTentaControllerInstance.CurrentTentacleState = new CoiledState(this, SPTentaControllerInstance);
                 }

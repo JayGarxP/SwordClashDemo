@@ -100,14 +100,23 @@ namespace SwordClash
 
         public TentacleState(SinglePlayerTentaController stc)
         {
-            //TODO: possible to call stc.OnStateExit() HERE in constructor!?!?!?
-            // could simplify a lot of code :)
+            SetDefualtValues(stc);
+            OnStateEnter();
+        }
 
+        public TentacleState(TentacleState oldState, SinglePlayerTentaController stc)
+        {
+            // first call exit logic of old state, then proceed to default constructor
+            oldState.OnStateExit();
+
+            SetDefualtValues(stc);
+            OnStateEnter();
+
+        }
+
+        private void SetDefualtValues(SinglePlayerTentaController stc)
+        {
             SPTentaControllerInstance = stc;
-
-            // TODO: refactor OnStateEnter and Exit to be automatic and consider having null guard clauses
-            // can i do this??? YES YOU CAN!!!! INCREDIBLE!
-            //OnStateEnter();
 
             IsCurrentlyProcessing = false;
             AmIPlayerTwo = false;

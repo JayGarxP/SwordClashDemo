@@ -14,7 +14,6 @@ namespace SwordClash
         private int JukeDirCode;
 
         private Vector2 JukeVelocity;
-        //TODO: put rotation angle on a wave function to make it diddle diddle shake
         private float JukeAngle;
 
         private float CurrentJukeTravelTime;
@@ -43,10 +42,8 @@ namespace SwordClash
         // initialize with another state to enter recovery state
         public JukingState(TentacleState oldState, SinglePlayerTentaController SPTC,
             Vector2 oldDirection, float oldRotation, short brollCount, short jukeCount, int jukeDirection)
-            : base(SPTC)
+            : base(oldState, SPTC)
         {
-            OnStateEnter(); // assume OSE is always called first; since it will be in future refactors...
-
             SwipeVelocityVector_before = oldDirection;
             SwipeAngle_before = oldRotation;
             BrollCount = brollCount;
@@ -54,8 +51,6 @@ namespace SwordClash
             JukeDirCode = jukeDirection;
 
             SetDirectionAndAngle();
-            
-
         }
 
         public override void HandleCollisionByTag(string ObjectHitTag, Rigidbody2D ObjectHitRB2D)

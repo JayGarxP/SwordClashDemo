@@ -26,11 +26,12 @@ namespace SwordClash
 
         // single player constructor
         public HoldingFoodState(TentacleState oldState, SinglePlayerTentaController SPTC, UnityEngine.Rigidbody2D foodToHold)
-           : base(SPTC)
+           : base(oldState, SPTC)
         {
             this.FoodHeld = foodToHold;
-            OnStateEnter();
-
+           
+            SPTentaControllerInstance.HoldingFoodRightNow = true;
+            SPTentaControllerInstance.TTPickupFood(FoodHeld);
         }
 
         public override void HandleCollisionByTag(string ObjectHitTag, Rigidbody2D ObjectHitRB2D)
@@ -64,15 +65,8 @@ namespace SwordClash
             {
                 TentaControllerInstance.HoldingFoodRightNow = true;
                 TentaControllerInstance.TTPickupFood(FoodHeld);
-            }
-            else
-            {
-                // still want it to crash if SPTC is null
-                SPTentaControllerInstance.HoldingFoodRightNow = true;
-                SPTentaControllerInstance.TTPickupFood(FoodHeld);
-            }
-           
 
+            }
         }
 
         public override void OnStateExit()
@@ -103,8 +97,7 @@ namespace SwordClash
             if (SPTentaControllerInstance.CheckifTTAtEatingPosition())
             {
                 SPTentaControllerInstance.TTEatFood("Player1");
-
-                OnStateExit();
+                
                 SPTentaControllerInstance.CurrentTentacleState = new CoiledState(this, SPTentaControllerInstance);
             }
         }
