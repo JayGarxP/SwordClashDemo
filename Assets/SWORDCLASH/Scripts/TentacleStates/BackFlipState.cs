@@ -13,6 +13,10 @@ namespace SwordClash
         private Vector2 SwipeDirection;
         private float SwipeAngle;
 
+        // snowboard degrees, 720 == two spins;
+        private float CurrentDegreesRotated;
+        private float TotalDegreesToRotate;
+
         //private float CurrentJukeTravelTime;
         //private float JukeTravelTime;
 
@@ -35,14 +39,20 @@ namespace SwordClash
 
         // initialize with another state w/ SPTC aka ProjectileState to enter BackFlipState
         public BackFlipState(TentacleState oldState, SinglePlayerTentaController SPTC,
-            Vector2 oldDirection, float oldRotation, short brollCount, short jukeCount, int jukeDirection)
+            Vector2 oldDirection, float oldRotation, short brollCount, short jukeCount,
+            Vector2 flipDir, float flipRotation)
             : base(oldState, SPTC)
         {
             SwipeVelocityVector_before = oldDirection;
             SwipeAngle_before = oldRotation;
             BrollCount = brollCount;
             JukeCount = jukeCount;
-            
+
+            SwipeDirection = flipDir;
+            SwipeAngle = flipRotation;
+
+            TotalDegreesToRotate = oldRotation - flipRotation;
+
         }
 
         public override void HandleCollisionByTag(string ObjectHitTag, Rigidbody2D ObjectHitRB2D)
@@ -58,7 +68,7 @@ namespace SwordClash
             }
             else if (ObjectHitTag == JellyfishEnemyGameObjectTag)
             {
-                // Play oregon duck whoop cant catch me sound effect
+                // Play whoop cant catch me sound effect
                 SoundManagerScript.PlaySound("miss");
 
             }
@@ -83,9 +93,37 @@ namespace SwordClash
 
         public override void ProcessState()
         {
+            // Do a back flip;
+            // shrink over time then grow over time then shrink down to normal sprite size
+            // while going backwards;
+            // while rotating to new angle
+            // overwrite stored projectile angle with new one.
 
-            // Always move every frame.
-            //SPTentaControllerInstance.TT_MoveTentacleTip(JukeVelocity, JukeAngle + angleModifier);
+            // NOT Free to process here!
+            IsCurrentlyProcessing = true;
+
+            // Move slowly every frame.
+            SPTentaControllerInstance.TT_MoveTentacleTip_WhileBackFlip(SwipeDirection);
+
+            CurrentDegreesRotated = SPTentaControllerInstance.BarrelRollin_rotate(CurrentDegreesRotated);
+
+            // check if done back flipping
+            if (CurrentDegreesRotated >= TotalDegreesToRotate)
+            {
+                SPTentaControllerInstance.ResetTentacleTipRotation();
+
+                // Change to projectile state.
+                SPTentaControllerInstance.CurrentTentacleState = new ProjectileState(this, SPTentaControllerInstance, SwipeDirection, SwipeAngle, BrollCount, JukeCount);
+            }
+            else
+            {
+                // Animate sprite
+
+            }
+
+
+
+
 
 
 

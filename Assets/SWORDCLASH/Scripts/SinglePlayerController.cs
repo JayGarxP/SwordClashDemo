@@ -34,7 +34,11 @@ namespace SwordClash
 
         private TapGestureRecognizer TapGesture; //juke by which half of screen tapped
         private TapGestureRecognizer DoubleTapGesture; //dodge roll if double tap on tentacle tip
-        //TODO: consider making a Swipe.Any gesture and deciding which kind it is in the callback method
+                                                       //TODO: consider making a Swipe.Any gesture and deciding which kind it is in the callback method
+
+        // General swipe gesture with many callback methods depending on direction
+        private SwipeGestureRecognizer SwordSwipeGesture; 
+
         private SwipeGestureRecognizer UpSwipeGesture; //send out tentacle
         private SwipeGestureRecognizer LeftSwipeGesture; //wall jump off right wall
         private SwipeGestureRecognizer RightSwipeGesture; //wall jump off left wall
@@ -60,9 +64,7 @@ namespace SwordClash
 
         private SinglePlayerTentaController TentaController;
         private Vector2 TentacleTipStartPosition;
-        private bool TTPrefabset;
-        //private short TTInSceneCount;
-       // private bool AmIPlayerTwo;
+     
 
         // Use this for initialization
         void Start()
@@ -70,26 +72,23 @@ namespace SwordClash
             //CreateDoubleTapGesture(); //TODO: find event order solution: https://stackoverflow.com/questions/374398/are-event-subscribers-called-in-order-of-subscription
 
             //CreateDoubleTapGesture(); // test if order matters; it does sadly... :(
+            CreateDragGesture();
             CreateSwipeGestures();
             CreateTapGesture();
-
-            //LeftTentacle = null;
-            TTPrefabset = false;
-            //TTInSceneCount = 0;
-            //AmIPlayerTwo = false;
 
             ////////////////////// SHOW TOUCHES
             FingersScript.Instance.ShowTouches = DebugShowTouches;
             ///////////////////
 
         }
-
+        // after SinglePlayerTentaController instance found in scene
+        void TC_Start()
+        {
+            TentaController.SetDrawSwipeAbility(longPress);
+        }
 
         ////FixedUpdate is called at a fixed interval and is independent of frame rate. Put physics code here.
-        //void FixedUpdate()
-        //{
-
-        //}
+        //void FixedUpdate()//{//}
 
         private void Update()
         {
@@ -100,9 +99,13 @@ namespace SwordClash
                 if (TCInstance != null)
                 {
                    TentaController = TCInstance;
-                    // TODO: can have a null check start() method here that starts event publishers AFTER TT found in scene
-                   TentaController.SetDrawSwipeAbility(longPress);
+                    TC_Start();
                 }
+                else
+                {
+                    TentaController = null;
+                }
+      
             }
 
         } // end unity update
@@ -164,13 +167,52 @@ namespace SwordClash
         // Call create swipe gesture methods or all-in-one swipe gesture here
         private void CreateSwipeGestures()
         {
-            CreateUpSwipeGesture();
-            CreateDownSwipeGesture();
-            CreateLeftSwipeGesture();
-            CreateRightSwipeGesture();
+            SwordSwipeGesture = new SwipeGestureRecognizer();
+            SwordSwipeGesture.Direction = SwipeGestureRecognizerDirection.Any;
+            SwordSwipeGesture.StateUpdated += SwordSwipeGestureCallback;
 
-            CreateDragGesture();
+            FingersScript.Instance.AddGesture(SwordSwipeGesture);
         }
+
+
+        private void SwordSwipeGestureCallback(DigitalRubyShared.GestureRecognizer gesture)
+        {
+            if (TentaController != null)
+            {
+                if (gesture.State == GestureRecognizerState.Ended)
+                {
+                    Debug.Log("1@1@1@ SWIPE DETECTED xoxo SWIPE DETECTED  @1@1@1");
+                    // Cast gesture to SwipeGesture
+                    var jesta = (SwipeGestureRecognizer)gesture;
+
+                    Vector2 normalizedSwipeVector = new Vector2(gesture.VelocityX, gesture.VelocityY).normalized;
+
+                    // swipe angle is the swipe gesture's launch angle = inverse tan(change in y position / change x position)
+                    float swipeAngle = Mathf.Rad2Deg * Mathf.Atan2(gesture.DeltaY, gesture.DeltaX);
+
+                    // need to subtract 90 since RB2D.rotation units are clockwise: 0 @noon, -90 @3pm, -179 @5:59pm, 180 @6pm, 90 @9pm
+                    //  versus the normal unit circle units that Atan2 spits out clockwise: 90 @noon, 0 @3pm, -89 @5:59pm, -90 @6pm, -180 @9pm -270 @midnight, -360 @3am 
+                    //  rotation units are wonky, only go to 180 to negative 180 and straight up is 0 degrees not 90.
+                    //  Since the up swipe only allows swipe angle to be unit circle degrees ~39 to ~136, simply subtracting 90 translates fine.
+
+                    // rotation has little precision, rounding feels better/smoother in-game
+                    swipeAngle = Mathf.Round(swipeAngle - 90.0f);
+
+                    // switch on gesture direction:
+                    //gesture.EndDirection
+                    if (jesta.EndDirection == SwipeGestureRecognizerDirection.Up)
+                    {
+                        LaunchTentacle(normalizedSwipeVector, swipeAngle);
+                    }
+                    else if (jesta.EndDirection == SwipeGestureRecognizerDirection.Down)
+                    {
+                        RegisterBackFlipInput(normalizedSwipeVector, swipeAngle);
+                    }
+
+                }
+            }
+        }
+
 
         private void CreateDragGesture()
         {
@@ -288,6 +330,18 @@ namespace SwordClash
                 }
             }
         }
+
+        private void LaunchTentacle(Vector2 swipeDir, float swipeAngle_Unity)
+        {
+            // Now, instead of directly setting it, make request to swipe tentacle
+            TentaController.LaunchTentacle_Please(swipeDir, swipeAngle_Unity);
+        }
+
+        private void RegisterBackFlipInput(Vector2 swipeDir, float swipeAngle_Unity)
+        {
+            TentaController.BackFlipTentacle_Please(swipeDir, swipeAngle_Unity);
+        }
+
 
         private void CreateRightSwipeGesture()
         {

@@ -44,7 +44,7 @@ namespace SwordClash
             RudderRight = 0,
             RudderLeft = 1,
             BarrelRoll = 2,
-            ReelBack = 3,
+            BackFlip = 3,
             LaunchSwipe = 4,
             DragSway = 5 // Use boat terms  (yaw, etc.) and add to END of this enum in future.
         };

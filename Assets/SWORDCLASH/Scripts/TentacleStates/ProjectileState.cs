@@ -270,10 +270,13 @@ namespace SwordClash
                     SPTentaControllerInstance.CurrentTentacleState = new RecoveryState(this, SPTentaControllerInstance);
                     // Debug.Log("Chris Changing to RecoveryState... .... ....");
                 }
-                else if (InputFlagArray[(int)HotInputs.ReelBack])
+                else if (InputFlagArray[(int)HotInputs.BackFlip])
                 {
-                    short voluntaryReelBack = 1;
-                    SPTentaControllerInstance.CurrentTentacleState = new RecoveryState(this, SPTentaControllerInstance, voluntaryReelBack);
+                    SPTentaControllerInstance.CurrentTentacleState = new BackFlipState(this, SPTentaControllerInstance,
+                       SwipeVelocityVector,
+                       SwipeAngle, BarrelRollCount, JukeCount,
+                       SPTentaControllerInstance.TTBackFlipNormalDirRequested, 
+                       SPTentaControllerInstance.TTBackFlipAngleRequested);
                 }
 
 

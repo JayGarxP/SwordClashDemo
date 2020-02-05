@@ -328,7 +328,7 @@ namespace SwordClash
 
         public void PleaseRecoilTentacle()
         {
-            int ReelBack = (int)TentacleState.HotInputs.ReelBack;
+            int ReelBack = (int)TentacleState.HotInputs.BackFlip;
             this.CurrentTentacleState.RaiseTentacleFlag_Request(ReelBack);
         }
         public void TT_RecoilTentacle()

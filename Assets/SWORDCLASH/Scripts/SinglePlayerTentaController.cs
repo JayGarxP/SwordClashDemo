@@ -56,6 +56,9 @@ namespace SwordClash
         public Vector2 TTMovePositionVelocityRequested;
         public float TTMoveRotationAngleRequested;
 
+        public Vector2 TTBackFlipNormalDirRequested;
+        public float TTBackFlipAngleRequested;
+
         private Rigidbody2D TentacleTipRB2D;
         private float StartTentacleLength;
         private Vector2 TentacleReadyPosition;
@@ -138,15 +141,6 @@ namespace SwordClash
 
         }
 
-        public void PleaseRecoilTentacle()
-        {
-            int ReelBack = (int)TentacleState.HotInputs.ReelBack;
-            this.CurrentTentacleState.RaiseTentacleFlag_Request(ReelBack);
-        }
-        public void TT_RecoilTentacle()
-        {
-            ResetTentacletoStartingPosition();
-        }
 
 
         public void TT_MoveTentacleTip(Vector2 swipePositionVelocity, float swipeAngle)
@@ -163,6 +157,11 @@ namespace SwordClash
         {
             //Move at half delta time speed ~around sqrt the normal speed. Do not rotate, rotate seperately in another method.
             TentacleTipRB2D.MovePosition(TentacleTipRB2D.position + (swipePositionVelocity * (Time.fixedDeltaTime * 0.5f)));
+        }
+
+        public void TT_MoveTentacleTip_WhileBackFlip(Vector2 swipeVelocity)
+        {
+            TentacleTipRB2D.MovePosition(TentacleTipRB2D.position + (swipeVelocity * (Time.fixedDeltaTime * 0.1f)));
         }
 
 
@@ -188,6 +187,13 @@ namespace SwordClash
             degreesRotatedSoFar += BarrelRollDegreestoRotatePerUpdate;
             return degreesRotatedSoFar;
         }
+
+        //public float BackFlippin_rotate(float degreesRotatedSoFar)
+        //{
+        //    TentacleTip.transform.Rotate(0, 0, BarrelRollDegreestoRotatePerUpdate, Space.World); //rotate gameobject via transform Space.World centroid, looks cooler.
+        //    degreesRotatedSoFar += BarrelRollDegreestoRotatePerUpdate;
+        //    return degreesRotatedSoFar;
+        //}
 
         // pass in true to jump left, false to get a jump right end position vector as return value
         public Vector2 TT_CalculateEndJumpPosition(bool YesJumpingLeft)
@@ -385,6 +391,27 @@ namespace SwordClash
             this.CurrentTentacleState.RaiseTentacleFlag_Request(LaunchTentFlagID);
         }
 
+        public void PleaseRecoilTentacle()
+        {
+            int ReelBack = (int)TentacleState.HotInputs.BackFlip;
+            this.CurrentTentacleState.RaiseTentacleFlag_Request(ReelBack);
+        }
+        public void TT_RecoilTentacle()
+        {
+            ResetTentacletoStartingPosition();
+        }
+
+        public void BackFlipTentacle_Please(Vector2 SwipeDirectionVector, float SwipeAngle_Unity)
+        {
+            //Save requested swipe (linear intepolation of swipes over time, 
+            //  with angles in RB2D.rotation friendly range)
+            TTBackFlipNormalDirRequested = SwipeDirectionVector;
+            TTBackFlipAngleRequested = SwipeAngle_Unity;
+
+            int BackFlipID = (int)TentacleState.HotInputs.BackFlip;
+            this.CurrentTentacleState.RaiseTentacleFlag_Request(BackFlipID);
+        }
+
 
         public bool BarrelRoll_Please()
         {
@@ -429,11 +456,18 @@ namespace SwordClash
 
         public void DisableDragSwipeGesture()
         {
-            this.DrawSwipeBroadcaster.Enabled = false;
+            if (DrawSwipeBroadcaster != null)
+            {
+                this.DrawSwipeBroadcaster.Enabled = false;
+            }
         }
+
         public void EnableDragSwipeGesture()
         {
-            this.DrawSwipeBroadcaster.Enabled = true;
+            if (DrawSwipeBroadcaster != null)
+            {
+                this.DrawSwipeBroadcaster.Enabled = true;
+            }
         }
 
         // Monobehavior reset when component is first dropped into scene, set default editor fields here

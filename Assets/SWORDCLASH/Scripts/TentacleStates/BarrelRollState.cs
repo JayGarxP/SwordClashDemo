@@ -101,8 +101,7 @@ namespace SwordClash
         public override void ProcessState()
         {
             StringRep = "BarrelRoll";
-            IsCurrentlyProcessing = false;
-
+           
             // NOT Free to process here!
             IsCurrentlyProcessing = true;
 
