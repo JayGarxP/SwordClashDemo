@@ -105,9 +105,13 @@ namespace SwordClash
             // Move slowly every frame.
             SPTentaControllerInstance.TT_MoveTentacleTip_WhileBackFlip(SwipeDirection);
 
+            // TODO: Make own BarrelRollin_Rotate for BackFlip here;
             CurrentDegreesRotated = SPTentaControllerInstance.BarrelRollin_rotate(CurrentDegreesRotated);
 
             // check if done back flipping
+            // TODO: rework timing of method to work off of Sprite Animation timing of the grow and shrink
+            //                plus color mute when in deep water, color brighten in shallower water
+            // TODO: write shader that simulates underwater color change via depth underwater as a function of time more time = deeper under water away from the light of God and the grace of her angels.
             if (CurrentDegreesRotated >= TotalDegreesToRotate)
             {
                 SPTentaControllerInstance.ResetTentacleTipRotation();

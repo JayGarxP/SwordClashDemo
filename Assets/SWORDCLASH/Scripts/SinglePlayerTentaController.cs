@@ -403,8 +403,6 @@ namespace SwordClash
 
         public void BackFlipTentacle_Please(Vector2 SwipeDirectionVector, float SwipeAngle_Unity)
         {
-            //Save requested swipe (linear intepolation of swipes over time, 
-            //  with angles in RB2D.rotation friendly range)
             TTBackFlipNormalDirRequested = SwipeDirectionVector;
             TTBackFlipAngleRequested = SwipeAngle_Unity;
 
