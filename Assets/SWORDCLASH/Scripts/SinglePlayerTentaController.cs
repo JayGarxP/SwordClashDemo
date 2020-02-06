@@ -22,6 +22,9 @@ namespace SwordClash
         public float EatingZoneOffsetFromStart;
         // Degrees to rotate tentacle tip per physics update, ~20 looks good.
         public float BarrelRollDegreestoRotatePerUpdate;
+        // degrees to rotate TT per fixed update
+        public float BackFlipDegreestoRotatePerUpdate;
+
         // snowboard style degrees of rotation until barrel roll ends, two rotations = 720.
         public float BarrelRollEndSpinRotationDegrees;
         // 2 times means each up-swipe launch player gets two barrel rolls, reset once coiled
@@ -188,12 +191,12 @@ namespace SwordClash
             return degreesRotatedSoFar;
         }
 
-        //public float BackFlippin_rotate(float degreesRotatedSoFar)
-        //{
-        //    TentacleTip.transform.Rotate(0, 0, BarrelRollDegreestoRotatePerUpdate, Space.World); //rotate gameobject via transform Space.World centroid, looks cooler.
-        //    degreesRotatedSoFar += BarrelRollDegreestoRotatePerUpdate;
-        //    return degreesRotatedSoFar;
-        //}
+        public float BackFlippin_rotate(float degreesRotatedSoFar)
+        {
+            TentacleTip.transform.Rotate(0, 0, BackFlipDegreestoRotatePerUpdate, Space.World);
+            degreesRotatedSoFar += BackFlipDegreestoRotatePerUpdate;
+            return degreesRotatedSoFar;
+        }
 
         // pass in true to jump left, false to get a jump right end position vector as return value
         public Vector2 TT_CalculateEndJumpPosition(bool YesJumpingLeft)
@@ -478,6 +481,7 @@ namespace SwordClash
             maxTentacleLength = 0;
             EatingZoneOffsetFromStart = 2.5f;
             BarrelRollDegreestoRotatePerUpdate = 20.0f;
+            BackFlipDegreestoRotatePerUpdate = 5.0f;
             BarrelRollEndSpinRotationDegrees = 720;
             TimesCanBarrelRoll = 2;
             TTJukePosLeftAmount = 1;

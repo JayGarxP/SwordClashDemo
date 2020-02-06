@@ -42,10 +42,7 @@ namespace SwordClash
             SwipeAngle = swipeAngle;
             BarrelRollCount = 0;
 
-            SwipeVelocityVector = MultiplyVectorComponentsBySpeed(
-                SwipeVelocityVector,
-                TentaControllerInstance.UPswipeSpeedConstant + TentaControllerInstance.UPswipeSpeedModifier
-                );
+            MagnitudeSwipeDir();
 
             Debug.Log("Chris SwipeVelocityVector in ProjectileState Constructor: " + SwipeVelocityVector.ToString());
 
@@ -62,10 +59,7 @@ namespace SwordClash
             SwipeAngle = swipeAngle;
             BarrelRollCount = 0;
 
-            SwipeVelocityVector = MultiplyVectorComponentsBySpeed(
-                SwipeVelocityVector,
-                SPTC.UPswipeSpeedConstant + SPTC.UPswipeSpeedModifier
-                );
+            MagnitudeSwipeDir();
 
             //Debug.Log("Chris SwipeVelocityVector in ProjectileState Constructor: " + SwipeVelocityVector.ToString());
 
@@ -111,12 +105,13 @@ namespace SwordClash
 
         }
 
-        // SinglePlayer initialize from BarrelRollState which increments BrollCount as side-effect; BAD CODE
+        // SinglePlayer initialize from BarrelRollState which increments BrollCount as side-effect
         public ProjectileState(TentacleState oldState, SinglePlayerTentaController SPTC,
             Vector2 swipeVelocityVector, float swipeAngle,
             short BrollCount, short jukeCount)
             : base(oldState, SPTC)
         {
+            // re-entrant; do not apply speed constant to velocity twice!!!
             SwipeVelocityVector = swipeVelocityVector;
             SwipeAngle = swipeAngle;
 
@@ -125,6 +120,7 @@ namespace SwordClash
             BarrelRollCount = BrollCount;
             // BarrelRolling does NOT reset jukeCount
             JukeCount = jukeCount;
+
         }
 
         public ProjectileState(ProjectileState copy, TentacleController copyTC)
@@ -133,11 +129,7 @@ namespace SwordClash
             SwipeVelocityVector = copy.SwipeVelocityVector;
             SwipeAngle = copy.SwipeAngle;
             BarrelRollCount = 0;
-
-            SwipeVelocityVector = MultiplyVectorComponentsBySpeed(
-                SwipeVelocityVector,
-                TentaControllerInstance.UPswipeSpeedConstant + TentaControllerInstance.UPswipeSpeedModifier
-                );
+            MagnitudeSwipeDir();
 
             OnStateEnter();
             // Set JukeCount to zero
@@ -350,6 +342,14 @@ namespace SwordClash
             //Debug.Log("Chris velocityVector: " + velocityVector.ToString());
             return velocityVector;
 
+        }
+
+        private void MagnitudeSwipeDir()
+        {
+            SwipeVelocityVector = MultiplyVectorComponentsBySpeed(
+             SwipeVelocityVector,
+             SPTentaControllerInstance.UPswipeSpeedConstant + SPTentaControllerInstance.UPswipeSpeedModifier
+             );
         }
 
         public override void ProcessState(ITentacleInputCommandInput input)

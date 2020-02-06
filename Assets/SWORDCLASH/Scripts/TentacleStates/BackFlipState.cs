@@ -5,8 +5,8 @@ namespace SwordClash
     class BackFlipState : TentacleState
     {
         // to reenter projectile state
-        private readonly Vector2 SwipeVelocityVector_before;
-        private readonly float SwipeAngle_before;
+        private Vector2 SwipeVelocityVector_before;
+        private float SwipeAngle_before;
         private readonly short BrollCount;
         private readonly short JukeCount;
 
@@ -16,6 +16,9 @@ namespace SwordClash
         // snowboard degrees, 720 == two spins;
         private float CurrentDegreesRotated;
         private float TotalDegreesToRotate;
+        private float BackFlipTimeRemaining;
+        // how long BackFlip always takes in seconds
+        private const float BackFlipTime = 2.0f;
 
         //private float CurrentJukeTravelTime;
         //private float JukeTravelTime;
@@ -80,6 +83,9 @@ namespace SwordClash
             LowerAllInputFlags();
             JustCollidedWithWall = false;
             JustCollidedWithWallVert = false;
+
+
+            BackFlipTimeRemaining = BackFlipTime;
         }
 
 
@@ -105,30 +111,35 @@ namespace SwordClash
             // Move slowly every frame.
             SPTentaControllerInstance.TT_MoveTentacleTip_WhileBackFlip(SwipeDirection);
 
-            // TODO: Make own BarrelRollin_Rotate for BackFlip here;
-            CurrentDegreesRotated = SPTentaControllerInstance.BarrelRollin_rotate(CurrentDegreesRotated);
 
             // check if done back flipping
             // TODO: rework timing of method to work off of Sprite Animation timing of the grow and shrink
             //                plus color mute when in deep water, color brighten in shallower water
             // TODO: write shader that simulates underwater color change via depth underwater as a function of time more time = deeper under water away from the light of God and the grace of her angels.
-            if (CurrentDegreesRotated >= TotalDegreesToRotate)
+            if (CurrentDegreesRotated < TotalDegreesToRotate)
             {
-                SPTentaControllerInstance.ResetTentacleTipRotation();
+                CurrentDegreesRotated = SPTentaControllerInstance.BackFlippin_rotate(CurrentDegreesRotated);
 
                 // Change to projectile state.
-                SPTentaControllerInstance.CurrentTentacleState = new ProjectileState(this, SPTentaControllerInstance, SwipeDirection, SwipeAngle, BrollCount, JukeCount);
+                // SPTentaControllerInstance.CurrentTentacleState = new ProjectileState(this, SPTentaControllerInstance, SwipeDirection, SwipeAngle, BrollCount, JukeCount);
+            }
+
+
+            // decrease time remaining
+            BackFlipTimeRemaining -= Time.deltaTime;
+
+            if (BackFlipTimeRemaining <= BackFlipTime / 4.0f)
+            {
+                // shrink sprite // deeper underwater
+            }
+            else if (BackFlipTimeRemaining <= BackFlipTime / 2.0f)
+            {
+                // grow sprite // higher up in water
             }
             else
             {
-                // Animate sprite
-
+                // shrink sprite to normal size
             }
-
-
-
-
-
 
 
             // drop a frame input processing if hit wall, so players can't glitch past it.
@@ -150,13 +161,19 @@ namespace SwordClash
             }
 
 
-            
-            //if (CurrentJukeTravelTime >= JukeTravelTime)
-            //{
-            //    // transition back to projectile state
-            //    SPTentaControllerInstance.CurrentTentacleState = new ProjectileState
-            //        (this, SPTentaControllerInstance, SwipeVelocityVector_before, SwipeAngle_before, BrollCount, JukeCount);
-            //}
+            if (BackFlipTimeRemaining <= 0.0f)
+            {
+                // change direction and angle of projectile
+                SwipeVelocityVector_before = CalcNewProjectileVector(SwipeDirection);
+
+                // flip angle upside down (unity deg is 180 to -180)
+                SwipeAngle_before = SwipeAngle + 180.0f;
+
+                // transition back to projectile state
+                SPTentaControllerInstance.CurrentTentacleState = new ProjectileState
+                    (this, SPTentaControllerInstance, SwipeVelocityVector_before, 
+                    SwipeAngle_before, BrollCount, JukeCount);
+            }
 
         }
 
@@ -187,6 +204,18 @@ namespace SwordClash
         private void OnWallCollision()
         {
             LowerAllInputFlags(); // drop frame of human input
+        }
+
+        private Vector2 CalcNewProjectileVector(Vector2 BFswipeDir)
+        {
+            // reverse direction of vector
+            BFswipeDir *= -1.0f;
+
+            // increase magnitude of vector to match projectile speed
+            var velocityVector = new Vector2(BFswipeDir.x * (SPTentaControllerInstance.UPswipeSpeedConstant + SPTentaControllerInstance.UPswipeSpeedModifier),
+                BFswipeDir.y * (SPTentaControllerInstance.UPswipeSpeedConstant + SPTentaControllerInstance.UPswipeSpeedModifier));
+
+            return velocityVector;
         }
 
         public override void ProcessCommandFromPlayerTwo(TentacleInputCommand command)
