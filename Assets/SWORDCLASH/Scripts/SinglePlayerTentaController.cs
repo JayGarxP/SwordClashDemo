@@ -367,6 +367,33 @@ namespace SwordClash
             this.CurrentTentacleState = new CoiledState(this);
         }
 
+        public void TT_ScaleTransform(float addToScale)
+        {
+            // in Update() loop
+            //Vector3 vec = new Vector3(Mathf.Sin(Time.time) + 1, Mathf.Sin(Time.time) + 1, Mathf.Sin(Time.time) + 1);
+
+
+            // A * Cos(f) + c = yHeight;_; Amplitude makes it shake more/further Freq (period w/shift) makes it wiggle faster 
+            //float angleModifier = 2.0f * Mathf.Cos(Time.time * 20.0f);
+
+            // TODO: Only want to scale sprite; so shader is better than entire transform!!!
+            //t += Time.deltaTime;
+            //TentacleTip.transform.localScale = new Vector3(1, Mathf.Lerp(2f, 1f, t / 3f), 1); // shrink from 2 to 1 over 3 seconds;
+
+            Vector3 originalTrans = TentacleTip.transform.localScale;
+
+            //Vector3 vec = new Vector3(2 * Mathf.Sin(Time.time), 2 * Mathf.Sin(Time.time), 1.0f);
+
+            //Vector3 vec = new Vector3(Mathf.Sin(Time.time) * 0.02f + originalTrans.x,
+            //    Mathf.Sin(Time.time) * 0.02f + originalTrans.y, originalTrans.z);
+
+            //Vector3 vec = new Vector3(addToScale + originalTrans.x,
+            //    addToScale + originalTrans.y, 
+            //    originalTrans.z);
+
+            //TentacleTip.transform.localScale = vec;
+        }
+
 
         //TODO: rename methods to have Pleasefirst and remove the underscores
         //Juke to the right, eventaully will only work 3 times either way; called by player controller

@@ -19,6 +19,9 @@ namespace SwordClash
         private float BackFlipTimeRemaining;
         // how long BackFlip always takes in seconds
         private const float BackFlipTime = 2.0f;
+        private const float ScaleSpriteDelta = 0.002f; // too lil 0.0005f // too mush 0.005f
+
+        private float timeElapsed;
 
         //private float CurrentJukeTravelTime;
         //private float JukeTravelTime;
@@ -86,6 +89,7 @@ namespace SwordClash
 
 
             BackFlipTimeRemaining = BackFlipTime;
+            timeElapsed = 0.0f;
         }
 
 
@@ -118,7 +122,7 @@ namespace SwordClash
             // TODO: write shader that simulates underwater color change via depth underwater as a function of time more time = deeper under water away from the light of God and the grace of her angels.
             if (CurrentDegreesRotated < TotalDegreesToRotate)
             {
-                CurrentDegreesRotated = SPTentaControllerInstance.BackFlippin_rotate(CurrentDegreesRotated);
+               // CurrentDegreesRotated = SPTentaControllerInstance.BackFlippin_rotate(CurrentDegreesRotated);
 
                 // Change to projectile state.
                 // SPTentaControllerInstance.CurrentTentacleState = new ProjectileState(this, SPTentaControllerInstance, SwipeDirection, SwipeAngle, BrollCount, JukeCount);
@@ -128,18 +132,61 @@ namespace SwordClash
             // decrease time remaining
             BackFlipTimeRemaining -= Time.deltaTime;
 
-            if (BackFlipTimeRemaining <= BackFlipTime / 4.0f)
+            // one way to shrink and grow is with 3 different lerps on local scale to shrink, grow, shrink over time.
+            timeElapsed += Time.deltaTime;
+            float halftime = BackFlipTime / 2.0f;
+
+            if (timeElapsed <= halftime)
             {
-                // shrink sprite // deeper underwater
-            }
-            else if (BackFlipTimeRemaining <= BackFlipTime / 2.0f)
-            {
-                // grow sprite // higher up in water
+                SPTentaControllerInstance.
+              TentacleTip.transform.localScale = new Vector3(Mathf.Lerp(0.269f, 0.12f, timeElapsed / halftime),
+              Mathf.Lerp(0.269f, 0.12f, timeElapsed / halftime), 0.27f);
             }
             else
             {
-                // shrink sprite to normal size
+                SPTentaControllerInstance.
+             TentacleTip.transform.localScale = new Vector3(Mathf.Lerp(0.12f, 0.269f, timeElapsed / (halftime * 2.0f)),
+             Mathf.Lerp(0.12f, 0.269f, timeElapsed / (halftime * 2.0f)), 0.27f);
             }
+
+           
+
+
+            //if (BackFlipTimeRemaining <= BackFlipTime / 4.0f)
+            //{
+            //    // shrink sprite // deeper underwater
+            //    //SPTentaControllerInstance.TT_ScaleTransform( - ScaleSpriteDelta);
+
+            //    SPTentaControllerInstance.
+            //       TentacleTip.transform.localScale = new Vector3(Mathf.Lerp(0.269f, 0.12f, timeElapsed / (BackFlipTime / 4.0f)),
+            //       Mathf.Lerp(0.269f, 0.12f, timeElapsed / (BackFlipTime / 4.0f)), 0.27f);
+
+            //}
+            //else if (BackFlipTimeRemaining <= BackFlipTime / 2.0f)
+            //{
+            //    // grow sprite // higher up in water
+            //    //SPTentaControllerInstance.TT_ScaleTransform(ScaleSpriteDelta);
+
+            //    SPTentaControllerInstance.
+            //           TentacleTip.transform.localScale = new Vector3(Mathf.Lerp(0.12f, 0.6f, timeElapsed / (BackFlipTime / 2.0f)),
+            //           Mathf.Lerp(0.12f, 0.6f, timeElapsed / (BackFlipTime / 2.0f)), 0.27f);
+
+
+
+            //}
+            //else
+            //{
+            //    // shrink sprite to normal size
+            //    //SPTentaControllerInstance.TT_ScaleTransform( - ScaleSpriteDelta);
+            //    SPTentaControllerInstance.
+            //    TentacleTip.transform.localScale = new Vector3(Mathf.Lerp(0.6f, 0.269f, timeElapsed / (BackFlipTime / 4.0f)),
+            //    Mathf.Lerp(0.6f, 0.269f, timeElapsed / (BackFlipTime / 4.0f)), 0.27f);
+
+
+
+            //}
+
+
 
 
             // drop a frame input processing if hit wall, so players can't glitch past it.
