@@ -376,7 +376,7 @@ namespace SwordClash
             // A * Cos(f) + c = yHeight;_; Amplitude makes it shake more/further Freq (period w/shift) makes it wiggle faster 
             //float angleModifier = 2.0f * Mathf.Cos(Time.time * 20.0f);
 
-            // TODO: Only want to scale sprite; so shader is better than entire transform!!!
+           
             //t += Time.deltaTime;
             //TentacleTip.transform.localScale = new Vector3(1, Mathf.Lerp(2f, 1f, t / 3f), 1); // shrink from 2 to 1 over 3 seconds;
 

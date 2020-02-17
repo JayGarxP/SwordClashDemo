@@ -133,61 +133,10 @@ namespace SwordClash
             BackFlipTimeRemaining -= Time.deltaTime;
 
             // one way to shrink and grow is with 3 different lerps on local scale to shrink, grow, shrink over time.
-            timeElapsed += Time.deltaTime;
-            float halftime = BackFlipTime / 2.0f;
+           // timeElapsed += Time.deltaTime;
+           // float halftime = BackFlipTime / 2.0f;
 
-            if (timeElapsed <= halftime)
-            {
-                SPTentaControllerInstance.
-              TentacleTip.transform.localScale = new Vector3(Mathf.Lerp(0.269f, 0.12f, timeElapsed / halftime),
-              Mathf.Lerp(0.269f, 0.12f, timeElapsed / halftime), 0.27f);
-            }
-            else
-            {
-                SPTentaControllerInstance.
-             TentacleTip.transform.localScale = new Vector3(Mathf.Lerp(0.12f, 0.269f, timeElapsed / (halftime * 2.0f)),
-             Mathf.Lerp(0.12f, 0.269f, timeElapsed / (halftime * 2.0f)), 0.27f);
-            }
-
-           
-
-
-            //if (BackFlipTimeRemaining <= BackFlipTime / 4.0f)
-            //{
-            //    // shrink sprite // deeper underwater
-            //    //SPTentaControllerInstance.TT_ScaleTransform( - ScaleSpriteDelta);
-
-            //    SPTentaControllerInstance.
-            //       TentacleTip.transform.localScale = new Vector3(Mathf.Lerp(0.269f, 0.12f, timeElapsed / (BackFlipTime / 4.0f)),
-            //       Mathf.Lerp(0.269f, 0.12f, timeElapsed / (BackFlipTime / 4.0f)), 0.27f);
-
-            //}
-            //else if (BackFlipTimeRemaining <= BackFlipTime / 2.0f)
-            //{
-            //    // grow sprite // higher up in water
-            //    //SPTentaControllerInstance.TT_ScaleTransform(ScaleSpriteDelta);
-
-            //    SPTentaControllerInstance.
-            //           TentacleTip.transform.localScale = new Vector3(Mathf.Lerp(0.12f, 0.6f, timeElapsed / (BackFlipTime / 2.0f)),
-            //           Mathf.Lerp(0.12f, 0.6f, timeElapsed / (BackFlipTime / 2.0f)), 0.27f);
-
-
-
-            //}
-            //else
-            //{
-            //    // shrink sprite to normal size
-            //    //SPTentaControllerInstance.TT_ScaleTransform( - ScaleSpriteDelta);
-            //    SPTentaControllerInstance.
-            //    TentacleTip.transform.localScale = new Vector3(Mathf.Lerp(0.6f, 0.269f, timeElapsed / (BackFlipTime / 4.0f)),
-            //    Mathf.Lerp(0.6f, 0.269f, timeElapsed / (BackFlipTime / 4.0f)), 0.27f);
-
-
-
-            //}
-
-
-
+          //TODO: SHADER LOGIC HERE
 
             // drop a frame input processing if hit wall, so players can't glitch past it.
             if (JustCollidedWithWall)
@@ -208,7 +157,7 @@ namespace SwordClash
             }
 
 
-            if (BackFlipTimeRemaining <= 0.0f)
+            if (BackFlipTimeRemaining < 0.0f)
             {
                 // change direction and angle of projectile
                 SwipeVelocityVector_before = CalcNewProjectileVector(SwipeDirection);
