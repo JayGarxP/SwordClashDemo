@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -70,6 +71,7 @@ namespace SwordClash
         private float StartTentacleRotation;
         private SpriteRenderer TTSpriteRenderer;
         private Sprite TTSceneSprite; //sprite object starts with
+        private Material TTSpriteMaterial;
 
         private GameObject GameWorld;
         // Reference to game logic controller in scene
@@ -98,6 +100,7 @@ namespace SwordClash
             // Set sprite renderer reference so tentacle can change color
             TTSpriteRenderer = GetComponent<SpriteRenderer>();
             TTSceneSprite = TTSpriteRenderer.sprite;
+            TTSpriteMaterial = TTSpriteRenderer.material;
 
 
             //// Redundant cast seems to help avoid null reference in update loop
@@ -144,7 +147,10 @@ namespace SwordClash
 
         }
 
-
+      public void TT_WaterDepth_WhileBackFlip(float waterDepth)
+        {
+            TTSpriteMaterial.SetFloat("_WaterDepth", waterDepth);
+        }
 
         public void TT_MoveTentacleTip(Vector2 swipePositionVelocity, float swipeAngle)
         {

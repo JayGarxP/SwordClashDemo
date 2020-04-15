@@ -1,16 +1,15 @@
 ﻿Shader "Sprites/WaterDepthColorFadeShader"
 {
 /*
-	Image Shader to make the back flipping Tentacle Tip look cool;
+	Image Shader to make the back flipping Tentacle Tip look like it is going deeper underwater;
 	WaterFX  -  Color fade with depth; Red fade at 5Meter O at 8M Y at 15M Green at 25M Blue at 35M
-	Sprite Scaling -  Shrink sprite as it goes deeper in the ocean, grow as it rises closer to surface
 */
 
 	Properties
 	{
 		_MainTex ("Texture", 2D) = "white" {}
 		_WaterDepth ("Water Depth", Range(0.0, 50.0)) = 1
-		_RedDepth ("Red Light Fade Depth", Float) = 0.0
+		_RedDepth ("Red Light Fade Depth", Float) = 5.0
 		_GrnDepth ("Green Light Fade Depth", Float) = 20.0
 		_BluDepth ("Blue Light Fade Depth", Float) = 35.0
 
@@ -57,10 +56,12 @@
 			v2f vert (appdata v)
 			{
 				v2f o;
-				// resize somewhere in vertex func here
-
+				 // half size, seems to down/up sample very lossy, better to do this somewhere else?
+				//o.vertex = UnityObjectToClipPos(v.vertex * 0.5f);
 				o.vertex = UnityObjectToClipPos(v.vertex);
+
 				o.uv = v.uv;
+
 				return o;
 			}
 			
@@ -75,15 +76,11 @@
 				/// Adjust RGB channels depending on depth.
 				float depth = _WaterDepth;
 				float maxDepth = 50.0f;
-
-				//col.r = 0; // just turns reds to black
-				//col.r = col.r - (depth - _RedDepth / maxDepth);
 				col.r = col.r - CalcDepthAdjustment(depth, _RedDepth, maxDepth);
 				col.g = col.g - CalcDepthAdjustment(depth, _GrnDepth, maxDepth);
 				col.b = col.b - CalcDepthAdjustment(depth, _BluDepth, maxDepth);
 
-
-				return col;
+  				return col;
 			}
 
 			

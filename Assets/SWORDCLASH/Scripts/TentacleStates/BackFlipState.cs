@@ -22,6 +22,7 @@ namespace SwordClash
         private const float ScaleSpriteDelta = 0.002f; // too lil 0.0005f // too mush 0.005f
 
         private float timeElapsed;
+        private float waterDepth;
 
         //private float CurrentJukeTravelTime;
         //private float JukeTravelTime;
@@ -90,6 +91,7 @@ namespace SwordClash
 
             BackFlipTimeRemaining = BackFlipTime;
             timeElapsed = 0.0f;
+            waterDepth = 0.0f;
         }
 
 
@@ -133,10 +135,27 @@ namespace SwordClash
             BackFlipTimeRemaining -= Time.deltaTime;
 
             // one way to shrink and grow is with 3 different lerps on local scale to shrink, grow, shrink over time.
-           // timeElapsed += Time.deltaTime;
-           // float halftime = BackFlipTime / 2.0f;
+            // timeElapsed += Time.deltaTime;
+            // float halftime = BackFlipTime / 2.0f;
 
-          //TODO: SHADER LOGIC HERE
+            // TODO: SHADER LOGIC HERE
+            // while bftremaining <=half travel time INCREASE water depth; else decrease water depth
+            // call back method to material reference in SPTC will use Material.SETFLOAT() to change water depth in shader
+
+            if (BackFlipTimeRemaining > BackFlipTime / 2.0f)
+            {
+                waterDepth += 10.0f; // not sure what value this should be, LERP maybe???
+            }
+            else
+            {
+                waterDepth -= 1.0f;
+            }
+
+            // change water depth in color fade shader
+            //SPTentaControllerInstance.TT_WaterDepth_WhileBackFlip(waterDepth);
+            SPTentaControllerInstance.TT_WaterDepth_WhileBackFlip(49.0f);
+
+
 
             // drop a frame input processing if hit wall, so players can't glitch past it.
             if (JustCollidedWithWall)
