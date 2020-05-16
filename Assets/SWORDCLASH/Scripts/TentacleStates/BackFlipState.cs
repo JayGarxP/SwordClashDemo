@@ -20,12 +20,13 @@ namespace SwordClash
         // how long BackFlip always takes in seconds
         private const float BackFlipTime = 2.0f;
         private const float ScaleSpriteDelta = 0.002f; // too lil 0.0005f // too mush 0.005f
+        private const float WaterDepthPerUpdate = 0.88f; //TODO: need to relate these to inspector editor properties & make them proportional
 
+        private float RotateSpriteDelta;
         private float timeElapsed;
         private float waterDepth;
 
-        //private float CurrentJukeTravelTime;
-        //private float JukeTravelTime;
+        
 
         private bool JustCollidedWithWall;
         private bool JustCollidedWithWallVert;
@@ -47,7 +48,7 @@ namespace SwordClash
         // initialize with another state w/ SPTC aka ProjectileState to enter BackFlipState
         public BackFlipState(TentacleState oldState, SinglePlayerTentaController SPTC,
             Vector2 oldDirection, float oldRotation, short brollCount, short jukeCount,
-            Vector2 flipDir, float flipRotation)
+            Vector2 flipDir, float flipAngle)
             : base(oldState, SPTC)
         {
             SwipeVelocityVector_before = oldDirection;
@@ -56,9 +57,22 @@ namespace SwordClash
             JukeCount = jukeCount;
 
             SwipeDirection = flipDir;
-            SwipeAngle = flipRotation;
+            SwipeAngle = flipAngle;
 
-            TotalDegreesToRotate = oldRotation - flipRotation;
+            // Let player adjust their direction when backflipping, show as public information
+            // change direction and angle of projectile
+            SwipeVelocityVector_before = CalcNewProjectileVector(SwipeDirection);
+            // rotate from old angle to flip angle
+            TotalDegreesToRotate = SwipeAngle_before - SwipeAngle;
+
+            
+            // definitely need to make these magic numbers related somehow and be public properties in the SPTC script
+            RotateSpriteDelta = 1.5f; //TotalDegreesToRotate / 2.0f; //???
+
+            if (flipDir.x < 0)
+            {
+                RotateSpriteDelta *= -1.0f;
+            }
 
         }
 
@@ -88,7 +102,6 @@ namespace SwordClash
             JustCollidedWithWall = false;
             JustCollidedWithWallVert = false;
 
-
             BackFlipTimeRemaining = BackFlipTime;
             timeElapsed = 0.0f;
             waterDepth = 0.0f;
@@ -117,45 +130,32 @@ namespace SwordClash
             // Move slowly every frame.
             SPTentaControllerInstance.TT_MoveTentacleTip_WhileBackFlip(SwipeDirection);
 
-
-            // check if done back flipping
             // TODO: rework timing of method to work off of Sprite Animation timing of the grow and shrink
             //                plus color mute when in deep water, color brighten in shallower water
-            // TODO: write shader that simulates underwater color change via depth underwater as a function of time more time = deeper under water away from the light of God and the grace of her angels.
             if (CurrentDegreesRotated < TotalDegreesToRotate)
             {
-               // CurrentDegreesRotated = SPTentaControllerInstance.BackFlippin_rotate(CurrentDegreesRotated);
-
-                // Change to projectile state.
-                // SPTentaControllerInstance.CurrentTentacleState = new ProjectileState(this, SPTentaControllerInstance, SwipeDirection, SwipeAngle, BrollCount, JukeCount);
+               CurrentDegreesRotated = SPTentaControllerInstance.BackFlippin_rotate(CurrentDegreesRotated, RotateSpriteDelta);
             }
 
 
             // decrease time remaining
             BackFlipTimeRemaining -= Time.deltaTime;
 
+            // Shrink then grow, also fade in color when going deeper underwater
             // one way to shrink and grow is with 3 different lerps on local scale to shrink, grow, shrink over time.
             // timeElapsed += Time.deltaTime;
             // float halftime = BackFlipTime / 2.0f;
-
-            // TODO: SHADER LOGIC HERE
-            // while bftremaining <=half travel time INCREASE water depth; else decrease water depth
-            // call back method to material reference in SPTC will use Material.SETFLOAT() to change water depth in shader
-
             if (BackFlipTimeRemaining > BackFlipTime / 2.0f)
             {
-                waterDepth += 10.0f; // not sure what value this should be, LERP maybe???
+                waterDepth += WaterDepthPerUpdate;
             }
             else
             {
-                waterDepth -= 1.0f;
+                waterDepth -= WaterDepthPerUpdate;
             }
 
             // change water depth in color fade shader
-            //SPTentaControllerInstance.TT_WaterDepth_WhileBackFlip(waterDepth);
-            SPTentaControllerInstance.TT_WaterDepth_WhileBackFlip(49.0f);
-
-
+            SPTentaControllerInstance.TT_WaterDepth_WhileBackFlip(waterDepth);
 
             // drop a frame input processing if hit wall, so players can't glitch past it.
             if (JustCollidedWithWall)
@@ -178,9 +178,8 @@ namespace SwordClash
 
             if (BackFlipTimeRemaining < 0.0f)
             {
-                // change direction and angle of projectile
-                SwipeVelocityVector_before = CalcNewProjectileVector(SwipeDirection);
-
+                // TODO: LEFT OFF HERE 5/16/2020 still need to scale transform as it goes through water and need better logic below
+                // now that we rotate too this code is not proportional...
                 // flip angle upside down (unity deg is 180 to -180)
                 SwipeAngle_before = SwipeAngle + 180.0f;
 

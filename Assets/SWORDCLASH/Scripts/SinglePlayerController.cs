@@ -199,7 +199,7 @@ namespace SwordClash
                     swipeAngle = Mathf.Round(swipeAngle - 90.0f);
 
                     // switch on gesture direction:
-                    //gesture.EndDirection
+                    Debug.Log("1@1@1@ SwipeDir: " + normalizedSwipeVector.ToString() + "   SwipeAngle: " + swipeAngle.ToString() + "@1@1@1");
                     if (jesta.EndDirection == SwipeGestureRecognizerDirection.Up)
                     {
                         LaunchTentacle(normalizedSwipeVector, swipeAngle);

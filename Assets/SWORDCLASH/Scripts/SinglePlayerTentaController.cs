@@ -197,9 +197,9 @@ namespace SwordClash
             return degreesRotatedSoFar;
         }
 
-        public float BackFlippin_rotate(float degreesRotatedSoFar)
+        public float BackFlippin_rotate(float degreesRotatedSoFar, float rotationAmountPerUpdate)
         {
-            TentacleTip.transform.Rotate(0, 0, BackFlipDegreestoRotatePerUpdate, Space.World);
+            TentacleTip.transform.Rotate(0, 0, rotationAmountPerUpdate, Space.World);
             degreesRotatedSoFar += BackFlipDegreestoRotatePerUpdate;
             return degreesRotatedSoFar;
         }
