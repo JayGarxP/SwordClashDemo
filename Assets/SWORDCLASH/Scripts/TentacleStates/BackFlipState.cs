@@ -13,6 +13,9 @@ namespace SwordClash
         private Vector2 SwipeDirection;
         private float SwipeAngle;
 
+        private Vector2 ReentrantSwipeVelocity;
+        private float ReentrantSwipeAngle;
+
         // snowboard degrees, 720 == two spins;
         private float CurrentDegreesRotated;
         private float TotalDegreesToRotate;
@@ -25,8 +28,11 @@ namespace SwordClash
         private float RotateSpriteDelta;
         private float timeElapsed;
         private float waterDepth;
+        private Quaternion FreshRotation;
 
-        
+        private float TargetAngle;
+        private float rotationDirection;
+
 
         private bool JustCollidedWithWall;
         private bool JustCollidedWithWallVert;
@@ -52,27 +58,42 @@ namespace SwordClash
             : base(oldState, SPTC)
         {
             SwipeVelocityVector_before = oldDirection;
+            Debug.Log( "<color=maroon>*** " + "SwipeVelocityVector_before " + SwipeVelocityVector_before + " ***</color>");
             SwipeAngle_before = oldRotation;
+            Debug.Log("<color=maroon>*** " + "oldRotation " + oldRotation + " ***</color>");
+
             BrollCount = brollCount;
             JukeCount = jukeCount;
 
             SwipeDirection = flipDir;
+            Debug.Log("<color=maroon>*** " + "flipDir " + flipDir + " ***</color>");
+
             SwipeAngle = flipAngle;
+            Debug.Log("<color=maroon>*** " + "FlipAngle " + flipAngle + " ***</color>");
 
-            // Let player adjust their direction when backflipping, show as public information
-            // change direction and angle of projectile
-            SwipeVelocityVector_before = CalcNewProjectileVector(SwipeDirection);
-            // rotate from old angle to flip angle
-            TotalDegreesToRotate = SwipeAngle_before - SwipeAngle;
+            // Negative backflip swipe is end direction
+            Vector2 EndDirectionofFlip = SwipeDirection * -1.0f;
+        
+            //TargetAngle = Vector2.Angle( EndDirectionofFlip, oldDirection );
+            //TargetAngle = Vector2.SignedAngle(EndDirectionofFlip, Vector2.up);
 
-            
-            // definitely need to make these magic numbers related somehow and be public properties in the SPTC script
-            RotateSpriteDelta = 1.5f; //TotalDegreesToRotate / 2.0f; //???
+            // Root cause of these angle problems is that inspector view is EULER angle in world coords,
+            //      but in script land we are dealing with local QUATERNION COORDINATES which cause all kinds of conversion problems
+            // Angle of swipe:
+            TargetAngle = (Mathf.Rad2Deg * Mathf.Atan2(EndDirectionofFlip.x, EndDirectionofFlip.y)) * -1.0f;
 
-            if (flipDir.x < 0)
-            {
-                RotateSpriteDelta *= -1.0f;
-            }
+            Debug.Log("<color=maroon>*** " + "TARGET ANGLE " + TargetAngle + " ***</color>");
+
+            //
+            //TotalDegreesToRotate = Mathf.Abs(SPTentaControllerInstance.transform.position.z - TargetAngle);
+           // TotalDegreesToRotate = Mathf.Abs(TargetAngle) - Mathf.Abs((Mathf.Rad2Deg * Mathf.Atan2(oldDirection.x, oldDirection.y)));
+            Debug.Log("<color=maroon>*** " + "TotalDegreesToRotate " + TotalDegreesToRotate + " ***</color>");
+
+
+            ReentrantSwipeVelocity = IncreaseMagnitudeofVectorbyProjectileSpeed(EndDirectionofFlip);
+            ReentrantSwipeAngle = TargetAngle;
+
+
 
         }
 
@@ -130,12 +151,9 @@ namespace SwordClash
             // Move slowly every frame.
             SPTentaControllerInstance.TT_MoveTentacleTip_WhileBackFlip(SwipeDirection);
 
-            // TODO: rework timing of method to work off of Sprite Animation timing of the grow and shrink
-            //                plus color mute when in deep water, color brighten in shallower water
-            if (CurrentDegreesRotated < TotalDegreesToRotate)
-            {
-               CurrentDegreesRotated = SPTentaControllerInstance.BackFlippin_rotate(CurrentDegreesRotated, RotateSpriteDelta);
-            }
+            // Rotate slowly each frame // many hours of pain converting from 4d quaternion local coords to 3d euler world coords
+            SPTentaControllerInstance.BackFlippin_rotate(Quaternion.Euler(0,0,TargetAngle), Time.deltaTime);
+
 
 
             // decrease time remaining
@@ -180,13 +198,11 @@ namespace SwordClash
             {
                 // TODO: LEFT OFF HERE 5/16/2020 still need to scale transform as it goes through water and need better logic below
                 // now that we rotate too this code is not proportional...
-                // flip angle upside down (unity deg is 180 to -180)
-                SwipeAngle_before = SwipeAngle + 180.0f;
 
                 // transition back to projectile state
                 SPTentaControllerInstance.CurrentTentacleState = new ProjectileState
-                    (this, SPTentaControllerInstance, SwipeVelocityVector_before, 
-                    SwipeAngle_before, BrollCount, JukeCount);
+                    (this, SPTentaControllerInstance, ReentrantSwipeVelocity, 
+                    ReentrantSwipeAngle, BrollCount, JukeCount);
             }
 
         }
@@ -220,11 +236,8 @@ namespace SwordClash
             LowerAllInputFlags(); // drop frame of human input
         }
 
-        private Vector2 CalcNewProjectileVector(Vector2 BFswipeDir)
+        private Vector2 IncreaseMagnitudeofVectorbyProjectileSpeed(Vector2 BFswipeDir)
         {
-            // reverse direction of vector
-            BFswipeDir *= -1.0f;
-
             // increase magnitude of vector to match projectile speed
             var velocityVector = new Vector2(BFswipeDir.x * (SPTentaControllerInstance.UPswipeSpeedConstant + SPTentaControllerInstance.UPswipeSpeedModifier),
                 BFswipeDir.y * (SPTentaControllerInstance.UPswipeSpeedConstant + SPTentaControllerInstance.UPswipeSpeedModifier));
