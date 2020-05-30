@@ -197,26 +197,26 @@ namespace SwordClash
             return degreesRotatedSoFar;
         }
 
-        public float BackFlippin_rotate(float degreesRotatedSoFar, float rotationAmountPerUpdate)
-        {
-            TentacleTip.transform.Rotate(0, 0, rotationAmountPerUpdate, Space.World);
-            degreesRotatedSoFar += BackFlipDegreestoRotatePerUpdate;
-            return degreesRotatedSoFar;
-        }
+        //public float BackFlippin_rotate(float degreesRotatedSoFar, float rotationAmountPerUpdate)
+        //{
+        //    TentacleTip.transform.Rotate(0, 0, rotationAmountPerUpdate, Space.World);
+        //    degreesRotatedSoFar += BackFlipDegreestoRotatePerUpdate;
+        //    return degreesRotatedSoFar;
+        //}
 
-        // Cannot figure out math to make target rotation from 2D unit vector, not sure if even possible...
+        // Quaternion.Slerp on Tentacle instance GameObject Transform Rotation
         public void BackFlippin_rotate(Quaternion targetRotation, float deltaTime)
         {
             //TentacleTip.transform.Rotate(0, 0, rotationAmountPerUpdate, Space.World);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, deltaTime);
         }
 
-        // still cannot figure out how to enforce the lerp to take shortest path
-        public void BackFlippin_rotate_lerp(float targetRotation, float deltaTime, bool rotateRight)
-        {
-            float tick = Mathf.Lerp(transform.rotation.z, targetRotation, deltaTime);
-            TentacleTip.transform.Rotate(0, 0, tick, Space.World);
-        }
+        //// still cannot figure out how to enforce the lerp to take shortest path
+        //public void BackFlippin_rotate_lerp(float targetRotation, float deltaTime, bool rotateRight)
+        //{
+        //    float tick = Mathf.Lerp(transform.rotation.z, targetRotation, deltaTime);
+        //    TentacleTip.transform.Rotate(0, 0, tick, Space.World);
+        //}
 
         // pass in true to jump left, false to get a jump right end position vector as return value
         public Vector2 TT_CalculateEndJumpPosition(bool YesJumpingLeft)

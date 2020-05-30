@@ -71,16 +71,18 @@ namespace SwordClash
             SwipeAngle = flipAngle;
             Debug.Log("<color=maroon>*** " + "FlipAngle " + flipAngle + " ***</color>");
 
-            // Negative backflip swipe is end direction
+            // Negative backflip swipe is end direction ;; flip entire vector by multiplying its components by -1
             Vector2 EndDirectionofFlip = SwipeDirection * -1.0f;
-        
+
             //TargetAngle = Vector2.Angle( EndDirectionofFlip, oldDirection );
             //TargetAngle = Vector2.SignedAngle(EndDirectionofFlip, Vector2.up);
 
             // Root cause of these angle problems is that inspector view is EULER angle in world coords,
             //      but in script land we are dealing with local QUATERNION COORDINATES which cause all kinds of conversion problems
-            // Angle of swipe:
-            TargetAngle = (Mathf.Rad2Deg * Mathf.Atan2(EndDirectionofFlip.x, EndDirectionofFlip.y)) * -1.0f;
+            // https://docs.unity3d.com/ScriptReference/Mathf.Atan2.html
+            // Angle of swipe * -1 to reverse it, : Atan2(X, Y) will get angle of reversed swipe in correct orientation, *-1 to make right and left angle sign correct again
+            // DO NOT be tempted to simplify this code, the math and what unity is doing under the hood is very difficult to understand!
+            TargetAngle = (Mathf.Rad2Deg * Mathf.Atan2(EndDirectionofFlip.x, EndDirectionofFlip.y)) * -1.0f; // flip angle sign +left -right since went from down to up vectors to get angle
 
             Debug.Log("<color=maroon>*** " + "TARGET ANGLE " + TargetAngle + " ***</color>");
 
