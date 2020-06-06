@@ -9,6 +9,7 @@ namespace SwordClash
         private float SwipeAngle_before;
         private readonly short BrollCount;
         private readonly short JukeCount;
+        private readonly Vector3 DefaultTTLocalScale;
 
         private Vector2 SwipeDirection;
         private float SwipeAngle;
@@ -20,9 +21,12 @@ namespace SwordClash
         private float CurrentDegreesRotated;
         private float TotalDegreesToRotate;
         private float BackFlipTimeRemaining;
+        private float CurrentRelLocalScaleX;
+        private float CurrentRelLocalScaleY;
+
         // how long BackFlip always takes in seconds
         private const float BackFlipTime = 2.0f;
-        private const float ScaleSpriteDelta = 0.002f; // too lil 0.0005f // too mush 0.005f
+        private const float ScaleSpriteDelta = 0.001f;
         private const float WaterDepthPerUpdate = 0.88f; //TODO: need to relate these to inspector editor properties & make them proportional
 
         private float RotateSpriteDelta;
@@ -64,6 +68,7 @@ namespace SwordClash
 
             BrollCount = brollCount;
             JukeCount = jukeCount;
+            DefaultTTLocalScale = SPTC.GetDefaultLocalScale();
 
             SwipeDirection = flipDir;
             Debug.Log("<color=maroon>*** " + "flipDir " + flipDir + " ***</color>");
@@ -94,6 +99,8 @@ namespace SwordClash
 
             ReentrantSwipeVelocity = IncreaseMagnitudeofVectorbyProjectileSpeed(EndDirectionofFlip);
             ReentrantSwipeAngle = TargetAngle;
+            CurrentRelLocalScaleX = DefaultTTLocalScale.x;
+            CurrentRelLocalScaleY = DefaultTTLocalScale.y;
 
 
 
@@ -119,6 +126,7 @@ namespace SwordClash
             
         }
 
+        // This will be called BEFORE THE CONSTRUCTOR by the way
         public override void OnStateEnter()
         {
             LowerAllInputFlags();
@@ -128,6 +136,8 @@ namespace SwordClash
             BackFlipTimeRemaining = BackFlipTime;
             timeElapsed = 0.0f;
             waterDepth = 0.0f;
+            
+
         }
 
 
@@ -136,6 +146,8 @@ namespace SwordClash
         {
 
             LowerAllInputFlags();
+            // reset TT game object to original scaling for sure
+            SPTentaControllerInstance.transform.localScale = DefaultTTLocalScale;
         }
 
 
@@ -168,11 +180,20 @@ namespace SwordClash
             if (BackFlipTimeRemaining > BackFlipTime / 2.0f)
             {
                 waterDepth += WaterDepthPerUpdate;
+                CurrentRelLocalScaleX -= ScaleSpriteDelta;
+                CurrentRelLocalScaleY -= ScaleSpriteDelta;
+
+
             }
             else
             {
                 waterDepth -= WaterDepthPerUpdate;
+                CurrentRelLocalScaleX += ScaleSpriteDelta;
+                CurrentRelLocalScaleY += ScaleSpriteDelta;
+
             }
+            // Actually scale TT game object
+            SPTentaControllerInstance.SetLocalScale(new Vector3 (CurrentRelLocalScaleX, CurrentRelLocalScaleY, DefaultTTLocalScale.z));
 
             // change water depth in color fade shader
             SPTentaControllerInstance.TT_WaterDepth_WhileBackFlip(waterDepth);
@@ -198,9 +219,6 @@ namespace SwordClash
 
             if (BackFlipTimeRemaining < 0.0f)
             {
-                // TODO: LEFT OFF HERE 5/16/2020 still need to scale transform as it goes through water and need better logic below
-                // now that we rotate too this code is not proportional...
-
                 // transition back to projectile state
                 SPTentaControllerInstance.CurrentTentacleState = new ProjectileState
                     (this, SPTentaControllerInstance, ReentrantSwipeVelocity, 

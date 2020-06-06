@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace SwordClash
 {
@@ -41,7 +38,7 @@ namespace SwordClash
         //3 means 3 taps can happen in one 'strike' or projectile state
         public float TTTimesAllowedToJuke;
 
-        
+
         public float TTJukeTravelTime;
 
         // Sprite to change TentacleTip sprite into after colliding with jellyfish
@@ -61,6 +58,17 @@ namespace SwordClash
         public float TTMoveRotationAngleRequested;
 
         public Vector2 TTBackFlipNormalDirRequested;
+
+        internal Vector3 GetDefaultLocalScale()
+        {
+            return this.transform.localScale;
+        }
+
+        public void SetLocalScale(Vector3 newScale)
+        {
+            this.transform.localScale = newScale;
+        }
+
         public float TTBackFlipAngleRequested;
 
         private Rigidbody2D TentacleTipRB2D;
@@ -125,7 +133,8 @@ namespace SwordClash
                     }
                 }
 
-            } else
+            }
+            else
             {
                 ////ACTUAL GAME LOOP:
 
@@ -147,7 +156,7 @@ namespace SwordClash
 
         }
 
-      public void TT_WaterDepth_WhileBackFlip(float waterDepth)
+        public void TT_WaterDepth_WhileBackFlip(float waterDepth)
         {
             TTSpriteMaterial.SetFloat("_WaterDepth", waterDepth);
         }
@@ -177,8 +186,8 @@ namespace SwordClash
 
         public bool IsTentacleAtMaxExtension()
         {
-            
-                return TentacleTipRB2D.position.magnitude >= maxTentacleLength;
+
+            return TentacleTipRB2D.position.magnitude >= maxTentacleLength;
         }
 
         private void ResetTentacletoStartingPosition()
@@ -208,7 +217,7 @@ namespace SwordClash
         public void BackFlippin_rotate(Quaternion targetRotation, float deltaTime)
         {
             //TentacleTip.transform.Rotate(0, 0, rotationAmountPerUpdate, Space.World);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, deltaTime);
+            this.transform.rotation = Quaternion.Slerp(this.transform.rotation, targetRotation, deltaTime);
         }
 
         //// still cannot figure out how to enforce the lerp to take shortest path
@@ -241,14 +250,14 @@ namespace SwordClash
 
         public bool TT_MoveSideWays_TillEnd(Vector2 endOfJumpPosition, Vector2 direction)
         {
-            
+
             TentacleTip_MoveSideways(direction);
 
             //bool CancelJump = false;
 
             // TRUE means the endOfJumpPosition has been reached
             return (TentacleTipRB2D.position == endOfJumpPosition);
-            
+
         }
 
         private void TentacleTip_MoveSideways(Vector2 velocity)
@@ -267,11 +276,11 @@ namespace SwordClash
         public bool TT_HitPosition(Vector2 Position)
         {
             return (TentacleTipRB2D.position == Position);
-            
+
         }
 
         // callback method to drag tenta here
-        
+
 
 
         public void PleaseStingTentacleSprite()
@@ -296,7 +305,7 @@ namespace SwordClash
             TTSpriteRenderer.color = Color.black;
         }
 
-       
+
         public void TT_WiggleBackToStartPosition()
         {
             // Higher floating point scalar multiplier means faster MoveTowards()
@@ -363,7 +372,7 @@ namespace SwordClash
 
         public void TTTeleportPosition(Vector3 unityWorldCoordPosition)
         {
-            this.TentacleTip.transform.position = unityWorldCoordPosition;
+            TentacleTip.transform.position = unityWorldCoordPosition;
         }
 
         public void TTPickupFood(Rigidbody2D foodTouching)
@@ -396,7 +405,7 @@ namespace SwordClash
             // A * Cos(f) + c = yHeight;_; Amplitude makes it shake more/further Freq (period w/shift) makes it wiggle faster 
             //float angleModifier = 2.0f * Mathf.Cos(Time.time * 20.0f);
 
-           
+
             //t += Time.deltaTime;
             //TentacleTip.transform.localScale = new Vector3(1, Mathf.Lerp(2f, 1f, t / 3f), 1); // shrink from 2 to 1 over 3 seconds;
 
@@ -490,8 +499,8 @@ namespace SwordClash
         public void ResetTentacleTipSprite()
         {
             //reset tentacle tip sprite to starting sprite; reference set in the Start() method
-                TTSpriteRenderer.sprite = TTSceneSprite;
-            
+            TTSpriteRenderer.sprite = TTSceneSprite;
+
 
             // default sprite color in Unity is white, undoing black burnt sprite from being zapped.
             TTSpriteRenderer.color = Color.white;
@@ -506,7 +515,7 @@ namespace SwordClash
         {
             if (DrawSwipeBroadcaster != null)
             {
-                this.DrawSwipeBroadcaster.Enabled = false;
+                DrawSwipeBroadcaster.Enabled = false;
             }
         }
 
@@ -514,7 +523,7 @@ namespace SwordClash
         {
             if (DrawSwipeBroadcaster != null)
             {
-                this.DrawSwipeBroadcaster.Enabled = true;
+                DrawSwipeBroadcaster.Enabled = true;
             }
         }
 
@@ -538,6 +547,6 @@ namespace SwordClash
             TTJukeTravelTime = 0.7f;
         }
 
-     
+
     }
 }
