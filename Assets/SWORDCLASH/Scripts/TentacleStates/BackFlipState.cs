@@ -10,6 +10,7 @@ namespace SwordClash
         private readonly short BrollCount;
         private readonly short JukeCount;
         private readonly Vector3 DefaultTTLocalScale;
+        private readonly Quaternion DefaultTTRotation;
 
         private Vector2 SwipeDirection;
         private float SwipeAngle;
@@ -25,23 +26,21 @@ namespace SwordClash
         private float CurrentRelLocalScaleY;
 
         // how long BackFlip always takes in seconds
-        private const float BackFlipTime = 2.0f;
-        private const float ScaleSpriteDelta = 0.001f;
-        private const float WaterDepthPerUpdate = 0.88f; //TODO: need to relate these to inspector editor properties & make them proportional
+        private readonly float BackFlipTime;
+        private readonly float ScaleSpriteDelta;
+        // tilt amount; snoot droop
+        private float SnootDroopDelta;
+        private readonly float WaterDepthPerUpdate;
+        private readonly float DroopSpeed;
 
-        private float RotateSpriteDelta;
-        private float timeElapsed;
         private float waterDepth;
         private Quaternion FreshRotation;
 
         private float TargetAngle;
-        private float rotationDirection;
-
 
         private bool JustCollidedWithWall;
         private bool JustCollidedWithWallVert;
        
-
         public BackFlipState(TentacleController tc) : base(tc)
         {
             OnStateEnter();
@@ -61,26 +60,34 @@ namespace SwordClash
             Vector2 flipDir, float flipAngle)
             : base(oldState, SPTC)
         {
+            // retrieve public inspector values that control gameplay timing of backflip
+            DefaultTTRotation = SPTC.transform.rotation;
+            BackFlipTime = SPTC.BackFlipTime;
+            ScaleSpriteDelta = SPTC.ScaleSpriteDelta;
+            SnootDroopDelta = SPTC.SnootDroopAmount;
+            DroopSpeed = SPTC.DroopSpeed;
+            WaterDepthPerUpdate = SPTC.WaterDepthPerUpdate;
+
+            // start timer
+            BackFlipTimeRemaining = BackFlipTime;
+
             SwipeVelocityVector_before = oldDirection;
-            Debug.Log( "<color=maroon>*** " + "SwipeVelocityVector_before " + SwipeVelocityVector_before + " ***</color>");
+            //Debug.Log( "<color=maroon>*** " + "SwipeVelocityVector_before " + SwipeVelocityVector_before + " ***</color>");
             SwipeAngle_before = oldRotation;
-            Debug.Log("<color=maroon>*** " + "oldRotation " + oldRotation + " ***</color>");
+            //Debug.Log("<color=maroon>*** " + "oldRotation " + oldRotation + " ***</color>");
 
             BrollCount = brollCount;
             JukeCount = jukeCount;
             DefaultTTLocalScale = SPTC.GetDefaultLocalScale();
 
             SwipeDirection = flipDir;
-            Debug.Log("<color=maroon>*** " + "flipDir " + flipDir + " ***</color>");
+            //Debug.Log("<color=maroon>*** " + "flipDir " + flipDir + " ***</color>");
 
             SwipeAngle = flipAngle;
-            Debug.Log("<color=maroon>*** " + "FlipAngle " + flipAngle + " ***</color>");
+            //Debug.Log("<color=maroon>*** " + "FlipAngle " + flipAngle + " ***</color>");
 
             // Negative backflip swipe is end direction ;; flip entire vector by multiplying its components by -1
             Vector2 EndDirectionofFlip = SwipeDirection * -1.0f;
-
-            //TargetAngle = Vector2.Angle( EndDirectionofFlip, oldDirection );
-            //TargetAngle = Vector2.SignedAngle(EndDirectionofFlip, Vector2.up);
 
             // Root cause of these angle problems is that inspector view is EULER angle in world coords,
             //      but in script land we are dealing with local QUATERNION COORDINATES which cause all kinds of conversion problems
@@ -89,21 +96,12 @@ namespace SwordClash
             // DO NOT be tempted to simplify this code, the math and what unity is doing under the hood is very difficult to understand!
             TargetAngle = (Mathf.Rad2Deg * Mathf.Atan2(EndDirectionofFlip.x, EndDirectionofFlip.y)) * -1.0f; // flip angle sign +left -right since went from down to up vectors to get angle
 
-            Debug.Log("<color=maroon>*** " + "TARGET ANGLE " + TargetAngle + " ***</color>");
-
-            //
-            //TotalDegreesToRotate = Mathf.Abs(SPTentaControllerInstance.transform.position.z - TargetAngle);
-           // TotalDegreesToRotate = Mathf.Abs(TargetAngle) - Mathf.Abs((Mathf.Rad2Deg * Mathf.Atan2(oldDirection.x, oldDirection.y)));
-            Debug.Log("<color=maroon>*** " + "TotalDegreesToRotate " + TotalDegreesToRotate + " ***</color>");
-
+            //Debug.Log("<color=maroon>*** " + "TARGET ANGLE " + TargetAngle + " ***</color>");
 
             ReentrantSwipeVelocity = IncreaseMagnitudeofVectorbyProjectileSpeed(EndDirectionofFlip);
             ReentrantSwipeAngle = TargetAngle;
             CurrentRelLocalScaleX = DefaultTTLocalScale.x;
             CurrentRelLocalScaleY = DefaultTTLocalScale.y;
-
-
-
         }
 
         public override void HandleCollisionByTag(string ObjectHitTag, Rigidbody2D ObjectHitRB2D)
@@ -132,12 +130,7 @@ namespace SwordClash
             LowerAllInputFlags();
             JustCollidedWithWall = false;
             JustCollidedWithWallVert = false;
-
-            BackFlipTimeRemaining = BackFlipTime;
-            timeElapsed = 0.0f;
             waterDepth = 0.0f;
-            
-
         }
 
 
@@ -148,6 +141,7 @@ namespace SwordClash
             LowerAllInputFlags();
             // reset TT game object to original scaling for sure
             SPTentaControllerInstance.transform.localScale = DefaultTTLocalScale;
+            SPTentaControllerInstance.transform.rotation = DefaultTTRotation;
         }
 
 
@@ -174,26 +168,30 @@ namespace SwordClash
             BackFlipTimeRemaining -= Time.deltaTime;
 
             // Shrink then grow, also fade in color when going deeper underwater
-            // one way to shrink and grow is with 3 different lerps on local scale to shrink, grow, shrink over time.
             // timeElapsed += Time.deltaTime;
             // float halftime = BackFlipTime / 2.0f;
             if (BackFlipTimeRemaining > BackFlipTime / 2.0f)
-            {
+            { // SINK
                 waterDepth += WaterDepthPerUpdate;
                 CurrentRelLocalScaleX -= ScaleSpriteDelta;
                 CurrentRelLocalScaleY -= ScaleSpriteDelta;
-
-
+                // Tilt downward (rotate +X direction)
             }
             else
-            {
+            { // RISE
                 waterDepth -= WaterDepthPerUpdate;
                 CurrentRelLocalScaleX += ScaleSpriteDelta;
                 CurrentRelLocalScaleY += ScaleSpriteDelta;
-
+                // Tilt upward (rotate -X direction)
+                if (SnootDroopDelta > 0.0f)
+                {
+                    SnootDroopDelta *= -1.0f;
+                }
             }
             // Actually scale TT game object
             SPTentaControllerInstance.SetLocalScale(new Vector3 (CurrentRelLocalScaleX, CurrentRelLocalScaleY, DefaultTTLocalScale.z));
+            // Tilt TT up and down to really sell the flip
+            SPTentaControllerInstance.TT_Tilt(SnootDroopDelta, DroopSpeed * BackFlipTime);
 
             // change water depth in color fade shader
             SPTentaControllerInstance.TT_WaterDepth_WhileBackFlip(waterDepth);

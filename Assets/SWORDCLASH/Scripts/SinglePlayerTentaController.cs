@@ -46,6 +46,16 @@ namespace SwordClash
 
         public Sprite TTPlayerTwoSprite;
 
+
+        [Tooltip("how long BackFlip takes in seconds")]
+        public float BackFlipTime;
+        public float ScaleSpriteDelta;
+        [Tooltip("How far TT tilts during backflip")]
+        public float SnootDroopAmount;
+        public float WaterDepthPerUpdate;
+        public float DroopSpeed;
+
+
         #endregion
 
         // Gang of Four State pattern, state machine for inputs allowed during tentacle movement
@@ -206,13 +216,6 @@ namespace SwordClash
             return degreesRotatedSoFar;
         }
 
-        //public float BackFlippin_rotate(float degreesRotatedSoFar, float rotationAmountPerUpdate)
-        //{
-        //    TentacleTip.transform.Rotate(0, 0, rotationAmountPerUpdate, Space.World);
-        //    degreesRotatedSoFar += BackFlipDegreestoRotatePerUpdate;
-        //    return degreesRotatedSoFar;
-        //}
-
         // Quaternion.Slerp on Tentacle instance GameObject Transform Rotation
         public void BackFlippin_rotate(Quaternion targetRotation, float deltaTime)
         {
@@ -220,12 +223,18 @@ namespace SwordClash
             this.transform.rotation = Quaternion.Slerp(this.transform.rotation, targetRotation, deltaTime);
         }
 
-        //// still cannot figure out how to enforce the lerp to take shortest path
-        //public void BackFlippin_rotate_lerp(float targetRotation, float deltaTime, bool rotateRight)
-        //{
-        //    float tick = Mathf.Lerp(transform.rotation.z, targetRotation, deltaTime);
-        //    TentacleTip.transform.Rotate(0, 0, tick, Space.World);
-        //}
+        // https://docs.unity3d.com/2018.2/Documentation/ScriptReference/Transform.Rotate.html
+        // public void Rotate(Vector3 axis, float angle, Space relativeTo = Space.Self); 
+        // TIP: Avoid multiple calls to transform, do them sequentially, do not try to combine them in one complicated rotation either.
+        public void TT_Tilt(float maxAngle, float deltatimeMultiplier)
+        {
+            // Vector3.right == x axis == transform.localEulerAngles.x    with LOCAL coordinates
+            // Lerp from current local x axis to maxAngle (~45 - 70 degrees) to tilt downward/upward.
+            Vector3 euler = transform.localEulerAngles;
+            euler.x = Mathf.LerpAngle(euler.x, maxAngle, deltatimeMultiplier * Time.deltaTime);
+            transform.localEulerAngles = euler;
+
+        }
 
         // pass in true to jump left, false to get a jump right end position vector as return value
         public Vector2 TT_CalculateEndJumpPosition(bool YesJumpingLeft)
@@ -398,29 +407,7 @@ namespace SwordClash
 
         public void TT_ScaleTransform(float addToScale)
         {
-            // in Update() loop
-            //Vector3 vec = new Vector3(Mathf.Sin(Time.time) + 1, Mathf.Sin(Time.time) + 1, Mathf.Sin(Time.time) + 1);
-
-
-            // A * Cos(f) + c = yHeight;_; Amplitude makes it shake more/further Freq (period w/shift) makes it wiggle faster 
-            //float angleModifier = 2.0f * Mathf.Cos(Time.time * 20.0f);
-
-
-            //t += Time.deltaTime;
-            //TentacleTip.transform.localScale = new Vector3(1, Mathf.Lerp(2f, 1f, t / 3f), 1); // shrink from 2 to 1 over 3 seconds;
-
             Vector3 originalTrans = TentacleTip.transform.localScale;
-
-            //Vector3 vec = new Vector3(2 * Mathf.Sin(Time.time), 2 * Mathf.Sin(Time.time), 1.0f);
-
-            //Vector3 vec = new Vector3(Mathf.Sin(Time.time) * 0.02f + originalTrans.x,
-            //    Mathf.Sin(Time.time) * 0.02f + originalTrans.y, originalTrans.z);
-
-            //Vector3 vec = new Vector3(addToScale + originalTrans.x,
-            //    addToScale + originalTrans.y, 
-            //    originalTrans.z);
-
-            //TentacleTip.transform.localScale = vec;
         }
 
 
@@ -545,7 +532,15 @@ namespace SwordClash
             TTJumpSpeed = 10.0f;
             TTTimesAllowedToJuke = 3;
             TTJukeTravelTime = 0.7f;
-        }
+
+            //backflip
+            BackFlipTime = 1.0f;
+            ScaleSpriteDelta = 0.004f;
+            SnootDroopAmount = 65.0f;
+            WaterDepthPerUpdate = 2.0f;
+            DroopSpeed = 4.5f;
+
+    }
 
 
     }
