@@ -76,13 +76,9 @@ namespace SwordClash
                 FoodHitRef = ObjectHitRB2D;
             }
 
-
-
-
-            //TODO: collision handling and wall bounce support; restore jukes etc.
-
             // Consider looking up having debug constants in Unity;
             // can i do that with a global deltatime modifier or having a simple reset preset but for debug
+            // e.g. move slowly in debug
 
         }
 
@@ -120,8 +116,6 @@ namespace SwordClash
             // Always move every frame.
             SPTentaControllerInstance.TT_MoveTentacleTip(JukeVelocity, JukeAngle + angleModifier);
 
-            
-           
 
             // drop a frame input processing if hit wall, so players can't glitch past it.
             if (JustCollidedWithWall)
@@ -139,6 +133,22 @@ namespace SwordClash
 
                 ReflectTentacleVelocity(Vector2.left);
                 JustCollidedWithWallVert = false;
+            }
+            else if (JustCollidedWithFood)
+            {
+                // Change state to HoldingFood and give reference to which food hit in constructor
+                SPTentaControllerInstance.CurrentTentacleState = new HoldingFoodState(this, SPTentaControllerInstance, FoodHitRef);
+                // TODO: grab sound FX 
+            }
+            else if (InputFlagArray[(int)HotInputs.BackFlip])
+            {
+                // TODO: play animation cancel sound FX
+                // TODO: Briefly flash colors to black??? later do a turning animation
+                SPTentaControllerInstance.CurrentTentacleState = new BackFlipState(this, SPTentaControllerInstance,
+                   SwipeVelocityVector_before,
+                   SwipeAngle_before, BrollCount, JukeCount,
+                   SPTentaControllerInstance.TTBackFlipNormalDirRequested,
+                   SPTentaControllerInstance.TTBackFlipAngleRequested);
             }
 
 
