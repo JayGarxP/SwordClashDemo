@@ -19,6 +19,7 @@ namespace SwordClash
         private bool JustCollidedWithWall;
         private bool JustCollidedWithWallVert;
         private bool JustStung;
+        private bool JustCollidedWithSword; // three clash states in a row without recovery will result in a microgame
 
         private Rigidbody2D FoodHitRef;
 
@@ -193,6 +194,16 @@ namespace SwordClash
                 JustCollidedWithWallVert = true;
             }
 
+            // https://opengameart.org/content/katana-1
+            // Collide with weapon / enemy tentacle (telegraph with laser sight animation that 'cuts' through tentacle body, tip is impervious)
+            if (ObjectHitTag == BladeObjectTag)
+            {
+                // TODO: Play one of many sword clash sound effects;
+                // bounce off in semi-random or exactly dot product of vectors?
+
+                JustCollidedWithSword = true;
+            }
+
             // Get stung and change sprite + recover
             if (ObjectHitTag == JellyfishEnemyGameObjectTag)
             {
@@ -247,6 +258,13 @@ namespace SwordClash
                 ReflectTentacleVelocity(Vector2.left);
                 JustCollidedWithWallVert = false;
             }
+            else if (JustCollidedWithSword)
+            {
+                SPTentaControllerInstance.CurrentTentacleState = new ClashState(this,
+                            SPTentaControllerInstance,
+                            SwipeVelocityVector,
+                            SwipeAngle, BarrelRollCount, JukeCount);
+            }
             else
             {
 
@@ -267,7 +285,7 @@ namespace SwordClash
                     SPTentaControllerInstance.CurrentTentacleState = new BackFlipState(this, SPTentaControllerInstance,
                        SwipeVelocityVector,
                        SwipeAngle, BarrelRollCount, JukeCount,
-                       SPTentaControllerInstance.TTBackFlipNormalDirRequested, 
+                       SPTentaControllerInstance.TTBackFlipNormalDirRequested,
                        SPTentaControllerInstance.TTBackFlipAngleRequested);
                 }
 

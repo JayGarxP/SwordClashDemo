@@ -11,7 +11,7 @@ namespace SwordClash
         //// OnCollisionEnter() is event Publisher for trigger collision (hit jellyfish); Subscriber to collision event is tentacleController (where state machine will be implemented)
         //public event EventHandler JellyfishHitByTentacleTip_Event;
 
-        public enum OccilationFuntion { Sine, Cosine }
+        public enum OscillationFunction { Sine, Cosine }
 
         private Vector2 startingPosition;
 
@@ -28,20 +28,20 @@ namespace SwordClash
             // If jellyfish has a rigidbody, then oscillate back and forth real smooth-like
             if (GetComponent<Rigidbody2D>() != null)
             {
-                Oscillate(OccilationFuntion.Sine, 1.5f);
+                Oscillate(OscillationFunction.Sine, 1.5f);
             }
         }
 
         // Dis dat Clinton Rodgers jam right here.
         // to start at scalar value
-        private void Oscillate(OccilationFuntion method, float scalar)
+        private void Oscillate(OscillationFunction method, float scalar)
         {
-                if (method == OccilationFuntion.Sine)
+                if (method == OscillationFunction.Sine)
                 {
                 GetComponent<Rigidbody2D>().MovePosition(new Vector2(startingPosition.x + Mathf.Sin(Time.time) * scalar, startingPosition.y));
                    //transform.position = new Vector3(Mathf.Sin(Time.time) * scalar, transform.position.y, transform.position.z);
                 }
-                else if (method == OccilationFuntion.Cosine)
+                else if (method == OscillationFunction.Cosine)
                 {
                     transform.position = new Vector3(Mathf.Cos(Time.time) * scalar, 0, 0);
                 }

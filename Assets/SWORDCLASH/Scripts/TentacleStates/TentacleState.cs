@@ -36,6 +36,10 @@ namespace SwordClash
         protected string OtherPlayerGameObjectTag = "TentacleTip";
         protected string WallGameObjectTag = "BouncyWall";
         protected string WallVerticalGameObjectTag = "BouncyWallVert";
+        protected string BladeObjectTag = "SwordClash";
+
+        // Times clashed before recovery
+        protected short ClashCount;
 
 
         // HotInputs is a way to map input flags to ints, used by other classes to index into InputFlagArray
@@ -89,6 +93,7 @@ namespace SwordClash
             TentaControllerInstance = tc;
             IsCurrentlyProcessing = false;
             AmIPlayerTwo = false;
+            ClashCount = 0;
             StringRep = "$Unknown$";
 
             // initialize input flag array to length of InputFlag_Enum, default value is false.
@@ -100,7 +105,7 @@ namespace SwordClash
 
         public TentacleState(SinglePlayerTentaController stc)
         {
-            SetDefualtValues(stc);
+            SetDefaultValues(stc);
             OnStateEnter();
         }
 
@@ -109,12 +114,12 @@ namespace SwordClash
             // first call exit logic of old state, then proceed to default constructor
             oldState.OnStateExit();
 
-            SetDefualtValues(stc);
+            SetDefaultValues(stc);
             OnStateEnter();
 
         }
 
-        private void SetDefualtValues(SinglePlayerTentaController stc)
+        private void SetDefaultValues(SinglePlayerTentaController stc)
         {
             SPTentaControllerInstance = stc;
 

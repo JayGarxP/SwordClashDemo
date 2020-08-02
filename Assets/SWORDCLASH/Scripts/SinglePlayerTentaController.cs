@@ -40,6 +40,7 @@ namespace SwordClash
 
 
         public float TTJukeTravelTime;
+        public float TTClashTravelTime;
 
         // Sprite to change TentacleTip sprite into after colliding with jellyfish
         public Sprite TTStungSprite;
@@ -179,6 +180,12 @@ namespace SwordClash
             //Set in PlayerController, updated here, consider adding if(bool angleSet), here it doesn't need to change, not sure which is faster...
             TentacleTipRB2D.rotation = swipeAngle;
             // TODO: consider seperataitng rotation from position in movement
+        }
+
+        public void TT_MoveTentacleTipAtSpeed(Vector2 swipePositionVelocity, float swipeAngle, float speedMultiplier)
+        {
+            TentacleTipRB2D.MovePosition(TentacleTipRB2D.position + swipePositionVelocity * Time.fixedDeltaTime * speedMultiplier);
+            TentacleTipRB2D.rotation = swipeAngle;
         }
 
         public void TT_MoveTentacleTip_WhileBroll(Vector2 swipePositionVelocity)
@@ -532,6 +539,7 @@ namespace SwordClash
             TTJumpSpeed = 10.0f;
             TTTimesAllowedToJuke = 3;
             TTJukeTravelTime = 0.7f;
+            TTClashTravelTime = 0.4f;
 
             //backflip
             BackFlipTime = 1.0f;
