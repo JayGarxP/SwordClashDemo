@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace SwordClash
 {
@@ -207,6 +208,11 @@ namespace SwordClash
             return TentacleTipRB2D.position.magnitude >= maxTentacleLength;
         }
 
+        public Vector2 TT_GetPosition()
+        {
+            return TentacleTipRB2D.position;
+        }
+
         private void ResetTentacletoStartingPosition()
         {
             // just teleport for now. Later change state.
@@ -288,6 +294,17 @@ namespace SwordClash
             TentacleTipRB2D.position = Vector2.MoveTowards(TentacleTipRB2D.position, whereToJumpTo, Time.fixedDeltaTime * TTJumpSpeed);
 
         }
+
+        // TODO: put magic numbers as editor fields.
+        public void TT_ClashWobble(Vector2 StartPosition, float Scalar)
+        {
+
+            TentacleTipRB2D.position = Vector2.MoveTowards(TentacleTipRB2D.position,
+                new Vector2(TentacleTipRB2D.position.x + Mathf.Sin(Time.time * 8.0f) * Scalar, StartPosition.y),
+                Time.fixedDeltaTime * TTJumpSpeed);
+
+        }
+
 
         public bool TT_HitPosition(Vector2 Position)
         {

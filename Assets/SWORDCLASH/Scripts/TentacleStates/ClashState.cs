@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace SwordClash
 {
@@ -7,10 +6,14 @@ namespace SwordClash
     {
         // clash state vars
         private Vector2 ClashVelocity;
+        private Vector2 SuspendPosition;
         private float ClashAngle;
         private const float BOUNCE_SPEED = 3.0f; // should bounce at twice the speed of normal projectile
         private float CurrentClashTravelTime;
         private float ClashTravelTime;
+        private float CurrentSuspendTime;
+        private float MaxSuspendTime = 4.0f; //TODO: set this in editor field
+        private bool Suspended;
 
         // to reenter projectile state
         private readonly Vector2 SwipeVelocityVector_before;
@@ -23,6 +26,7 @@ namespace SwordClash
         private bool JustCollidedWithWall;
         private bool JustCollidedWithWallVert;
         private Rigidbody2D FoodHitRef;
+        
 
         // initialize with another state to enter recovery state
         public ClashState(TentacleState oldState, SinglePlayerTentaController SPTC,
@@ -69,6 +73,7 @@ namespace SwordClash
             JustCollidedWithFood = false;
             JustCollidedWithWall = false;
             JustCollidedWithWallVert = false;
+            Suspended = false;
             Rigidbody2D FoodHitRef = null;
             // Increment Clash Count
             ClashCount++;
@@ -76,9 +81,8 @@ namespace SwordClash
             // Set travel time of CLASH
             ClashTravelTime = SPTentaControllerInstance.TTClashTravelTime;
             CurrentClashTravelTime = 0.0f;
-
-          
-
+            CurrentSuspendTime = 0.0f;
+            //MaxSuspendTime = SPTentaControllerInstance.TTMaxSuspendTime;
         }
 
         public override void OnStateExit()
@@ -100,14 +104,28 @@ namespace SwordClash
             //TODO: add second collider behind TT (crit spot) and along its arm for being "cut off", make over extending into enemy territory more risky.
 
             // Always move every frame.
-           SPTentaControllerInstance.TT_MoveTentacleTipAtSpeed(ClashVelocity, ClashAngle, BOUNCE_SPEED);
+            SPTentaControllerInstance.TT_MoveTentacleTipAtSpeed(ClashVelocity, ClashAngle, BOUNCE_SPEED);
 
+            // increment distance traveled
+            CurrentClashTravelTime += Time.fixedDeltaTime;
+
+            // if travel time >= jumpdistance, stop juking
+            if (CurrentClashTravelTime >= ClashTravelTime && Suspended == false)
+            {
+                // stop moving
+                ClashVelocity = Vector2.zero;
+                ClashAngle = 0.0f;
+
+                // start flashing; begin countdown to recovery
+                Suspended = true;
+                SuspendPosition = SPTentaControllerInstance.TT_GetPosition();
+            }
 
             // drop a frame input processing if hit wall, so players can't glitch past it.
             if (JustCollidedWithWall)
             {
                 OnWallCollision();
-                
+
                 ReflectTentacleVelocity(Vector2.up);
                 JustCollidedWithWall = false;
 
@@ -123,20 +141,28 @@ namespace SwordClash
             else if (JustCollidedWithFood)
             {
                 // whiff / miss food
-                
+
             }
-            else if (InputFlagArray[(int)HotInputs.BackFlip])
+
+            if (Suspended)
             {
-                SPTentaControllerInstance.CurrentTentacleState = new BackFlipState(this, SPTentaControllerInstance,
-                   SwipeVelocityVector_before,
-                   SwipeAngle_before, BrollCount, JukeCount,
-                   SPTentaControllerInstance.TTBackFlipNormalDirRequested,
-                   SPTentaControllerInstance.TTBackFlipAngleRequested);
-            }
-            else if (InputFlagArray[(int)HotInputs.LaunchSwipe])
-            {
+
+                // increment time suspended
+                CurrentSuspendTime += Time.fixedDeltaTime;
+
                 
-                
+
+                if (InputFlagArray[(int)HotInputs.BackFlip])
+                {
+                    SPTentaControllerInstance.CurrentTentacleState = new BackFlipState(this, SPTentaControllerInstance,
+                       SwipeVelocityVector_before,
+                       SwipeAngle_before, BrollCount, JukeCount,
+                       SPTentaControllerInstance.TTBackFlipNormalDirRequested,
+                       SPTentaControllerInstance.TTBackFlipAngleRequested);
+                }
+                else if (InputFlagArray[(int)HotInputs.LaunchSwipe])
+                {
+
                     var UpSwipe = new Vector3(SPTentaControllerInstance.TTMovePositionVelocityRequested.x,
                         SPTentaControllerInstance.TTMovePositionVelocityRequested.y, 0);
 
@@ -148,19 +174,55 @@ namespace SwordClash
                              UpSwipe,
                              SwipeAngle);
 
-                
+                }
+                else if (JukeCount < SPTentaControllerInstance.TTTimesAllowedToJuke)
+                {
+
+                    // if juke - right input received
+                    if (InputFlagArray[(int)HotInputs.RudderRight])
+                    {
+                        InputFlagArray[(int)HotInputs.RudderRight] = false;
+
+                        // rotate quickly in place to block right
+                        ClashAngle = -90.0f;
+
+                    }
+                    else if (InputFlagArray[(int)HotInputs.RudderLeft])
+                    {
+
+                        InputFlagArray[(int)HotInputs.RudderLeft] = false;
+                        ++JukeCount;
+
+                        // rotate quickly in place to block left
+                        ClashAngle = 90.0f;
+
+
+                    }
+
+                }
+
+                // hopefully this is compiled out and is not re-calc every frame
+                if (CurrentSuspendTime >= 0.49f * MaxSuspendTime)
+                {
+                    // apply shaking, creaking then breaking FX
+
+                    // apply random clamped noise to current position???
+                    // will do back and forth on x axis for now
+                    SPTentaControllerInstance.TT_ClashWobble(SuspendPosition, 0.045f);
+
+                    if (CurrentSuspendTime >= MaxSuspendTime)
+                    {
+                        // play animation
+
+                        // play break/shatter FX
+
+                        SPTentaControllerInstance.CurrentTentacleState = new RecoveryState(this, SPTentaControllerInstance);
+                    }
+                }
+
             }
 
 
-            // increment distance traveled
-            CurrentClashTravelTime += Time.fixedDeltaTime;
-
-            // if travel time >= jumpdistance, stop juking
-            if (CurrentClashTravelTime >= ClashTravelTime)
-            {
-                // stop moving
-                ClashVelocity = Vector2.zero;
-            }
 
         }
 
@@ -185,7 +247,7 @@ namespace SwordClash
             // try just -neg flipping for angle?
             ClashAngle = ClashAngle * -1;
         }
-       
+
         private void OnWallCollision()
         {
             LowerAllInputFlags(); // drop frame of human input
@@ -198,6 +260,7 @@ namespace SwordClash
         {
             // seems to work OK for now, but will add better logic if swipe velocity becomes a public property other colliders can use...
             ClashVelocity = Vector2.Reflect(SwipeVelocityVector_before, Vector2.up);
+
             ClashAngle = SwipeAngle_before * -1;
         }
 
