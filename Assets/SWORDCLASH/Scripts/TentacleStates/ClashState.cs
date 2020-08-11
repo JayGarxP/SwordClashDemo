@@ -8,11 +8,13 @@ namespace SwordClash
         private Vector2 ClashVelocity;
         private Vector2 SuspendPosition;
         private float ClashAngle;
-        private const float BOUNCE_SPEED = 3.0f; // should bounce at twice the speed of normal projectile
+        private float ClashBounceSpeed;
         private float CurrentClashTravelTime;
         private float ClashTravelTime;
+        private float ClashTravelTimeJitterStartPercent;
+        private float JitterStart;
         private float CurrentSuspendTime;
-        private float MaxSuspendTime = 4.0f; //TODO: set this in editor field
+        private float ClashMaxSuspendTime;
         private bool Suspended;
 
         // to reenter projectile state
@@ -37,6 +39,12 @@ namespace SwordClash
             SwipeAngle_before = oldRotation;
             BrollCount = brollCount;
             JukeCount = jukeCount;
+            ClashBounceSpeed = SPTC.ClashBounceSpeed;
+            ClashMaxSuspendTime = SPTC.ClashMaxSuspendTime;
+            ClashTravelTime = SPTC.TTClashTravelTime;
+            ClashTravelTimeJitterStartPercent = SPTC.ClashTravelTimeJitterStartPercent;
+
+            JitterStart = ClashTravelTimeJitterStartPercent * ClashMaxSuspendTime;
 
             //set velocity and angle of clash
             SetClashDirection();
@@ -79,10 +87,9 @@ namespace SwordClash
             ClashCount++;
 
             // Set travel time of CLASH
-            ClashTravelTime = SPTentaControllerInstance.TTClashTravelTime;
             CurrentClashTravelTime = 0.0f;
             CurrentSuspendTime = 0.0f;
-            //MaxSuspendTime = SPTentaControllerInstance.TTMaxSuspendTime;
+            
         }
 
         public override void OnStateExit()
@@ -104,7 +111,7 @@ namespace SwordClash
             //TODO: add second collider behind TT (crit spot) and along its arm for being "cut off", make over extending into enemy territory more risky.
 
             // Always move every frame.
-            SPTentaControllerInstance.TT_MoveTentacleTipAtSpeed(ClashVelocity, ClashAngle, BOUNCE_SPEED);
+            SPTentaControllerInstance.TT_MoveTentacleTipAtSpeed(ClashVelocity, ClashAngle, ClashBounceSpeed);
 
             // increment distance traveled
             CurrentClashTravelTime += Time.fixedDeltaTime;
@@ -202,7 +209,7 @@ namespace SwordClash
                 }
 
                 // hopefully this is compiled out and is not re-calc every frame
-                if (CurrentSuspendTime >= 0.49f * MaxSuspendTime)
+                if (CurrentSuspendTime >= JitterStart)
                 {
                     // apply shaking, creaking then breaking FX
 
@@ -210,7 +217,7 @@ namespace SwordClash
                     // will do back and forth on x axis for now
                     SPTentaControllerInstance.TT_ClashWobble(SuspendPosition, 0.045f);
 
-                    if (CurrentSuspendTime >= MaxSuspendTime)
+                    if (CurrentSuspendTime >= ClashMaxSuspendTime)
                     {
                         // play animation
 

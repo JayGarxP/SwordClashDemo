@@ -57,8 +57,16 @@ namespace SwordClash
         public float WaterDepthPerUpdate;
         public float DroopSpeed;
 
-
-        #endregion
+        [Tooltip("Distance clash state jitters before break - Frequency Multiplier")]
+        public float ClashJitterFrequency;
+        [Tooltip("Speed Clash Bounces after collision, should bounce at twice the speed of normal projectile")]
+        public float ClashBounceSpeed;
+        [Tooltip("Time (s) Clash State suspends in air b4 recovery")]
+        public float ClashMaxSuspendTime;
+        [Tooltip("Percent (0 - 1.0) of Suspend Time b4 clash jitters, 0.49 is 49% time of suspend time")]
+        public float ClashTravelTimeJitterStartPercent;
+        
+            #endregion
 
         // Gang of Four State pattern, state machine for inputs allowed during tentacle movement
         public TentacleState CurrentTentacleState { get; set; }
@@ -298,9 +306,11 @@ namespace SwordClash
         // TODO: put magic numbers as editor fields.
         public void TT_ClashWobble(Vector2 StartPosition, float Scalar)
         {
-
+            /* https://www.mathsisfun.com/algebra/amplitude-period-frequency-phase-shift.html
+             * Review of sin wave equation terminology
+             */ 
             TentacleTipRB2D.position = Vector2.MoveTowards(TentacleTipRB2D.position,
-                new Vector2(TentacleTipRB2D.position.x + Mathf.Sin(Time.time * 8.0f) * Scalar, StartPosition.y),
+                new Vector2(TentacleTipRB2D.position.x + Mathf.Sin(Time.time * ClashJitterFrequency) * Scalar, StartPosition.y),
                 Time.fixedDeltaTime * TTJumpSpeed);
 
         }
@@ -565,6 +575,11 @@ namespace SwordClash
             WaterDepthPerUpdate = 2.0f;
             DroopSpeed = 4.5f;
 
+            // Clash State
+            ClashJitterFrequency = 8.0f;
+            ClashBounceSpeed = 3.0f;
+            ClashMaxSuspendTime = 4.0f;
+            ClashTravelTimeJitterStartPercent = 0.49f;
     }
 
 
