@@ -41,7 +41,6 @@ namespace SwordClash
         // Times clashed before recovery
         protected short ClashCount;
 
-
         // HotInputs is a way to map input flags to ints, used by other classes to index into InputFlagArray
         public enum HotInputs
         {
@@ -93,7 +92,6 @@ namespace SwordClash
             TentaControllerInstance = tc;
             IsCurrentlyProcessing = false;
             AmIPlayerTwo = false;
-            ClashCount = 0;
             StringRep = "$Unknown$";
 
             // initialize input flag array to length of InputFlag_Enum, default value is false.
@@ -105,6 +103,7 @@ namespace SwordClash
 
         public TentacleState(SinglePlayerTentaController stc)
         {
+            ClashCount = 0;
             SetDefaultValues(stc);
             OnStateEnter();
         }
@@ -113,7 +112,7 @@ namespace SwordClash
         {
             // first call exit logic of old state, then proceed to default constructor
             oldState.OnStateExit();
-
+            ClashCount = oldState.ClashCount;
             SetDefaultValues(stc);
             OnStateEnter();
 

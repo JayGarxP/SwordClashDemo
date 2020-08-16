@@ -110,6 +110,14 @@ namespace SwordClash
 
             //TODO: add second collider behind TT (crit spot) and along its arm for being "cut off", make over extending into enemy territory more risky.
 
+            // first check the clash count:
+            if (ClashCount >= 3)
+            {
+                // launch into microgame
+                SPTentaControllerInstance.LoadSceneByIndex(3);
+
+            }
+
             // Always move every frame.
             SPTentaControllerInstance.TT_MoveTentacleTipAtSpeed(ClashVelocity, ClashAngle, ClashBounceSpeed);
 

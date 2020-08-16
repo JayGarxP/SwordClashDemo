@@ -50,6 +50,8 @@ namespace SwordClash
             IsCurrentlyProcessing = false;
             GameLoopTicksBeforeSync = 0;
 
+     
+
             // Allow drag gesture to fire in SinglePlayerController
             SPTentaControllerInstance.EnableDragSwipeGesture();
 

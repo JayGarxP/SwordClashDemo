@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace SwordClash
 {
@@ -546,6 +547,13 @@ namespace SwordClash
             {
                 DrawSwipeBroadcaster.Enabled = true;
             }
+        }
+
+        public void LoadSceneByIndex(int index)
+        {
+
+            // load scene index
+            SceneManager.LoadScene(index);
         }
 
         // Monobehavior reset when component is first dropped into scene, set default editor fields here
